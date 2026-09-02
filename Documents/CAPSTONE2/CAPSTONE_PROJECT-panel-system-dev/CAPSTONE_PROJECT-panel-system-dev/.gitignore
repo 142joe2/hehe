@@ -1,36 +1,47 @@
-.venv/
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Django
 db.sqlite3
-.env
+*.sqlite3
+*.db
+*.sqlite
+media/
+staticfiles/
+collectstatic/
+
+# Editors / tools
+.opencode/
+.idea/
 .vscode/
-.pytest_cache
+*.swp
+*.swo
 
-*.md
-.kilo 
-.aider*
-.opencode
-.blackbox
-.qodo
+# Claude skills / agent tools
+claude-skills/
 
+# OS
+Thumbs.db
+.DS_Store
+Desktop.ini
 
-*.jpg
-*.docx
-*.pdf
-*.xlsx
-*.png
+# Environment / secrets
+.env
+.env.*
+*.local
 
-/media/*.jpg
-/media/*.png
-/media/*.jpeg
-/media/*.gif
-/media/*.docx
-/media/*.pdf
-/media/*.xlsx
-/md
-/resourcefromJas
-templates/Old
-templates\website\Treasurer\legacy_do_not_touch
-.txt
-
-blackbox_mcp_settings.json
+# Screenshots / temp
+screenshots/
+temp_*
+tmp_*
+*.bak
+*.bak2
+*.bak3
