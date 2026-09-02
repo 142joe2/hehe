@@ -1,0 +1,51 @@
+{% load static %}
+<div id="zt-badge-container">
+  <div id="zt-badge" class="zt-badge zt-badge-loading" title="Checking Zero Trust status...">
+    <span class="zt-icon">🛡</span>
+    <span class="zt-label">Checking...</span>
+  </div>
+  <script>
+    (function() {
+      var pollTimer;
+      function updateBadge() {
+        fetch("/api/auth/zero-trust/status/", {
+          method: "GET",
+          headers: { "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")?.value || "" }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var badge = document.getElementById("zt-badge");
+          if (!badge) return;
+          var fp = data.fingerprint || {};
+          var ip = fp.ip || "";
+          var device = (fp.device || "").substring(0, 30);
+          var since = fp.logged_in_since
+            ? Math.floor((Date.now() - new Date(fp.logged_in_since).getTime()) / 60000) + "m"
+            : "";
+
+          if (data.verified) {
+            badge.className = "zt-badge zt-badge-verified";
+            badge.title = "ZT Verified · IP: " + ip + " · " + since;
+            badge.innerHTML = '<span class="zt-icon">🛡</span><span class="zt-label">ZT</span><span class="zt-detail">' + ip + ' · ' + since + '</span>';
+          } else if (data.ok) {
+            badge.className = "zt-badge zt-badge-unverified";
+            badge.title = "Awaiting first confirmation";
+            badge.innerHTML = '<span class="zt-icon">?</span><span class="zt-label">ZT</span><span class="zt-detail">Needs confirmation</span>';
+          }
+        })
+        .catch(function() {
+          var badge = document.getElementById("zt-badge");
+          if (badge) {
+            badge.className = "zt-badge zt-badge-error";
+            badge.innerHTML = '<span class="zt-icon">✗</span><span class="zt-label">ZT Error</span>';
+          }
+        });
+      }
+      updateBadge();
+      pollTimer = setInterval(updateBadge, 30000);
+      document.addEventListener("visibilitychange", function() {
+        if (!document.hidden) updateBadge();
+      });
+    })();
+  </script>
+</div>

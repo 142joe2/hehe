@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claim Completed - ISU CAUFA</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f4f4f4; font-family:'Segoe UI',Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4; padding:20px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+          <!-- Header with Logo -->
+          <tr>
+            <td style="background-color:#1b5e20; text-align:center; padding:30px 20px 20px;">
+              <img src="cid:logo_cid" alt="" width="90" style="display:block; margin:0 auto 8px;" />
+              <div style="color:#ffffff; font-size:14px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:4px;">ISU CAUFA</div>
+              <h1 style="color:#ffffff; font-size:24px; margin:0; font-weight:600;">
+                Claim Completed
+              </h1>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:30px 30px 20px; color:#333333;">
+              <p style="font-size:16px; line-height:1.6; margin:0 0 20px;">
+                Dear <strong>{{ member_name }}</strong>,
+              </p>
+              <p style="font-size:16px; line-height:1.6; margin:0 0 20px;">
+                Your <strong>{{ aid_type }}</strong> claim has been <strong>completed</strong>.
+              </p>
+
+              <table role="presentation" width="100%" cellpadding="8" cellspacing="0" style="background-color:#f8f9fa; border-radius:6px; margin:0 0 20px;">
+                <tr>
+                  <td style="font-weight:600; color:#1b5e20; width:140px;">Aid Type:</td>
+                  <td>{{ aid_type }}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600; color:#1b5e20;">Completion Date:</td>
+                  <td>{{ completion_date }}</td>
+                </tr>
+              </table>
+
+              <div style="background-color:#d4edda; border-left:4px solid #28a745; padding:15px; margin:0 0 20px; border-radius:4px;">
+                <h4 style="color:#155724; font-size:16px; margin:0 0 10px;">Action Required</h4>
+                <p style="font-size:14px; line-height:1.6; margin:0; color:#155724;">
+                  Please contact the Treasurer to receive your assistance. Make sure to bring any required documentation for verification.
+                </p>
+              </div>
+
+              <p style="font-size:14px; line-height:1.6; margin:0 0 20px; color:#666666; border-top:1px solid #eeeeee; padding-top:20px;">
+                Thank you for your patience throughout the claim process. ISU CAUFA is committed to supporting our members in times of need.
+              </p>
+              
+              <p style="font-size:14px; line-height:1.6; margin:0; color:#666666;">
+                If you have any questions or concerns regarding this claim, please contact the
+                ISU CAUFA Treasurer's Office.
+              </p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#1b5e20; text-align:center; padding:15px 20px;">
+              <p style="color:#ffffff; font-size:12px; margin:0;">
+                &copy; {% now "Y" %} ISU CAUFA &mdash; Isabela State University &bull; Cauayan City, Philippines
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

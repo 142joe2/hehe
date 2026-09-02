@@ -1,0 +1,213 @@
+﻿{% extends "website/base.html" %}
+{% load static %}
+
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block content %}
+    <!-- Page Banner -->
+    <section class="relative h-[320px] overflow-hidden">
+        {% if article.featured_image %}
+        <div class="absolute inset-0">
+            <img src="{{ article.featured_image.url }}" alt="{{ article.title }}" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent"></div>
+        </div>
+        {% else %}
+        <div class="absolute inset-0 bg-gradient-to-br from-brand-green via-green-800 to-brand-dark"></div>
+        {% endif %}
+        
+        <div class="relative z-10 h-full flex flex-col items-center justify-center text-white text-center px-6">
+            <p class="text-3xl md:text-4xl uppercase font-black tracking-[0.3em] text-yellow-400 mb-5 drop-shadow">ISU CAUFA</p>
+            <h1 class="text-4xl md:text-6xl font-black tracking-tighter mb-5 drop-shadow-lg max-w-5xl">{{ article.title }}</h1>
+            <div class="w-28 h-2 bg-brand-green"></div>
+            <div class="flex items-center gap-4 mt-6 text-sm md:text-base font-medium">
+                {% if article.category %}
+                <span class="bg-brand-green px-3 py-1 rounded-full">{{ article.category.name }}</span>
+                {% endif %}
+                <span><i class="fa-solid fa-calendar mr-1"></i> {{ article.published_at|date:"F d, Y" }}</span>
+                {% if article.view_count %}
+                <span><i class="fa-solid fa-eye mr-1"></i> {{ article.view_count }} views</span>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Article Content -->
+    <section class="bg-gradient-to-b from-[#fbfaf7] to-[#f3f1ea] py-16 px-6 sm:px-12">
+        <div class="max-w-4xl mx-auto">
+            <!-- Event Details (if applicable) -->
+            {% if article.event_date or article.event_time or article.venue %}
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-brand-green/15 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)]">
+                <h3 class="font-black text-brand-dark mb-4">Event Details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    {% if article.event_date %}
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-calendar text-brand-green"></i>
+                        <span>{{ article.event_date|date:"F d, Y" }}</span>
+                    </div>
+                    {% endif %}
+                    {% if article.event_time %}
+                    <div class="flex items-center gap-2">
+                        <i class="fa-regular fa-clock text-brand-green"></i>
+                        <span>{{ article.event_time|time:"g:i A" }}</span>
+                    </div>
+                    {% endif %}
+                    {% if article.venue %}
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-location-dot text-brand-green"></i>
+                        <span>{{ article.venue }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Article Body -->
+            <div class="prose prose-lg max-w-none">
+                {{ article.content|safe }}
+            </div>
+
+            <!-- Video Section (if applicable) -->
+            {% if article.video_url %}
+            <div class="mt-12">
+                <h3 class="text-2xl font-black text-brand-dark mb-6">Video Highlights</h3>
+                <div class="aspect-video bg-brand-dark rounded-xl overflow-hidden relative">
+                    {% if article.video_url and video_is_direct_file %}
+                    <video controls playsinline class="w-full h-full" preload="metadata">
+                        <source src="{{ article.video_url }}" />
+                        Your browser does not support HTML5 video.
+                    </video>
+                    {% elif article.video_url %}
+                    <iframe src="{{ article.video_url }}" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center">
+                        <i class="fa-solid fa-play text-4xl text-white/50"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if video_watch_url %}
+                <a href="{{ video_watch_url }}" target="_blank" rel="noopener" class="mt-3 inline-flex items-center gap-2 text-sm font-bold text-brand hover:text-brand-dark transition-colors">
+                    <i class="fa-solid fa-up-right-from-square"></i> If the video doesn't play, open it in a new tab
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Photo Gallery -->
+            {% if gallery %}
+            <div class="mt-12">
+                <h3 class="text-2xl font-black text-brand-dark mb-6">Event Gallery</h3>
+                <div class="relative bg-brand-dark rounded-xl overflow-hidden" id="gallery-carousel">
+                    <div class="flex transition-transform duration-500 ease-out" id="gallery-track">
+                        {% for photo in gallery %}
+                        <div class="w-full shrink-0 aspect-[16/9] flex items-center justify-center bg-brand-dark overflow-hidden">
+                            <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if gallery|length > 1 %}
+                    <button type="button" onclick="galleryPrev()" aria-label="Previous image" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center transition-colors cursor-pointer">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button type="button" onclick="galleryNext()" aria-label="Next image" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center transition-colors cursor-pointer">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                    <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2" id="gallery-dots">
+                        {% for photo in gallery %}
+                        <button type="button" onclick="galleryGo({{ forloop.counter0 }})" aria-label="Go to image {{ forloop.counter }}" class="w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition-colors cursor-pointer{% if forloop.first %} bg-white{% endif %}"></button>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% if gallery|length > 1 %}
+                <p class="text-center text-sm font-bold text-gray-500 mt-3"><span id="gallery-index">1</span> / {{ gallery|length }}</p>
+                {% endif %}
+            </div>
+
+            <script>
+                (function () {
+                    var track = document.getElementById('gallery-track');
+                    var index = 0;
+                    var count = {{ gallery|length }};
+                    if (!track || count < 2) return;
+                    var dots = document.getElementById('gallery-dots');
+                    var label = document.getElementById('gallery-index');
+                    window.galleryGo = function (i) {
+                        index = ((i % count) + count) % count;
+                        track.style.transform = 'translateX(-' + (index * 100) + '%)';
+                        if (label) label.textContent = index + 1;
+                        if (dots) dots.querySelectorAll('button').forEach(function (d, j) {
+                            d.classList.toggle('bg-white', j === index);
+                        });
+                    };
+                    window.galleryPrev = function () { galleryGo(index - 1); };
+                    window.galleryNext = function () { galleryGo(index + 1); };
+                })();
+            </script>
+            {% endif %}
+
+            <!-- Share Section -->
+            <div class="mt-12 pt-8 border-t border-black/5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-bold text-gray-600">Share this article:</span>
+                        <div class="flex gap-2">
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors">
+                                <i class="fa-brands fa-facebook-f"></i>
+                            </a>
+                            <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}" target="_blank" class="w-10 h-10 rounded-full bg-sky-500 text-white flex items-center justify-center hover:bg-sky-600 transition-colors">
+                                <i class="fa-brands fa-twitter"></i>
+                            </a>
+                            <a href="mailto:?subject={{ article.title }}&body={{ request.build_absolute_uri }}" class="w-10 h-10 rounded-full bg-gray-600 text-white flex items-center justify-center hover:bg-gray-700 transition-colors">
+                                <i class="fa-solid fa-envelope"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <a href="{% url 'news_page' %}" class="text-sm font-bold text-brand-green hover:text-brand-dark transition-colors">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Back to News
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related News -->
+    {% if related_articles %}
+    <section class="bg-[#f3f1ea] py-16 px-6 sm:px-12">
+        <div class="max-w-[1440px] mx-auto">
+            <div class="mb-12">
+                <p class="text-[10px] uppercase font-black tracking-[0.2em] text-brand-green mb-2">You might also like</p>
+                <h2 class="text-3xl md:text-4xl font-black tracking-tighter text-brand-dark">Related News</h2>
+                <div class="w-24 h-1.5 bg-brand-green mt-4"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+                {% for related in related_articles %}
+                <a href="{% url 'news_detail' related.slug %}" class="group bg-white border border-black/5 rounded-2xl overflow-hidden shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.18)] hover:-translate-y-0.5 transition-all duration-300 block">
+                    <div class="aspect-video bg-gradient-to-br from-brand-green to-green-700 flex items-center justify-center overflow-hidden">
+                        {% if related.featured_image %}
+                        <img src="{{ related.featured_image.url }}" alt="{{ related.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        {% else %}
+                        <i class="fa-solid fa-newspaper text-4xl text-white/50"></i>
+                        {% endif %}
+                    </div>
+                    <div class="p-6">
+                        {% if related.category %}
+                        <span class="text-[10px] font-bold text-brand-green uppercase tracking-wider">{{ related.category.name }}</span>
+                        {% endif %}
+                        <h3 class="font-black text-brand-dark text-lg leading-tight mt-2 group-hover:text-brand-green transition-colors">
+                            {{ related.title }}
+                        </h3>
+                        <p class="text-sm text-gray-500 mt-2 line-clamp-2">{{ related.summary }}</p>
+                        <div class="flex items-center gap-2 mt-4 text-xs font-bold text-gray-400">
+                            <i class="fa-solid fa-calendar"></i>
+                            <span>{{ related.published_at|date:"F d, Y" }}</span>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+{% endblock %}

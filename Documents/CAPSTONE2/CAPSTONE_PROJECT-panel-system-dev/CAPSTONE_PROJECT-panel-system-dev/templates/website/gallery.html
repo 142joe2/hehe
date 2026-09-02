@@ -1,0 +1,123 @@
+﻿{% extends "website/base.html" %}
+{% load static %}
+
+{% block title %}Gallery{% endblock %}
+
+{% block content %}
+    <!-- Page Banner -->
+    <section class="relative h-[400px] overflow-hidden">
+        <div class="absolute inset-0">
+            <img src="{% static 'img/isugym.jpg' %}" alt="ISU CAUFA" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-black/40"></div>
+        </div>
+        <div class="relative z-10 h-full flex flex-col items-center justify-center text-white text-center px-6">
+            <p class="text-3xl md:text-4xl uppercase font-black tracking-[0.3em] text-yellow-400 mb-5 drop-shadow">ISU CAUFA</p>
+            <h1 class="text-6xl md:text-7xl font-black tracking-tighter mb-5 drop-shadow-lg">Gallery</h1>
+            <div class="w-28 h-2 bg-brand-green"></div>
+        </div>
+    </section>
+
+    <!-- Activity Albums -->
+    <section class="bg-gradient-to-b from-[#fbfaf7] to-[#f3f1ea] py-16 px-6 sm:px-12" id="activity-albums">
+        <div class="max-w-[1440px] mx-auto">
+            <div class="mb-12">
+                <p class="text-[10px] uppercase font-black tracking-[0.2em] text-brand-green mb-2">Moments in Photos</p>
+                <h2 class="text-3xl md:text-4xl font-black tracking-tighter text-brand-dark">Activity Albums</h2>
+                <div class="w-24 h-1.5 bg-brand-green mt-4"></div>
+            </div>
+
+            {% if albums %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                {% for album in albums %}
+                <div class="group bg-white border border-black/5 rounded-2xl overflow-hidden shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.18)] hover:-translate-y-0.5 transition-all duration-300">
+                    <div class="aspect-video bg-gradient-to-br from-brand-green to-green-700 flex items-center justify-center overflow-hidden">
+                        {% if album.cover_url %}
+                        <img src="{{ album.cover_url }}" alt="{{ album.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+                        {% else %}
+                        <i class="fa-solid fa-image text-4xl text-white/50"></i>
+                        {% endif %}
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-black text-brand-dark leading-tight">{{ album.title }}</h3>
+                        {% if album.description %}
+                        <p class="text-[11px] text-gray-500 mt-1 line-clamp-2">{{ album.description }}</p>
+                        {% endif %}
+                        <p class="text-[10px] font-bold text-brand-green uppercase tracking-wider mt-3">
+                            <i class="fa-regular fa-images mr-1"></i> {{ album.photo_count }} photo{{ album.photo_count|pluralize }}
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-16 text-gray-400 bg-white/70 border border-black/5 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)]">
+                <i class="fa-solid fa-images text-4xl mb-3 block"></i>
+                <p class="text-[11px] font-bold uppercase">No photo albums have been published yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Featured Photos -->
+    <section class="bg-[#f3f1ea] py-16 px-6 sm:px-12" id="featured-photos">
+        <div class="max-w-[1440px] mx-auto">
+            <div class="mb-12">
+                <p class="text-[10px] uppercase font-black tracking-[0.2em] text-brand-green mb-2">Highlights</p>
+                <h2 class="text-3xl md:text-4xl font-black tracking-tighter text-brand-dark">Featured Photos</h2>
+                <div class="w-24 h-1.5 bg-brand-green mt-4"></div>
+            </div>
+
+            {% if featured_photos %}
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {% for p in featured_photos %}
+                <div class="relative aspect-square bg-gradient-to-br from-brand-green to-green-700 rounded-xl overflow-hidden shadow-[0_1px_2px_rgba(16,24,40,0.05),0_8px_24px_-12px_rgba(16,24,40,0.14)] hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.18)] transition-all duration-300">
+                    <img src="{{ p.image_url }}" alt="{{ p.caption|default:p.album_title }}" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+                    {% if p.caption %}
+                    <div class="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/70 to-transparent">
+                        <p class="text-[11px] font-bold text-white">{{ p.caption }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-16 text-gray-400 bg-white/70 border border-black/5 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)]">
+                <i class="fa-solid fa-star text-4xl mb-3 block"></i>
+                <p class="text-[11px] font-bold uppercase">No featured photos have been selected yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Videos -->
+    <section class="bg-gradient-to-b from-[#fbfaf7] to-[#f3f1ea] py-16 px-6 sm:px-12" id="videos">
+        <div class="max-w-[1440px] mx-auto">
+            <div class="mb-12">
+                <p class="text-[10px] uppercase font-black tracking-[0.2em] text-brand-green mb-2">Watch</p>
+                <h2 class="text-3xl md:text-4xl font-black tracking-tighter text-brand-dark">Videos</h2>
+                <div class="w-24 h-1.5 bg-brand-green mt-4"></div>
+            </div>
+
+            {% if videos %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                {% for v in videos %}
+                <div class="bg-white border border-black/5 rounded-2xl overflow-hidden shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.18)] hover:-translate-y-0.5 transition-all duration-300">
+                    <div class="aspect-video bg-brand-dark flex items-center justify-center">
+                        <i class="fa-solid fa-play text-3xl text-white/50"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-black text-brand-dark">{{ v.title }}</h3>
+                        <p class="text-[11px] text-gray-500 mt-1">{{ v.description }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-16 text-gray-400 bg-white/70 border border-black/5 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)]">
+                <i class="fa-solid fa-video text-4xl mb-3 block"></i>
+                <p class="text-[11px] font-bold uppercase">No videos have been uploaded yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

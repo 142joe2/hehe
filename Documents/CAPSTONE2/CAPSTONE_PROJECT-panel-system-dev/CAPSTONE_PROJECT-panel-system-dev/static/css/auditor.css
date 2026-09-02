@@ -1,0 +1,312 @@
+/* Import Poppins Font Family */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
+/* ==========================================================================
+   GLOBAL RESET & BRAND VARIABLE PATHS
+   ========================================================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body,
+html {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: #f6fbf6; /* Light Pale Mint Brand BG */
+  color: #263238; /* Dark Charcoal Text */
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Master Layout Grid */
+.app-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* ==========================================================================
+   AUDITOR SIDEBAR STRUCTURE (Top Links & Bottom Footer Isolated)
+   ========================================================================== */
+.sidebar {
+  width: 280px;
+  height: 100%;
+  background: #1b5e20; /* Deep Institutional Green */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: width 0.25s ease;
+  flex-shrink: 0;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1010;
+}
+
+.sidebar-top {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-footer {
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 15px 0;
+}
+
+/* Navigation Items Matrix */
+.menu-item {
+  padding: 14px 24px;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+  white-space: nowrap;
+}
+
+.menu-item:hover {
+  color: #fbc02d; /* Accent Gold Yellow hover */
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.menu-item.active {
+  color: #1b5e20;
+  background: #f6fbf6; /* Merges cleanly into content bg */
+  border-left: 4px solid #fbc02d;
+  font-weight: 600;
+}
+
+.menu-icon {
+  font-size: 1.15rem;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* Nested Folders UI */
+.nested-folder {
+  display: flex;
+  flex-direction: column;
+}
+
+.folder-header {
+  padding: 14px 24px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: 0.3s;
+}
+
+.folder-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.chevron-icon {
+  font-size: 0.8rem;
+  transition: transform 0.25s ease;
+}
+
+.folder-contents {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+  background: #144317; /* Darker green background tone inside the folder dropdown */
+}
+
+.folder-contents.open {
+  max-height: 300px;
+}
+
+/* Sub-navigation item indent tweaks */
+.folder-contents .menu-item {
+  padding-left: 36px;
+}
+
+.sub-icon {
+  font-size: 0.95rem;
+  opacity: 0.8;
+}
+
+/* ==========================================================================
+   MAIN DASHBOARD WORKSPACE PANELS
+   ========================================================================== */
+.main-viewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Main Content Wrapper Window */
+.content-viewport {
+  flex: 1;
+  overflow-y: auto;
+  padding: 40px;
+  background: #eef7ef; /* Pale Mint Section Color */
+}
+
+/* Modular Content Panel Containers */
+.dashboard-panel {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 35px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border: 1px solid #dfe9df;
+}
+
+/* Form inputs & styling based on contact form design definitions */
+.dashboard-form label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1b5e20;
+  margin-bottom: 8px;
+}
+
+.dashboard-form input,
+.dashboard-form select,
+.dashboard-form textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #cfdccc;
+  font: inherit;
+  background: #fbfdfb;
+  color: #263238;
+  transition: 0.2s;
+}
+
+.dashboard-form input:focus,
+.dashboard-form select:focus,
+.dashboard-form textarea:focus {
+  outline: none;
+  border-color: #1b5e20;
+  box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
+}
+
+/* Interactive Action Buttons */
+.btn-brand {
+  padding: 14px 28px;
+  border-radius: 10px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+  font-family: "Poppins", sans-serif;
+}
+
+.btn-brand-primary {
+  background: #1b5e20;
+  color: white;
+}
+
+.btn-brand-primary:hover {
+  background: #2e7d32;
+  transform: translateY(-1px);
+}
+
+.btn-brand-secondary {
+  background: #fbc02d;
+  color: #1b1b1b;
+}
+
+.btn-brand-secondary:hover {
+  background: #ffd54f;
+  transform: translateY(-1px);
+}
+
+/* Badges for System State Loops */
+.badge-zero {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+/* Smooth Navigation Animations */
+.module-fade-in {
+  animation: fadeInSlide 0.3s ease-out;
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   SHRINK / COLLAPSED STATE MODIFIERS
+   ========================================================================== */
+.sidebar.collapsed {
+  width: 75px;
+}
+
+/* Structural clean sweep hiding to eliminate text wrapper overflow lines */
+.sidebar.collapsed .logo-mark,
+.sidebar.collapsed .role-tag,
+.sidebar.collapsed .menu-text,
+.sidebar.collapsed .chevron-icon,
+.sidebar.collapsed .folder-contents {
+  display: none !important;
+}
+
+/* Perfect alignment overrides for icons when width drops */
+.sidebar.collapsed .sidebar-brand {
+  justify-content: center !important;
+  padding: 25px 0 !important;
+}
+
+.sidebar.collapsed .sidebar-brand button {
+  margin: 0 auto;
+}
+
+.sidebar.collapsed .menu-item {
+  justify-content: center !important;
+  padding: 16px 0 !important;
+  border-left: none !important;
+  gap: 0 !important;
+}
+
+.sidebar.collapsed .folder-header {
+  justify-content: center !important;
+  padding: 16px 0 !important;
+}
+
+.sidebar.collapsed .folder-title-wrapper {
+  justify-content: center !important;
+  gap: 0 !important;
+}
+
+#pendingPaymentsTable tr.selected-row,
+#aidMembersChecklistTable tr.selected-row {
+  background: #e8f5e9;
+}
+
+#aidMembersChecklistTable .member-row-check {
+  width: 16px;
+  height: 16px;
+  accent-color: #1b5e20;
+  cursor: pointer;
+}

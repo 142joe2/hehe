@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CAUFA | MFA Verification</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="{% static 'img/isu_caufa_official.png' %}"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="{% static 'css/login.css' %}" />
+  </head>
+  <body>
+    <a
+      href="{% url 'home' %}"
+      style="
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #1b5e20;
+        text-decoration: none;
+        font-weight: 600;
+        font-family: 'Poppins', sans-serif;
+        font-size: 15px;
+        background: white;
+        padding: 10px 16px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: 0.2s;
+        z-index: 9999;
+      "
+      onmouseover="this.style.transform = 'translateY(-2px)'"
+      onmouseout="this.style.transform = 'translateY(0)'"
+    >
+      <i class="fa-solid fa-arrow-left"></i> Back to Home
+    </a>
+
+    <section class="login-shell">
+      <div class="brand">
+        <img src="{% static 'img/isu_caufa_official.png' %}" alt="CAUFA logo" />
+        <div>
+          <strong>CAUFA</strong>
+          <span>Two-Factor Authentication</span>
+        </div>
+      </div>
+
+      <form id="mfaForm" novalidate>
+        {% csrf_token %}
+        <p class="mfa-intro">
+          Enter the 6-digit verification code sent to your registered email address.
+        </p>
+
+        <div id="mfaError" class="error-note" style="display: none;">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span id="mfaErrorText"></span>
+        </div>
+
+        <div>
+          <label for="otp">Verification Code</label>
+          <div class="input-wrap">
+            <i class="fa-solid fa-shield-halved field-icon" aria-hidden="true"></i>
+            <input
+              id="otp"
+              name="otp"
+              type="text"
+              inputmode="numeric"
+              maxlength="6"
+              pattern="[0-9]*"
+              placeholder="000000"
+              required
+              autofocus
+            />
+          </div>
+        </div>
+
+        <input type="hidden" id="preAuthToken" value="{{ pre_auth_token|default:'' }}" />
+        <input type="hidden" id="mfaUsername" value="{{ username|default:'' }}" />
+
+        <div class="mfa-actions">
+          <button class="btn-slim btn-primary" type="submit" id="mfaSubmitBtn">
+            <i class="fa-solid fa-check"></i> Verify
+          </button>
+          <button
+            class="btn-slim btn-secondary"
+            type="button"
+            id="resendBtn"
+          >
+            <i class="fa-solid fa-rotate-right"></i> Resend Code
+          </button>
+        </div>
+
+        <p class="mfa-footer">
+          Didn't receive it? Check your email.
+        </p>
+      </form>
+    </section>
+
+    <script src="{% static 'js/login.js' %}"></script>
+    <script>
+      (function () {
+        var form = document.getElementById("mfaForm");
+        var errorBox = document.getElementById("mfaError");
+        var errorText = document.getElementById("mfaErrorText");
+        var preAuthToken = document.getElementById("preAuthToken").value;
+        var username = document.getElementById("mfaUsername").value;
+        var otpInput = document.getElementById("otp");
+
+        function showError(msg) {
+          errorText.textContent = msg;
+          errorBox.style.display = "block";
+        }
+
+        function hideError() {
+          errorBox.style.display = "none";
+        }
+
+        function setLoading(loading) {
+          var btn = document.getElementById("mfaSubmitBtn");
+          btn.disabled = loading;
+          btn.innerHTML = loading
+            ? '<i class="fa-solid fa-circle-notch fa-spin"></i> Verifying...'
+            : '<i class="fa-solid fa-check"></i> Verify';
+        }
+
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          hideError();
+          setLoading(true);
+
+          var otp = otpInput.value.trim();
+          if (!otp || otp.length !== 6) {
+            showError("Please enter the 6-digit code.");
+            setLoading(false);
+            return;
+          }
+
+          fetch("/api/auth/mfa/verify/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+            },
+            body: new URLSearchParams({
+              otp: otp,
+              pre_auth_token: preAuthToken,
+            }),
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              setLoading(false);
+              if (data && data.ok && data.redirect_url) {
+                window.location.href = data.redirect_url;
+              } else {
+                showError((data && data.error) || "Verification failed.");
+              }
+            })
+            .catch(function () {
+              setLoading(false);
+              showError("Network error. Please try again.");
+            });
+        });
+
+        document.getElementById("resendBtn").addEventListener("click", function () {
+          hideError();
+          var btn = document.getElementById("resendBtn");
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending...';
+
+          var formData = new FormData();
+          formData.append("username", username);
+
+          fetch("/api/auth/mfa/challenge/", {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+            },
+            body: formData,
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Resend Code';
+              if (data && data.ok) {
+                alert("Verification code resent via email.");
+              } else {
+                showError((data && data.error) || "Failed to resend code.");
+              }
+            })
+            .catch(function () {
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Resend Code';
+              showError("Network error. Please try again.");
+            });
+        });
+
+        if (otpInput.value.length === 6) {
+          form.dispatchEvent(new Event("submit"));
+        }
+      })();
+    </script>
+  </body>
+</html>

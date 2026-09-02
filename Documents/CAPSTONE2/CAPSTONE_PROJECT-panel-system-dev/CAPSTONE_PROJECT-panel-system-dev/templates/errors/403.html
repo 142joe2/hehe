@@ -1,0 +1,56 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Access Denied | CAUFA Security</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="{% static 'css/error_pages.css' %}" />
+  </head>
+  <body>
+    <div class="error-container">
+      <div class="security-shield-icon">
+        <i class="fa-solid fa-shield-keyhole"></i>
+        <div class="lock-bolt"></div>
+      </div>
+
+      <h1 class="error-code">403</h1>
+      <h2 class="error-title">Restricted Workspace Domain</h2>
+
+      <p class="error-message">
+        Sorry, you do not have the required structural clearance tokens to view
+        this space. Your current user profile role cannot access routes outside
+        its assigned clearance matrix.
+      </p>
+
+      <div class="context-alert-box">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span
+          >This security anomaly event has been recorded in the central system
+          audit log.</span
+        >
+      </div>
+
+      <div class="action-button-group">
+        <button onclick="window.history.back()" class="btn-error-back">
+          <i class="fa-solid fa-arrow-left-long"></i> Go Back to Workspace
+        </button>
+        <a
+          href="{% url 'logout' %}"
+          class="btn-error-switch"
+          onclick="
+            return confirm(
+              'Are you sure you want to exit your active session?',
+            );
+          "
+        >
+          <i class="fa-solid fa-right-from-bracket"></i> Switch Account
+        </a>
+      </div>
+    </div>
+  </body>
+</html>

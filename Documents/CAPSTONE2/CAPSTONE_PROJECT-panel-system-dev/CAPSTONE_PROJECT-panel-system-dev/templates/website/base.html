@@ -1,0 +1,727 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        window.FontAwesomeConfig = {
+          autoReplaceSvg: 'nest'
+        };
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#004d26">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ISU CAUFA">
+    <meta name="application-name" content="ISU CAUFA">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="description" content="Isabela State University - Cauayan Faculty Association. United for Progress, Inspired by Service.">
+    <link rel="manifest" href="{% static 'manifest.json' %}?v=8">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/isu_caufa_splash_180.png' %}?v=8">
+    <link rel="icon" sizes="192x192" href="{% static 'img/isu_caufa_splash_192.png' %}?v=8" type="image/png">
+    <link rel="icon" sizes="512x512" href="{% static 'img/isu_caufa_splash_512.png' %}?v=8" type="image/png">
+    <link rel="mask-icon" href="{% static 'img/isu_caufa_official_512.png' %}?v=8" color="#004d26">
+    <link rel="shortcut icon" href="{% static 'img/isu_caufa_official_512.png' %}?v=8" type="image/png">
+    <title>{% block title %}ISU CAUFA{% endblock %} | ISU CAUFA</title>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="//cdn.tailwindcss.com">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-green': '#004d26',
+                        'brand-dark': '#18181b',
+                        'brand-gray': '#e4e4e7',
+                        'brand-surface': '#f4f4f5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    keyframes: {
+                        scroll: {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        }
+                    },
+                    animation: {
+                        scroll: 'scroll 20s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .nav-link { position: relative; }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: currentColor;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s ease;
+        }
+        .nav-link:hover::after, .nav-group:hover .nav-link::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+        .nav-link.active { border-bottom: 2px solid #004d26; padding-bottom: 2px; color: #004d26; }
+        .nav-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(8px);
+            min-width: 220px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+            padding: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            z-index: 100;
+            border: 1px solid #f1f5f9;
+        }
+        .nav-group:hover .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(4px);
+        }
+        .nav-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-left: 1px solid #f1f5f9;
+            border-top: 1px solid #f1f5f9;
+        }
+        .nav-dropdown a {
+            display: block;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .nav-dropdown a:hover {
+            background: #f4f4f5;
+            color: #004d26;
+        }
+        .nav-dropdown .dropdown-section {
+            font-size: 9px;
+            font-weight: 800;
+            color: #004d26;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            padding: 6px 14px 2px;
+            margin-top: 4px;
+        }
+        .nav-dropdown .dropdown-section:first-child { margin-top: 0; }
+        .nav-dropdown-divider {
+            height: 1px;
+            background: #e4e4e7;
+            margin: 4px 14px;
+        }
+        .announcement-card img { transition: transform 0.5s ease, filter 0.5s ease; filter: grayscale(100%); }
+        .announcement-card:hover img { transform: scale(1.05); filter: grayscale(0%); }
+        .marquee-container:hover .animate-scroll { animation-play-state: paused; }
+
+        /* ===== Native app feel (mobile) ===== */
+        html { -webkit-text-size-adjust: 100%; }
+        body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
+        a, button, [role="button"], input, select, textarea {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .mobile-menu-nav, .mobile-drawer-scroll {
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+        }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+        .safe-top { padding-top: env(safe-area-inset-top, 0px); }
+
+        /* Sticky header: hide on scroll down, reveal on scroll up (mobile only) */
+        @media (max-width: 1023px) {
+            .app-header {
+                transition: transform 0.3s ease;
+            }
+            .app-header.header-hidden {
+                transform: translateY(-100%);
+            }
+            .app-header.header-flat {
+                box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            }
+        }
+    </style>
+</head>
+<body class="bg-[#faf9f6] text-brand-dark overflow-x-hidden">
+
+    <!-- Header -->
+    <header class="app-header sticky top-0 z-50 bg-[#fbfaf7] safe-top" id="app-header">
+        <!-- Top Utility Bar -->
+        <div class="hidden md:block bg-brand-green py-1 px-12">
+            <div class="max-w-[1440px] mx-auto flex justify-between items-center text-[11px] text-white">
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span>Isabela State University - Cauayan Campus</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-8">
+                    {% if site_email %}
+                    <a href="mailto:{{ site_email }}" class="flex items-center gap-2 hover:opacity-80">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span>{{ site_email }}</span>
+                    </a>
+                    {% endif %}
+                    {% if site_phone %}
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-phone"></i>
+                        <span>{{ site_phone }}</span>
+                    </div>
+                    {% endif %}
+                    {% if facebook_url and facebook_url != '#' %}
+                    <a href="{{ facebook_url }}" target="_blank" rel="noopener" class="hover:opacity-80 text-lg"><i class="fa-brands fa-facebook"></i></a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Navigation -->
+        <div class="w-full px-4 sm:px-6 lg:px-8 py-2 bg-[#fbfaf7]/95 backdrop-blur-md shadow-[0_1px_2px_rgba(16,24,40,0.06)]" style="display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; column-gap:2rem;">
+            <div class="flex items-center gap-3 justify-self-start">
+                <a href="{% url 'home' %}"><img class="h-10 w-10" src="{% static 'img/isu_caufa_official.png' %}" alt="ISU CAUFA Logo" /></a>
+                <div class="leading-tight">
+                    <h1 class="text-xl font-black text-brand-dark tracking-tighter">ISU CAUFA</h1>
+                    <p class="text-[11px] uppercase font-bold text-gray-500 tracking-tighter">Isabela State University - Cauayan</p>
+                    <p class="text-[10px] uppercase font-medium text-gray-400">Faculty Association</p>
+                </div>
+            </div>
+
+            <nav class="hidden xl:flex items-center gap-6 justify-self-center text-[11px] uppercase tracking-wider font-bold text-gray-700">
+                <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+
+                <!-- About Us Dropdown -->
+                <div class="nav-group relative">
+                    <a href="{% url 'about_page' %}#about" class="nav-link {% if request.resolver_match.url_name == 'about_page' %}active{% endif %}">About Us <i class="fa-solid fa-chevron-down ml-1 text-[10px]"></i></a>
+                    <div class="nav-dropdown">
+                        <a href="{% url 'about_page' %}#preamble">Preamble</a>
+                        <a href="{% url 'about_page' %}#vision">Vision</a>
+                        <a href="{% url 'about_page' %}#mission">Mission</a>
+                        <a href="{% url 'about_page' %}#objectives">Objectives</a>
+                        <a href="{% url 'about_page' %}#core-values">Core Values</a>
+                        <a href="{% url 'about_page' %}#constitution">Constitution</a>
+                        <a href="{% url 'about_page' %}#org-structure">Organizational Structure</a>
+                    </div>
+                </div>
+
+                <!-- Officers Dropdown -->
+                <div class="nav-group relative">
+                    <a href="{% url 'officers_page' %}" class="nav-link {% if request.resolver_match.url_name == 'officers_page' %}active{% endif %}">Officers <i class="fa-solid fa-chevron-down ml-1 text-[10px]"></i></a>
+                    <div class="nav-dropdown">
+                        <a href="{% url 'officers_page' %}#executive-officers">Executive Officers</a>
+                        <a href="{% url 'officers_page' %}#board-of-directors">Board of Directors</a>
+                        <a href="{% url 'officers_page' %}#advisers">Adviser(s)</a>
+                    </div>
+                </div>
+
+                <!-- Activities & Events Dropdown -->
+                <div class="nav-group relative">
+                    <a href="{% url 'activities_page' %}" class="nav-link {% if request.resolver_match.url_name == 'activities_page' %}active{% endif %}">Activities & Events <i class="fa-solid fa-chevron-down ml-1 text-[10px]"></i></a>
+                    <div class="nav-dropdown">
+                        <a href="{% url 'activities_page' %}#upcoming">Upcoming Activities</a>
+                        <a href="{% url 'activities_page' %}#past">Past Activities</a>
+                        <a href="{% url 'announcements_page' %}">Announcements</a>
+                        <a href="{% url 'activities_page' %}#calendar">Event Calendar</a>
+                    </div>
+                </div>
+
+                <!-- Resources Dropdown -->
+                <div class="nav-group relative">
+                    <a href="{% url 'resources_page' %}" class="nav-link {% if request.resolver_match.url_name == 'resources_page' %}active{% endif %}">Resources <i class="fa-solid fa-chevron-down ml-1 text-[10px]"></i></a>
+                    <div class="nav-dropdown">
+                        <a href="{% url 'resources_page' %}#constitution">Constitution</a>
+                        <a href="{% url 'resources_page' %}#by-laws">By-Laws</a>
+                        <a href="{% url 'resources_page' %}#membership-forms">Membership Forms</a>
+                        <a href="{% url 'resources_page' %}#public-documents">Public Documents</a>
+                        <a href="{% url 'resources_page' %}#financial-reports">Financial Reports</a>
+                        <a href="{% url 'resources_page' %}#faqs">FAQs</a>
+                    </div>
+                </div>
+
+                <!-- News & Highlights Dropdown -->
+                <div class="nav-group relative">
+                    <a href="{% url 'news_page' %}" class="nav-link {% if request.resolver_match.url_name == 'news_page' %}active{% endif %}">News & Highlights <i class="fa-solid fa-chevron-down ml-1 text-[10px]"></i></a>
+                    <div class="nav-dropdown">
+                        <a href="{% url 'news_page' %}#featured">Featured News</a>
+                        <a href="{% url 'news_page' %}#recent">Recent News</a>
+                        <a href="{% url 'news_page' %}#categories">Categories</a>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Auth Buttons + Mobile Menu Toggle -->
+            <div class="flex items-center gap-2 justify-self-end">
+                <button id="mobile-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu" class="xl:hidden flex items-center justify-center w-11 h-11 rounded-full text-brand-green hover:bg-brand-surface transition-colors -mr-3 sm:-mr-4 lg:mr-0">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <div class="hidden xl:flex items-center gap-2">
+                    <button id="install-app-btn" type="button" class="hidden border border-brand-green text-brand-green rounded-full px-4 py-1.5 text-[11px] uppercase font-bold tracking-wider hover:bg-brand-green hover:text-white transition-all">Install App</button>
+                    <a href="{% url 'login' %}" class="border border-brand-green text-brand-green rounded-full px-4 py-1.5 text-[11px] uppercase font-bold tracking-wider hover:bg-brand-green hover:text-white transition-all">Login</a>
+                    <a href="{% url 'public_register' %}" class="bg-brand-green text-white rounded-full px-4 py-1.5 text-[11px] uppercase font-bold tracking-wider hover:bg-brand-dark transition-all">Register</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/50 z-[55] opacity-0 pointer-events-none transition-opacity duration-300 xl:hidden"></div>
+
+    <!-- Mobile Drawer Menu -->
+    <aside id="mobile-menu" class="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-[#fbfaf7] z-[60] shadow-2xl translate-x-full transition-transform duration-300 ease-out xl:hidden flex flex-col" aria-label="Mobile navigation" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <div class="flex items-center gap-2">
+                <img class="h-8 w-8" src="{% static 'img/isu_caufa_official.png' %}" alt="ISU CAUFA Logo" />
+                <span class="text-base font-black text-brand-dark tracking-tighter">ISU CAUFA</span>
+            </div>
+            <button id="mobile-menu-close" aria-label="Close menu" class="flex items-center justify-center w-10 h-10 rounded-full text-gray-600 hover:bg-brand-surface transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <nav class="mobile-drawer-scroll flex-1 overflow-y-auto py-2 text-sm">
+            <a href="{% url 'home' %}" class="mobile-menu-link flex items-center justify-between px-5 py-3.5 font-bold uppercase tracking-wider text-gray-800 hover:text-brand-green {% if request.resolver_match.url_name == 'home' %}text-brand-green{% endif %}">
+                Home
+            </a>
+
+            <!-- About Us -->
+            <div class="mobile-menu-group border-b border-gray-100">
+                <div class="flex items-center">
+                    <a href="{% url 'about_page' %}#about" class="mobile-menu-link flex-1 py-3.5 px-5 font-bold uppercase tracking-wider text-gray-800 hover:text-brand-green {% if request.resolver_match.url_name == 'about_page' %}text-brand-green{% endif %}">About Us</a>
+                    <button class="mobile-menu-toggle flex items-center justify-center w-12 h-12 text-gray-500" aria-label="Toggle About Us submenu"><i class="fa-solid fa-chevron-down mobile-menu-chevron transition-transform duration-300"></i></button>
+                </div>
+                <div class="mobile-menu-sub max-h-0 overflow-hidden transition-all duration-300">
+                    <div class="px-5 pb-3 space-y-1">
+                        <a href="{% url 'about_page' %}#preamble" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Preamble</a>
+                        <a href="{% url 'about_page' %}#vision" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Vision</a>
+                        <a href="{% url 'about_page' %}#mission" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Mission</a>
+                        <a href="{% url 'about_page' %}#objectives" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Objectives</a>
+                        <a href="{% url 'about_page' %}#core-values" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Core Values</a>
+                        <a href="{% url 'about_page' %}#constitution" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Constitution</a>
+                        <a href="{% url 'about_page' %}#org-structure" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Organizational Structure</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Officers -->
+            <div class="mobile-menu-group border-b border-gray-100">
+                <div class="flex items-center">
+                    <a href="{% url 'officers_page' %}" class="mobile-menu-link flex-1 py-3.5 px-5 font-bold uppercase tracking-wider text-gray-800 hover:text-brand-green {% if request.resolver_match.url_name == 'officers_page' %}text-brand-green{% endif %}">Officers</a>
+                    <button class="mobile-menu-toggle flex items-center justify-center w-12 h-12 text-gray-500" aria-label="Toggle Officers submenu"><i class="fa-solid fa-chevron-down mobile-menu-chevron transition-transform duration-300"></i></button>
+                </div>
+                <div class="mobile-menu-sub max-h-0 overflow-hidden transition-all duration-300">
+                    <div class="px-5 pb-3 space-y-1">
+                        <a href="{% url 'officers_page' %}#executive-officers" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Executive Officers</a>
+                        <a href="{% url 'officers_page' %}#board-of-directors" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Board of Directors</a>
+                        <a href="{% url 'officers_page' %}#advisers" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Adviser(s)</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activities & Events -->
+            <div class="mobile-menu-group border-b border-gray-100">
+                <div class="flex items-center">
+                    <a href="{% url 'activities_page' %}" class="mobile-menu-link flex-1 py-3.5 px-5 font-bold uppercase tracking-wider text-gray-800 hover:text-brand-green {% if request.resolver_match.url_name == 'activities_page' %}text-brand-green{% endif %}">Activities &amp; Events</a>
+                    <button class="mobile-menu-toggle flex items-center justify-center w-12 h-12 text-gray-500" aria-label="Toggle Activities submenu"><i class="fa-solid fa-chevron-down mobile-menu-chevron transition-transform duration-300"></i></button>
+                </div>
+                <div class="mobile-menu-sub max-h-0 overflow-hidden transition-all duration-300">
+                    <div class="px-5 pb-3 space-y-1">
+                        <a href="{% url 'activities_page' %}#upcoming" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Upcoming Activities</a>
+                        <a href="{% url 'activities_page' %}#past" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Past Activities</a>
+                        <a href="{% url 'announcements_page' %}" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Announcements</a>
+                        <a href="{% url 'activities_page' %}#calendar" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Event Calendar</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resources -->
+            <div class="mobile-menu-group border-b border-gray-100">
+                <div class="flex items-center">
+                    <a href="{% url 'resources_page' %}" class="mobile-menu-link flex-1 py-3.5 px-5 font-bold uppercase tracking-wider text-gray-800 hover:text-brand-green {% if request.resolver_match.url_name == 'resources_page' %}text-brand-green{% endif %}">Resources</a>
+                    <button class="mobile-menu-toggle flex items-center justify-center w-12 h-12 text-gray-500" aria-label="Toggle Resources submenu"><i class="fa-solid fa-chevron-down mobile-menu-chevron transition-transform duration-300"></i></button>
+                </div>
+                <div class="mobile-menu-sub max-h-0 overflow-hidden transition-all duration-300">
+                    <div class="px-5 pb-3 space-y-1">
+                        <a href="{% url 'resources_page' %}#constitution" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Constitution</a>
+                        <a href="{% url 'resources_page' %}#by-laws" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">By-Laws</a>
+                        <a href="{% url 'resources_page' %}#membership-forms" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Membership Forms</a>
+                        <a href="{% url 'resources_page' %}#public-documents" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Public Documents</a>
+                        <a href="{% url 'resources_page' %}#financial-reports" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Financial Reports</a>
+                        <a href="{% url 'resources_page' %}#faqs" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">FAQs</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- News & Highlights -->
+            <div class="mobile-menu-group border-b border-gray-100">
+                <div class="flex items-center">
+                    <a href="{% url 'news_page' %}" class="mobile-menu-link flex-1 py-3.5 px-5 font-bold uppercase tracking-wider text-gray-800 hover:text-brand-green {% if request.resolver_match.url_name == 'news_page' %}text-brand-green{% endif %}">News &amp; Highlights</a>
+                    <button class="mobile-menu-toggle flex items-center justify-center w-12 h-12 text-gray-500" aria-label="Toggle News submenu"><i class="fa-solid fa-chevron-down mobile-menu-chevron transition-transform duration-300"></i></button>
+                </div>
+                <div class="mobile-menu-sub max-h-0 overflow-hidden transition-all duration-300">
+                    <div class="px-5 pb-3 space-y-1">
+                        <a href="{% url 'news_page' %}#featured" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Featured News</a>
+                        <a href="{% url 'news_page' %}#recent" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Recent News</a>
+                        <a href="{% url 'news_page' %}#categories" class="mobile-menu-link block py-2 text-gray-600 hover:text-brand-green">Categories</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="border-t border-gray-100 p-5 safe-bottom">
+            <div class="grid grid-cols-2 gap-3">
+                <a href="{% url 'login' %}" class="border border-brand-green text-brand-green rounded-full px-4 py-3 text-center text-sm uppercase font-bold tracking-wider hover:bg-brand-green hover:text-white transition-all">Login</a>
+                <a href="{% url 'public_register' %}" class="bg-brand-green text-white rounded-full px-4 py-3 text-center text-sm uppercase font-bold tracking-wider hover:bg-brand-dark transition-all">Register</a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Mobile Bottom Tab Bar (app-like navigation, hidden on desktop) -->
+    <nav id="mobile-tabbar" class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#fbfaf7]/95 backdrop-blur-md border-t border-black/5 safe-bottom shadow-[0_-4px_16px_rgba(0,0,0,0.06)]" aria-label="Primary">
+        <div class="grid grid-cols-5">
+            <a href="{% url 'home' %}" class="flex flex-col items-center justify-center gap-0.5 py-2 {% if request.resolver_match.url_name == 'home' %}text-brand-green{% else %}text-gray-400 hover:text-brand-green{% endif %}" aria-label="Home">
+                <i class="fa-solid fa-house text-lg leading-none"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wide">Home</span>
+            </a>
+            <a href="{% url 'about_page' %}#about" class="flex flex-col items-center justify-center gap-0.5 py-2 {% if request.resolver_match.url_name == 'about_page' %}text-brand-green{% else %}text-gray-400 hover:text-brand-green{% endif %}" aria-label="About Us">
+                <i class="fa-solid fa-building-columns text-lg leading-none"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wide">About</span>
+            </a>
+            <a href="{% url 'activities_page' %}" class="flex flex-col items-center justify-center gap-0.5 py-2 {% if request.resolver_match.url_name == 'activities_page' %}text-brand-green{% else %}text-gray-400 hover:text-brand-green{% endif %}" aria-label="Activities and Events">
+                <i class="fa-solid fa-calendar-days text-lg leading-none"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wide">Events</span>
+            </a>
+            <a href="{% url 'news_page' %}" class="flex flex-col items-center justify-center gap-0.5 py-2 {% if request.resolver_match.url_name == 'news_page' %}text-brand-green{% else %}text-gray-400 hover:text-brand-green{% endif %}" aria-label="News and Highlights">
+                <i class="fa-solid fa-newspaper text-lg leading-none"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wide">News</span>
+            </a>
+            <a href="#contact" class="flex flex-col items-center justify-center gap-0.5 py-2 text-gray-400 hover:text-brand-green" aria-label="Contact Us">
+                <i class="fa-solid fa-headset text-lg leading-none"></i>
+                <span class="text-[9px] font-bold uppercase tracking-wide">Contact</span>
+            </a>
+        </div>
+    </nav>
+
+    {% block content %}{% endblock %}
+
+    <!-- Footer -->
+    <footer id="contact" class="bg-brand-dark text-white px-6 md:px-12">
+        <div id="site-footer" class="max-w-[1440px] mx-auto pt-10 md:pt-12 pb-24 md:pb-8 lg:pb-8 transition-all duration-700 ease-out">
+
+            <!-- Two-Column Top -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
+
+                <!-- Left: Branding -->
+                <div class="flex flex-col items-center md:items-start text-center md:text-left">
+                    <div class="flex items-center gap-3">
+                        <img class="w-12 h-12 md:w-14 md:h-14 object-contain flex-shrink-0" src="{% static 'img/isu_caufa_official.png' %}" alt="ISU CAUFA Logo" />
+                        <div class="leading-tight">
+                            <h3 class="text-lg md:text-xl font-black tracking-tight text-white">ISU CAUFA</h3>
+                            <p class="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400">
+                                Isabela State University &ndash; Cauayan Faculty Association
+                            </p>
+                        </div>
+                    </div>
+                    <p class="mt-3 max-w-sm text-xs md:text-sm text-gray-400 leading-relaxed">
+                        Uniting faculty members through collaboration, service, and excellence.
+                    </p>
+                </div>
+
+                <!-- Right: Compact Info Rows -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm font-bold uppercase tracking-wider text-gray-400">
+                    <div class="space-y-3">
+                        {% if site_address %}
+                        <div class="flex items-start gap-2"><i class="fa-solid fa-location-dot mt-0.5 text-brand-green flex-shrink-0"></i> <span class="normal-case font-medium">{{ site_address }}</span></div>
+                        {% else %}
+                        <div class="flex items-start gap-2"><i class="fa-solid fa-location-dot mt-0.5 text-brand-green flex-shrink-0"></i> <span class="normal-case font-medium italic text-gray-500">Address not provided</span></div>
+                        {% endif %}
+                        {% if site_phone %}
+                        <div class="flex items-start gap-2"><i class="fa-solid fa-phone mt-0.5 text-brand-green flex-shrink-0"></i> <span class="normal-case font-medium">{{ site_phone }}</span></div>
+                        {% else %}
+                        <div class="flex items-start gap-2"><i class="fa-solid fa-phone mt-0.5 text-brand-green flex-shrink-0"></i> <span class="normal-case font-medium italic text-gray-500">Phone not provided</span></div>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-3">
+                        {% if site_email %}
+                        <div class="flex items-start gap-2"><i class="fa-solid fa-envelope mt-0.5 text-brand-green flex-shrink-0"></i> <span class="normal-case font-medium">{{ site_email }}</span></div>
+                        {% else %}
+                        <div class="flex items-start gap-2"><i class="fa-solid fa-envelope mt-0.5 text-brand-green flex-shrink-0"></i> <span class="normal-case font-medium italic text-gray-500">Email not provided</span></div>
+                        {% endif %}
+                        <div class="flex items-start gap-2"><i class="fa-regular fa-clock mt-0.5 text-brand-green flex-shrink-0"></i> <span class="normal-case font-medium">Mon &ndash; Fri | 8:00 AM &ndash; 5:00 PM</span></div>
+                        {% if facebook_url and facebook_url != '#' %}
+                        <div class="flex items-start gap-2"><i class="fa-brands fa-facebook mt-0.5 text-brand-green flex-shrink-0"></i> <a href="{{ facebook_url }}" target="_blank" rel="noopener" class="text-white font-semibold normal-case hover:text-brand-green hover:underline transition-colors">Facebook</a></div>
+                        {% else %}
+                        <div class="flex items-start gap-2"><i class="fa-brands fa-facebook mt-0.5 text-gray-600 flex-shrink-0"></i> <span class="normal-case font-medium italic text-gray-500">Facebook page not available</span></div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Single Divider + Bottom -->
+            <div class="mt-8 md:mt-10 pt-5 border-t border-white/5 text-center">
+                <p class="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-gray-500">
+                    &copy; {% now "Y" %} ISU CAUFA. All Rights Reserved.
+                </p>
+                <div class="mt-2 flex items-center justify-center gap-3 text-xs font-medium text-gray-500">
+                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                    <span>&bull;</span>
+                    <a href="#" class="hover:text-white transition-colors">Terms of Use</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ======= Footer Fade-In on Scroll =======
+        (function () {
+            var footer = document.getElementById('site-footer');
+            if (!footer) return;
+            if (!('IntersectionObserver' in window)) return;
+            footer.classList.add('opacity-0', 'translate-y-6');
+            var io = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        footer.classList.remove('opacity-0', 'translate-y-6');
+                        io.disconnect();
+                    }
+                });
+            }, { threshold: 0.15 });
+            io.observe(footer);
+        })();
+    </script>
+
+    <script>
+        // ======= Smooth Scroll =======
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const header = document.getElementById('app-header');
+                    const offset = header ? header.offsetHeight + 8 : 80;
+                    const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+                    window.scrollTo({ top, behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+
+    <script>
+        // ======= AJAX Pagination (no full reload, keeps scroll position) =======
+        document.querySelectorAll('[data-pagination-section]').forEach(function (wrapper) {
+            wrapper.addEventListener('click', function (e) {
+                const link = e.target.closest('a');
+                if (!link) return;
+                const url = link.getAttribute('href');
+                if (!url || url.indexOf('page=') === -1) return;
+                const y = window.scrollY;
+                e.preventDefault();
+                wrapper.style.opacity = '0.5';
+                wrapper.style.pointerEvents = 'none';
+                fetch(url)
+                    .then(function (r) { return r.text(); })
+                    .then(function (html) {
+                        wrapper.innerHTML = html;
+                        wrapper.style.opacity = '';
+                        wrapper.style.pointerEvents = '';
+                        window.scrollTo(0, y);
+                    })
+                    .catch(function () {
+                        wrapper.style.opacity = '';
+                        wrapper.style.pointerEvents = '';
+                        window.location.href = url;
+                    });
+            });
+        });
+    </script>
+    <script>
+        // ======= Mobile Menu (slide-in drawer) =======
+        (function () {
+            var btn = document.getElementById('mobile-menu-btn');
+            var close = document.getElementById('mobile-menu-close');
+            var menu = document.getElementById('mobile-menu');
+            var overlay = document.getElementById('mobile-menu-overlay');
+            if (!btn || !close || !menu || !overlay) return;
+
+            function open() {
+                menu.classList.remove('translate-x-full');
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+                document.body.style.overflow = 'hidden';
+                btn.setAttribute('aria-expanded', 'true');
+            }
+            function closeMenu() {
+                menu.classList.add('translate-x-full');
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+                document.body.style.overflow = '';
+                btn.setAttribute('aria-expanded', 'false');
+            }
+
+            btn.addEventListener('click', open);
+            close.addEventListener('click', closeMenu);
+            overlay.addEventListener('click', closeMenu);
+
+            menu.querySelectorAll('.mobile-menu-link').forEach(function (link) {
+                link.addEventListener('click', closeMenu);
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !menu.classList.contains('translate-x-full')) closeMenu();
+            });
+
+            // Accordion submenus
+            menu.querySelectorAll('.mobile-menu-toggle').forEach(function (toggle) {
+                toggle.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var group = toggle.closest('.mobile-menu-group');
+                    var sub = group.querySelector('.mobile-menu-sub');
+                    var chevron = toggle.querySelector('.mobile-menu-chevron');
+                    var wasOpen = sub.classList.contains('max-h-96');
+                    group.parentElement.querySelectorAll('.mobile-menu-sub').forEach(function (s) {
+                        s.classList.remove('max-h-96');
+                        s.classList.add('max-h-0');
+                    });
+                    group.parentElement.querySelectorAll('.mobile-menu-chevron').forEach(function (i) {
+                        i.classList.remove('rotate-180');
+                    });
+                    if (!wasOpen) {
+                        sub.classList.remove('max-h-0');
+                        sub.classList.add('max-h-96');
+                        chevron.classList.add('rotate-180');
+                    }
+                });
+            });
+        })();
+    </script>
+
+    <script>
+        // ======= Sticky header: hide on scroll down, reveal on scroll up (mobile only) =======
+        (function () {
+            var header = document.getElementById('app-header');
+            if (!header) return;
+            var mq = window.matchMedia('(max-width: 1023px)');
+            var lastY = window.scrollY;
+            var ticking = false;
+            function onScroll() {
+                var y = window.scrollY;
+                var dy = y - lastY;
+                lastY = y;
+                if (!mq.matches || y <= 90 || Math.abs(dy) < 10) {
+                    header.classList.remove('header-hidden');
+                } else if (dy > 0) {
+                    header.classList.add('header-hidden');
+                } else {
+                    header.classList.remove('header-hidden');
+                }
+                ticking = false;
+            }
+            window.addEventListener('scroll', function () {
+                if (!ticking) { window.requestAnimationFrame(onScroll); ticking = true; }
+            }, { passive: true });
+        })();
+    </script>
+    {% block extra_js %}{% endblock %}
+
+    <script>
+        // Register the PWA service worker at root so the app can be installed on desktop and mobile.
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                    console.log('ServiceWorker registered:', reg.scope);
+                }).catch(function(err) {
+                    console.log('ServiceWorker registration failed:', err);
+                });
+            });
+        }
+
+        // Show install button when the app becomes installable.
+        var deferredInstallPrompt;
+        var installButton = document.getElementById('install-app-btn');
+
+        window.addEventListener('beforeinstallprompt', function(event) {
+            console.log('beforeinstallprompt fired');
+            event.preventDefault();
+            deferredInstallPrompt = event;
+            if (installButton) {
+                installButton.classList.remove('hidden');
+            }
+            // Show only one install button depending on viewport width
+            var isDesktop = window.matchMedia('(min-width: 640px)').matches; // tailwind 'sm' breakpoint
+            var mobileBtn = document.getElementById('download-app-mobile');
+            var desktopBtn = document.getElementById('download-app-desktop');
+            if (isDesktop) {
+                if (desktopBtn) desktopBtn.classList.remove('hidden');
+                if (mobileBtn) mobileBtn.classList.add('hidden');
+            } else {
+                if (mobileBtn) mobileBtn.classList.remove('hidden');
+                if (desktopBtn) desktopBtn.classList.add('hidden');
+            }
+        });
+
+        function promptAppInstall() {
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                deferredInstallPrompt.userChoice.then(function(choiceResult) {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    } else {
+                        console.log('User dismissed the install prompt');
+                    }
+                    deferredInstallPrompt = null;
+                    if (installButton) {
+                        installButton.classList.add('hidden');
+                    }
+                });
+                return;
+            }
+
+            if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+                alert('The app is already installed.');
+                return;
+            }
+
+            console.log('Install prompt is not available yet.');
+        }
+
+        if (installButton) {
+            installButton.addEventListener('click', promptAppInstall);
+        }
+
+        window.addEventListener('appinstalled', function() {
+            if (installButton) {
+                installButton.classList.add('hidden');
+            }
+            console.log('PWA was installed');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exemption Request Received - ISU CAUFA</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f4f4f4; font-family:'Segoe UI',Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4; padding:20px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+          <!-- Header with Logo -->
+          <tr>
+            <td style="background-color:#1b5e20; text-align:center; padding:30px 20px 20px;">
+              <img src="cid:logo_cid" alt="" width="90" style="display:block; margin:0 auto 8px;" />
+              <div style="color:#ffffff; font-size:14px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:4px;">ISU CAUFA</div>
+              <h1 style="color:#ffffff; font-size:24px; margin:0; font-weight:600;">
+                Exemption Request Received
+              </h1>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:30px 30px 20px; color:#333333;">
+              <p style="font-size:16px; line-height:1.6; margin:0 0 20px;">
+                Dear <strong>{{ member_name }}</strong>,
+              </p>
+              <p style="font-size:16px; line-height:1.6; margin:0 0 20px;">
+                We have received your salary deduction exemption request for <strong>{{ month_covered }}</strong>.
+              </p>
+
+              <table role="presentation" width="100%" cellpadding="8" cellspacing="0" style="background-color:#f8f9fa; border-radius:6px; margin:0 0 20px;">
+                <tr>
+                  <td style="font-weight:600; color:#1b5e20; width:140px;">Month:</td>
+                  <td>{{ month_covered }}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600; color:#1b5e20;">Request Date:</td>
+                  <td>{{ request_date }}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600; color:#1b5e20;">Status:</td>
+                  <td style="font-weight:700; color:#ffc107;">Pending Review</td>
+                </tr>
+              </table>
+
+              <div style="background-color:#d1ecf1; border-left:4px solid #17a2b8; padding:15px; margin:0 0 20px; border-radius:4px;">
+                <h4 style="color:#0c5460; font-size:16px; margin:0 0 10px;">Next Steps</h4>
+                <p style="font-size:14px; line-height:1.6; margin:0; color:#0c5460;">
+                  Your request is now being reviewed by the Treasurer. You will receive a notification once a decision has been made.
+                </p>
+              </div>
+
+              <p style="font-size:14px; line-height:1.6; margin:0 0 20px; color:#666666; border-top:1px solid #eeeeee; padding-top:20px;">
+                If you have any questions about your exemption request, please contact the ISU CAUFA Treasurer's Office.
+              </p>
+              
+              <p style="font-size:14px; line-height:1.6; margin:0; color:#666666;">
+                Thank you for your submission.
+              </p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#1b5e20; text-align:center; padding:15px 20px;">
+              <p style="color:#ffffff; font-size:12px; margin:0;">
+                &copy; {% now "Y" %} ISU CAUFA &mdash; Isabela State University &bull; Cauayan City, Philippines
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

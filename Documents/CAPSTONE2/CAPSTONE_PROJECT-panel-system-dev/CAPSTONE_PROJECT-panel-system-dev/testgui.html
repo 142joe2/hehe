@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISU-CAUFA FMIS — Member App</title>
+<style>
+  :root{
+    --green-dark:#0f3d24;
+    --green:#155c33;
+    --green-mid:#1c7a43;
+    --green-light:#e7f3ec;
+    --green-accent:#2e9e5b;
+    --bg:#f3f5f4;
+    --card:#ffffff;
+    --text:#16211b;
+    --muted:#6b7a72;
+    --border:#e7ece9;
+    --red:#e0523f;
+    --orange:#f2a33d;
+    --blue:#3a86c8;
+    --yellow-badge:#f4b942;
+    --radius-lg:20px;
+    --radius-md:14px;
+    --radius-sm:10px;
+    --shadow:0 2px 10px rgba(15,61,36,0.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:#dfe4e1;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:24px 12px;
+    min-height:100vh;
+    color:var(--text);
+  }
+
+  /* ---------- Phone frame ---------- */
+  .phone{
+    width:390px;
+    max-width:100%;
+    background:var(--bg);
+    border-radius:44px;
+    border:10px solid #111;
+    box-shadow:0 30px 60px rgba(0,0,0,0.35);
+    overflow:hidden;
+    position:relative;
+    height:844px;
+    display:flex;
+    flex-direction:column;
+  }
+  .statusbar{
+    height:34px;
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 26px;
+    font-size:13px;
+    font-weight:600;
+    color:#fff;
+    background:var(--headerbg,var(--green-dark));
+    transition:background .2s;
+  }
+  .statusbar .icons{display:flex;gap:5px;align-items:center;}
+  .statusbar svg{display:block;}
+
+  .screens{
+    flex:1;
+    position:relative;
+    overflow:hidden;
+  }
+  .screen{
+    position:absolute;
+    inset:0;
+    overflow-y:auto;
+    -ms-overflow-style:none;
+    scrollbar-width:none;
+    display:none;
+    padding-bottom:90px;
+    animation:fadeIn .18s ease;
+  }
+  .screen::-webkit-scrollbar{display:none;}
+  .screen.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  /* ---------- Header ---------- */
+  .header{
+    background:linear-gradient(180deg,var(--green-dark),var(--green));
+    color:#fff;
+    padding:18px 20px 26px;
+    border-radius:0 0 26px 26px;
+  }
+  .header-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-badge{
+    width:38px;height:38px;border-radius:50%;
+    background:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:18px;
+  }
+  .brand-name{font-size:14px;font-weight:700;line-height:1.2;}
+  .brand-sub{font-size:11px;color:#cfe6d8;font-weight:500;}
+  .bell{
+    position:relative;width:36px;height:36px;border-radius:50%;
+    background:rgba(255,255,255,0.12);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+  .badge{
+    position:absolute;top:-3px;right:-3px;
+    background:var(--red);color:#fff;font-size:10px;font-weight:700;
+    min-width:16px;height:16px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;padding:0 3px;
+    border:2px solid var(--green-dark);
+  }
+  .header-title{font-size:16px;font-weight:700;text-align:center;flex:1;}
+  .header-simple{display:flex;align-items:center;justify-content:space-between;}
+
+  .greeting{margin-top:18px;display:flex;align-items:center;justify-content:space-between;}
+  .greeting-text .hi{font-size:12px;color:#cfe6d8;}
+  .greeting-text .name{font-size:21px;font-weight:800;letter-spacing:.2px;}
+  .greeting-text .date{font-size:11.5px;color:#cfe6d8;margin-top:2px;}
+  .avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.5);}
+
+  /* ---------- Cards ---------- */
+  .content{padding:16px 16px 4px;}
+  .card{
+    background:var(--card);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .card-white-on-green{
+    background:rgba(255,255,255,0.97);
+    border-radius:var(--radius-lg);
+    padding:14px 16px;
+    margin-top:-14px;
+    position:relative;
+    z-index:2;
+  }
+  .row-between{display:flex;align-items:center;justify-content:space-between;}
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:600;color:var(--green-mid);
+  }
+  .pill .dot{width:8px;height:8px;border-radius:50%;background:var(--green-accent);}
+  .status-active{font-size:16px;font-weight:800;color:var(--green-mid);margin-top:2px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+  .field-label{font-size:11px;color:var(--muted);font-weight:600;}
+  .field-value{font-size:13.5px;font-weight:700;margin-top:2px;}
+
+  .section-title{font-size:14.5px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+  .section-title .view-all{font-size:12px;font-weight:700;color:var(--green-mid);cursor:pointer;}
+
+  .balance-row{display:flex;align-items:center;justify-content:space-between;margin:8px 0 14px;}
+  .balance-amt{font-size:26px;font-weight:800;color:var(--text);}
+  .wallet-ico{
+    width:46px;height:46px;border-radius:50%;background:var(--green-mid);
+    display:flex;align-items:center;justify-content:center;color:#fff;
+  }
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--green-mid);color:#fff;font-weight:700;font-size:14px;
+    border:none;border-radius:var(--radius-sm);padding:13px;width:100%;cursor:pointer;
+  }
+  .btn:active{opacity:.85;}
+
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+  .stat-card{
+    background:var(--card);border-radius:var(--radius-md);box-shadow:var(--shadow);
+    padding:14px 8px;text-align:center;
+  }
+  .stat-ico{width:34px;height:34px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;}
+  .stat-num{font-size:15px;font-weight:800;}
+  .stat-label{font-size:10.5px;color:var(--muted);margin-top:1px;}
+
+  .notif-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);position:relative;}
+  .notif-item:last-child{border-bottom:none;}
+  .notif-ico{width:34px;height:34px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
+  .notif-title{font-size:12.5px;font-weight:600;line-height:1.35;}
+  .notif-time{font-size:10.5px;color:var(--muted);margin-top:2px;}
+  .unread-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);position:absolute;right:0;top:14px;}
+
+  .list-item{
+    display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;
+  }
+  .list-item:last-child{border-bottom:none;}
+  .list-ico{width:36px;height:36px;border-radius:10px;background:var(--green-light);display:flex;align-items:center;justify-content:center;flex:0 0 auto;color:var(--green-mid);}
+  .list-text{flex:1;font-size:13.5px;font-weight:700;}
+  .chev{color:var(--muted);}
+
+  /* Bottom nav */
+  .bottomnav{
+    position:absolute;left:0;right:0;bottom:0;
+    background:#fff;border-top:1px solid var(--border);
+    display:flex;justify-content:space-around;align-items:center;
+    padding:8px 4px 14px;
+    z-index:10;
+  }
+  .navbtn{
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    color:var(--muted);font-size:10px;font-weight:600;cursor:pointer;
+    background:none;border:none;position:relative;padding:4px 8px;
+  }
+  .navbtn.active{color:var(--green-mid);}
+  .navbtn svg{stroke:currentColor;}
+  .nav-badge{
+    position:absolute;top:-2px;right:2px;background:var(--red);color:#fff;
+    font-size:9px;font-weight:700;min-width:14px;height:14px;border-radius:7px;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  /* Attendance screen */
+  .qr-card{background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:20px;text-align:center;margin-bottom:14px;}
+  .qr-title{font-size:14.5px;font-weight:800;text-align:left;margin-bottom:14px;}
+  .qr-box{
+    width:200px;height:200px;margin:0 auto 14px;background:#fff;border:1px solid var(--border);
+    border-radius:16px;display:flex;align-items:center;justify-content:center;padding:10px;
+  }
+  .qr-name{font-size:16px;font-weight:800;margin-top:2px;}
+  .qr-id{font-size:12.5px;color:var(--muted);margin-top:2px;}
+  .qr-hint{
+    margin-top:14px;background:var(--green-light);color:var(--green-mid);
+    font-size:12px;font-weight:600;padding:10px;border-radius:var(--radius-sm);
+  }
+  .attend-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 10px;}
+  .attend-num-card{text-align:center;}
+  .attend-circle{
+    width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    margin:0 auto 6px;color:#fff;font-weight:800;font-size:14px;
+  }
+  .progress-bar{height:7px;background:var(--border);border-radius:6px;overflow:hidden;margin-top:8px;}
+  .progress-fill{height:100%;background:var(--green-accent);border-radius:6px;}
+  .progress-caption{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;}
+
+  .event-item{display:flex;align-items:center;gap:12px;}
+  .event-ico{width:38px;height:38px;border-radius:10px;background:var(--green-light);display:flex;align-items:center;justify-content:center;color:var(--green-mid);flex:0 0 auto;}
+  .event-title{font-size:13.5px;font-weight:700;}
+  .event-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+
+  /* Finance screen extras */
+  .finance-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;}
+  .finance-row:last-child{border-bottom:none;}
+  .tag{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+  .tag-paid{background:#e3f6e9;color:#1f9d55;}
+  .tag-approved{background:#e3f6e9;color:#1f9d55;}
+  .tag-pending{background:#fdeee0;color:var(--orange);}
+  .tag-unpaid{background:#fdeaea;color:var(--red);}
+  .tag-returned{background:#eaeef7;color:#5b6fbf;}
+  .due-card{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:15px 16px;margin-bottom:14px;}
+
+  /* Notifications tabs */
+  .tabs{display:flex;gap:8px;margin-bottom:14px;}
+  .tab{
+    padding:7px 14px;border-radius:20px;font-size:12.5px;font-weight:700;
+    background:var(--card);color:var(--muted);border:1px solid var(--border);cursor:pointer;
+  }
+  .tab.active{background:var(--green-mid);color:#fff;border-color:var(--green-mid);}
+  .tab .tab-badge{background:var(--red);color:#fff;font-size:10px;padding:1px 5px;border-radius:8px;margin-left:5px;}
+
+  /* Profile screen */
+  .profile-head{background:linear-gradient(180deg,var(--green-dark),var(--green));padding:20px 20px 60px;border-radius:0 0 26px 26px;position:relative;}
+  .profile-avatar-wrap{display:flex;flex-direction:column;align-items:center;margin-top:10px;}
+  .profile-avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,0.6);position:relative;}
+  .cam-badge{
+    width:26px;height:26px;border-radius:50%;background:var(--green-accent);border:2px solid #fff;
+    display:flex;align-items:center;justify-content:center;color:#fff;margin-top:-24px;margin-left:60px;
+  }
+  .profile-card{background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:16px;margin:-40px 16px 14px;position:relative;z-index:2;}
+  .pinfo-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+  .pinfo-row:last-child{border-bottom:none;}
+  .pinfo-label{color:var(--muted);}
+  .pinfo-value{font-weight:700;}
+
+  /* Sub-page (ledger, payment history) */
+  .subpage-header{
+    background:linear-gradient(180deg,var(--green-dark),var(--green));color:#fff;
+    padding:16px 18px 18px;display:flex;align-items:center;gap:12px;border-radius:0 0 20px 20px;
+  }
+  .back-btn{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;}
+  .subpage-title{font-size:16px;font-weight:800;}
+
+  .month-selector{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:var(--radius-sm);box-shadow:var(--shadow);padding:12px 14px;margin:16px 16px 14px;font-weight:700;font-size:13.5px;}
+  .month-selector .side{color:var(--muted);cursor:pointer;}
+
+  .summary-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px;margin-bottom:14px;}
+  .summary-box{background:var(--card);border-radius:var(--radius-md);box-shadow:var(--shadow);padding:12px;text-align:center;}
+  .summary-box .lbl{font-size:10.5px;color:var(--muted);}
+  .summary-box .val{font-size:14.5px;font-weight:800;margin-top:2px;}
+
+  .filter-tabs{display:flex;gap:18px;padding:0 16px;margin-bottom:10px;border-bottom:1px solid var(--border);}
+  .filter-tab{font-size:12.5px;font-weight:700;color:var(--muted);padding-bottom:10px;cursor:pointer;border-bottom:2px solid transparent;}
+  .filter-tab.active{color:var(--green-mid);border-color:var(--green-mid);}
+
+  .ledger-item{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);}
+  .ledger-left .lt{font-size:13.5px;font-weight:700;}
+  .ledger-left .ls{font-size:11px;color:var(--muted);margin-top:2px;}
+  .ledger-right{text-align:right;}
+  .ledger-right .amt{font-size:13.5px;font-weight:800;}
+
+  .hint-box{margin:14px 16px 0;background:var(--green-light);color:var(--green-mid);font-size:11.5px;font-weight:600;padding:10px 12px;border-radius:var(--radius-sm);display:flex;gap:8px;align-items:flex-start;}
+
+  .payhist-item{padding:12px 16px;border-bottom:1px solid var(--border);}
+  .payhist-top{display:flex;justify-content:space-between;font-size:13px;font-weight:700;}
+  .payhist-sub{font-size:11.5px;color:var(--muted);margin-top:3px;display:flex;justify-content:space-between;}
+
+  .legend-note{padding:14px;font-size:11px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+
+  <div class="statusbar" id="statusbar">
+    <span>9:41</span>
+    <div class="icons">
+      <svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="6" width="2.5" height="5" rx="0.5" fill="#fff"/><rect x="4.3" y="4" width="2.5" height="7" rx="0.5" fill="#fff"/><rect x="8.6" y="2" width="2.5" height="9" rx="0.5" fill="#fff"/><rect x="12.9" y="0" width="2.5" height="11" rx="0.5" fill="#fff"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 3C11 3 13.5 4.2 15 6L13.6 7.5C12.3 6.1 10.3 5.2 8 5.2C5.7 5.2 3.7 6.1 2.4 7.5L1 6C2.5 4.2 5 3 8 3Z" fill="#fff"/><circle cx="8" cy="9.5" r="1.4" fill="#fff"/></svg>
+      <svg width="24" height="11" viewBox="0 0 24 11" fill="none"><rect x="0.5" y="0.5" width="20" height="10" rx="2.5" stroke="#fff"/><rect x="2" y="2" width="17" height="7" rx="1.3" fill="#fff"/><rect x="21.5" y="3" width="2" height="4" rx="1" fill="#fff"/></svg>
+    </div>
+  </div>
+
+  <div class="screens">
+
+    <!-- ============ HOME ============ -->
+    <div class="screen active" id="screen-home">
+      <div class="header">
+        <div class="header-top">
+          <div class="brand">
+            <div class="brand-badge">🌿</div>
+            <div>
+              <div class="brand-name">ISU-CAUFA FMIS</div>
+              <div class="brand-sub">Member App</div>
+            </div>
+          </div>
+          <div class="bell" onclick="goTo('notifications')">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+            <span class="badge">3</span>
+          </div>
+        </div>
+        <div class="greeting">
+          <div class="greeting-text">
+            <div class="hi">Good Morning,</div>
+            <div class="name">JUSTIN VON</div>
+            <div class="date">July 29, 2026</div>
+          </div>
+          <img class="avatar" src="https://i.pravatar.cc/120?img=13" alt="profile">
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="card-white-on-green" style="margin-top:-18px;">
+          <div class="row-between">
+            <div class="pill"><span class="dot"></span> Membership Status</div>
+          </div>
+          <div class="status-active">Active Member</div>
+          <div class="grid-2">
+            <div>
+              <div class="field-label">Category</div>
+              <div class="field-value">Permanent</div>
+            </div>
+            <div>
+              <div class="field-label">Member Since</div>
+              <div class="field-value">June 29, 2026</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:14px;"></div>
+
+        <div class="card">
+          <div class="section-title" style="margin-bottom:2px;">Financial Overview</div>
+          <div class="field-label">Outstanding Balance</div>
+          <div class="balance-row" style="margin-top:2px;">
+            <div class="balance-amt">₱50.00</div>
+          </div>
+          <button class="btn" onclick="goTo('finance')">View Ledger</button>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-card" onclick="goTo('attendance')">
+            <div class="stat-ico" style="background:#e7f3ec;color:var(--green-mid);">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            </div>
+            <div class="stat-num">18 / 20</div>
+            <div class="stat-label">This Month</div>
+          </div>
+          <div class="stat-card" onclick="goTo('finance')">
+            <div class="stat-ico" style="background:#e7f3ec;color:var(--green-mid);">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h12"/></svg>
+            </div>
+            <div class="stat-num">11 / 12</div>
+            <div class="stat-label">Monthly Dues</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-ico" style="background:#fdeaea;color:var(--red);">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.3 5c1.9 0 3.2 1 3.7 2 0.5-1 1.8-2 3.7-2 3.3 0 4.6 3.4 2.8 7-2.5 4.5-9.5 9-9.5 9z"/></svg>
+            </div>
+            <div class="stat-num">None</div>
+            <div class="stat-label">Medical Aid</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Recent Notifications <span class="view-all" onclick="goTo('notifications')">View All</span></div>
+
+          <div class="notif-item">
+            <div class="notif-ico" style="background:#fdeaea;color:var(--red);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.3 5c1.9 0 3.2 1 3.7 2 0.5-1 1.8-2 3.7-2 3.3 0 4.6 3.4 2.8 7-2.5 4.5-9.5 9-9.5 9z"/></svg>
+            </div>
+            <div>
+              <div class="notif-title">Medical Aid Claim has been approved.</div>
+              <div class="notif-time">July 27, 2026 • 10:30 AM</div>
+            </div>
+            <div class="unread-dot"></div>
+          </div>
+
+          <div class="notif-item">
+            <div class="notif-ico" style="background:#e7f3ec;color:var(--green-mid);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            </div>
+            <div>
+              <div class="notif-title">Monthly dues for August 2026 is now open.</div>
+              <div class="notif-time">July 27, 2026 • 9:15 AM</div>
+            </div>
+            <div class="unread-dot"></div>
+          </div>
+
+          <div class="notif-item">
+            <div class="notif-ico" style="background:#fdeee0;color:var(--orange);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 21h20L12 2z"/><path d="M12 9v5M12 17h.01"/></svg>
+            </div>
+            <div>
+              <div class="notif-title">Faculty Assembly will be on July 30, 2026.</div>
+              <div class="notif-time">July 26, 2026 • 4:45 PM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ATTENDANCE ============ -->
+    <div class="screen" id="screen-attendance">
+      <div class="header">
+        <div class="header-top">
+          <span style="width:36px;"></span>
+          <div class="header-title">Attendance</div>
+          <div class="bell" onclick="goTo('notifications')">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+            <span class="badge">3</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="qr-card">
+          <div class="qr-title">My QR Code</div>
+          <div class="qr-box">
+            <svg viewBox="0 0 100 100" width="100%" height="100%">
+              <rect width="100" height="100" fill="#fff"/>
+              <rect x="4" y="4" width="24" height="24" fill="none" stroke="#0f3d24" stroke-width="6"/>
+              <rect x="12" y="12" width="8" height="8" fill="#0f3d24"/>
+              <rect x="72" y="4" width="24" height="24" fill="none" stroke="#0f3d24" stroke-width="6"/>
+              <rect x="80" y="12" width="8" height="8" fill="#0f3d24"/>
+              <rect x="4" y="72" width="24" height="24" fill="none" stroke="#0f3d24" stroke-width="6"/>
+              <rect x="12" y="80" width="8" height="8" fill="#0f3d24"/>
+              <g fill="#0f3d24">
+                <rect x="34" y="6" width="5" height="5"/><rect x="44" y="6" width="5" height="5"/><rect x="54" y="10" width="5" height="5"/>
+                <rect x="34" y="16" width="5" height="5"/><rect x="60" y="20" width="5" height="5"/><rect x="34" y="34" width="5" height="5"/>
+                <rect x="44" y="34" width="5" height="5"/><rect x="54" y="38" width="5" height="5"/><rect x="64" y="34" width="5" height="5"/>
+                <rect x="34" y="44" width="5" height="5"/><rect x="44" y="50" width="5" height="5"/><rect x="54" y="46" width="5" height="5"/>
+                <rect x="64" y="50" width="5" height="5"/><rect x="6" y="40" width="5" height="5"/><rect x="16" y="46" width="5" height="5"/>
+                <rect x="6" y="56" width="5" height="5"/><rect x="20" y="60" width="5" height="5"/><rect x="34" y="60" width="5" height="5"/>
+                <rect x="44" y="64" width="5" height="5"/><rect x="54" y="60" width="5" height="5"/><rect x="64" y="64" width="5" height="5"/>
+                <rect x="34" y="72" width="5" height="5"/><rect x="44" y="78" width="5" height="5"/><rect x="54" y="82" width="5" height="5"/>
+                <rect x="64" y="76" width="5" height="5"/><rect x="74" y="42" width="5" height="5"/><rect x="84" y="46" width="5" height="5"/>
+                <rect x="74" y="58" width="5" height="5"/><rect x="86" y="60" width="5" height="5"/><rect x="76" y="70" width="5" height="5"/>
+                <rect x="86" y="80" width="5" height="5"/><rect x="60" y="88" width="5" height="5"/><rect x="74" y="90" width="5" height="5"/>
+              </g>
+              <circle cx="50" cy="50" r="8" fill="#fff" stroke="#0f3d24" stroke-width="1.5"/>
+              <text x="50" y="53" font-size="9" text-anchor="middle" fill="#0f3d24">🌿</text>
+            </svg>
+          </div>
+          <div class="qr-name">JUSTIN VON VERGARA</div>
+          <div class="qr-id">Faculty ID: 2024-023</div>
+          <div class="qr-hint">Present this QR code to the Secretary for attendance.</div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Attendance Summary <span class="view-all">This Year ⌄</span></div>
+          <div class="attend-summary">
+            <div class="attend-num-card">
+              <div class="attend-circle" style="background:#1f9d55;">✓</div>
+              <div class="stat-num">18</div>
+              <div class="stat-label">Present</div>
+            </div>
+            <div class="attend-num-card">
+              <div class="attend-circle" style="background:var(--orange);">⏱</div>
+              <div class="stat-num">2</div>
+              <div class="stat-label">Late</div>
+            </div>
+            <div class="attend-num-card">
+              <div class="attend-circle" style="background:var(--red);">✕</div>
+              <div class="stat-num">1</div>
+              <div class="stat-label">Absent</div>
+            </div>
+            <div class="attend-num-card">
+              <div class="attend-circle" style="background:var(--blue);">%</div>
+              <div class="stat-num">90%</div>
+              <div class="stat-label">Rate</div>
+            </div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:90%;"></div></div>
+          <div class="progress-caption"><span>21 out of 23 meetings attended</span><span>90%</span></div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Latest Attendance <span class="view-all">View All</span></div>
+          <div class="event-item">
+            <div class="event-ico">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div class="event-title">Faculty General Assembly</div>
+              <div class="event-sub">July 29, 2026 • 8:05 AM</div>
+            </div>
+            <span class="chev">›</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Upcoming Events <span class="view-all">View All</span></div>
+          <div class="event-item">
+            <div class="event-ico">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div class="event-title">Faculty General Assembly</div>
+              <div class="event-sub">July 30, 2026 • 8:00 AM &nbsp;📍 Main Auditorium</div>
+            </div>
+            <span class="chev">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ FINANCE ============ -->
+    <div class="screen" id="screen-finance">
+      <div class="header">
+        <div class="header-top">
+          <span style="width:36px;"></span>
+          <div class="header-title">Finance</div>
+          <div class="bell" onclick="goTo('notifications')">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+            <span class="badge">3</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="card">
+          <div class="section-title" style="margin-bottom:0;">Financial Summary</div>
+          <div class="field-label" style="margin-top:10px;">Outstanding Balance</div>
+          <div class="balance-row">
+            <div class="balance-amt">₱50.00</div>
+            <div class="wallet-ico">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 7H5a2 2 0 010-4h12v4"/><path d="M3 5v14a2 2 0 002 2h16v-8H5"/><circle cx="17" cy="15" r="1.2" fill="#fff" stroke="none"/></svg>
+            </div>
+          </div>
+
+          <div class="finance-row"><span>Membership Fee</span><span class="tag tag-paid">Paid</span></div>
+          <div class="finance-row"><span>Monthly Contributions</span><span style="font-weight:700;">11 / 12</span></div>
+          <div class="finance-row"><span>Total Contributions</span><span style="font-weight:700;">₱3,250.00</span></div>
+          <div class="finance-row"><span>Medical Aid Claim</span><span class="tag tag-approved">Approved</span></div>
+          <div class="finance-row"><span>Death Aid Claim</span><span class="tag tag-pending">Pending</span></div>
+        </div>
+
+        <div class="due-card">
+          <div>
+            <div class="field-label">Next Due Date</div>
+            <div class="field-value" style="font-size:15px;">August 15, 2026</div>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green-mid)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        </div>
+
+        <button class="btn" style="margin-bottom:14px;" onclick="alert('Payment submission form would open here.')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+          Submit Direct Payment
+        </button>
+
+        <div class="card" style="padding:6px 16px;">
+          <div class="list-item" onclick="goTo('ledger')">
+            <div class="list-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-4"/><path d="M9 15l11-11 3 3-11 11H9v-3z"/></svg></div>
+            <div class="list-text">My Ledger</div>
+            <span class="chev">›</span>
+          </div>
+          <div class="list-item" onclick="goTo('paymenthistory')">
+            <div class="list-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/></svg></div>
+            <div class="list-text">Payment History</div>
+            <span class="chev">›</span>
+          </div>
+          <div class="list-item">
+            <div class="list-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"/></svg></div>
+            <div class="list-text">Contribution History</div>
+            <span class="chev">›</span>
+          </div>
+          <div class="list-item">
+            <div class="list-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3m0 12l-4-4m4 4l4-4"/><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/></svg></div>
+            <div class="list-text">Download Statement</div>
+            <span class="chev">›</span>
+          </div>
+          <div class="list-item">
+            <div class="list-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 .5c0 1.5-2 1.8-2 3.3M12 17h.01"/></svg></div>
+            <div class="list-text">Help &amp; Support</div>
+            <span class="chev">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ NOTIFICATIONS ============ -->
+    <div class="screen" id="screen-notifications">
+      <div class="header">
+        <div class="header-top">
+          <span style="width:36px;"></span>
+          <div class="header-title">Notifications</div>
+          <span style="width:36px;"></span>
+        </div>
+      </div>
+      <div class="content">
+        <div class="tabs">
+          <div class="tab active" data-tab="all" onclick="switchNotifTab('all')">All</div>
+          <div class="tab" data-tab="unread" onclick="switchNotifTab('unread')">Unread <span class="tab-badge">3</span></div>
+          <div class="tab" data-tab="important" onclick="switchNotifTab('important')">Important</div>
+        </div>
+
+        <div class="card" id="notif-list">
+          <div class="notif-item" data-unread="1">
+            <div class="notif-ico" style="background:#fdeaea;color:var(--red);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.7 8.4 2 5 5.3 5c1.9 0 3.2 1 3.7 2 0.5-1 1.8-2 3.7-2 3.3 0 4.6 3.4 2.8 7-2.5 4.5-9.5 9-9.5 9z"/></svg>
+            </div>
+            <div>
+              <div class="notif-title">Medical Aid Claim has been approved.</div>
+              <div class="notif-time">July 27, 2026 • 10:30 AM</div>
+            </div>
+            <div class="unread-dot"></div>
+          </div>
+
+          <div class="notif-item" data-unread="1">
+            <div class="notif-ico" style="background:#e7f3ec;color:var(--green-mid);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            </div>
+            <div>
+              <div class="notif-title">Monthly dues for August 2026 is now open.</div>
+              <div class="notif-time">July 27, 2026 • 9:15 AM</div>
+            </div>
+            <div class="unread-dot"></div>
+          </div>
+
+          <div class="notif-item" data-unread="1">
+            <div class="notif-ico" style="background:#fdeee0;color:var(--orange);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 21h20L12 2z"/><path d="M12 9v5M12 17h.01"/></svg>
+            </div>
+            <div>
+              <div class="notif-title">Faculty Assembly will be on July 30, 2026 at 8:00 AM.</div>
+              <div class="notif-time">July 26, 2026 • 4:45 PM</div>
+            </div>
+            <div class="unread-dot"></div>
+          </div>
+
+          <div class="notif-item" data-unread="0">
+            <div class="notif-ico" style="background:#e7f3ec;color:var(--green-mid);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div>
+              <div class="notif-title">Your payment for July 2026 has been approved.</div>
+              <div class="notif-time">July 20, 2026 • 11:05 AM</div>
+            </div>
+          </div>
+
+          <div class="notif-item" data-unread="0">
+            <div class="notif-ico" style="background:#fdeee0;color:var(--orange);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5l3 2"/></svg>
+            </div>
+            <div>
+              <div class="notif-title">Death Aid Claim is pending review.</div>
+              <div class="notif-time">July 18, 2026 • 2:20 PM</div>
+            </div>
+          </div>
+
+          <div class="notif-item" data-unread="0">
+            <div class="notif-ico" style="background:#e7f3ec;color:var(--green-mid);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 21h20L12 2z"/></svg>
+            </div>
+            <div>
+              <div class="notif-title">Welcome to ISU-CAUFA FMIS!</div>
+              <div class="notif-time">June 29, 2026 • 8:00 AM</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn" style="background:var(--card);color:var(--green-mid);border:1px solid var(--border);" onclick="markAllRead()">Mark all as read</button>
+      </div>
+    </div>
+
+    <!-- ============ PROFILE ============ -->
+    <div class="screen" id="screen-profile">
+      <div class="profile-head">
+        <div class="header-top">
+          <span style="width:36px;"></span>
+          <div class="header-title">Profile</div>
+          <span style="width:36px;"></span>
+        </div>
+        <div class="profile-avatar-wrap">
+          <img class="profile-avatar" src="https://i.pravatar.cc/160?img=13" alt="profile">
+          <div class="cam-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 7h3l2-3h6l2 3h3a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1V8a1 1 0 011-1z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-card">
+        <div class="section-title">Personal Information <span class="view-all">✎</span></div>
+        <div class="pinfo-row"><span class="pinfo-label">Full Name</span><span class="pinfo-value">Justin Von Vergara</span></div>
+        <div class="pinfo-row"><span class="pinfo-label">Faculty ID</span><span class="pinfo-value">2024-023</span></div>
+        <div class="pinfo-row"><span class="pinfo-label">College</span><span class="pinfo-value">CCSICT</span></div>
+        <div class="pinfo-row"><span class="pinfo-label">Department</span><span class="pinfo-value">Computer Science</span></div>
+        <div class="pinfo-row"><span class="pinfo-label">Position</span><span class="pinfo-value">Instructor I</span></div>
+        <div class="pinfo-row"><span class="pinfo-label">Email</span><span class="pinfo-value">justinvon@gmail.com</span></div>
+        <div class="pinfo-row"><span class="pinfo-label">Contact Number</span><span class="pinfo-value">0912 345 6789</span></div>
+      </div>
+
+      <div class="content" style="padding-top:0;">
+        <div class="card">
+          <div class="section-title">Membership Information</div>
+          <div class="pinfo-row"><span class="pinfo-label">Membership Category</span><span class="pinfo-value">Permanent</span></div>
+          <div class="pinfo-row"><span class="pinfo-label">Membership Status</span><span class="pinfo-value" style="color:var(--green-mid);">Active Member</span></div>
+          <div class="pinfo-row"><span class="pinfo-label">Member Since</span><span class="pinfo-value">June 29, 2026</span></div>
+        </div>
+        <button class="btn" style="background:#fdeaea;color:var(--red);" onclick="alert('You have been logged out.')">Log Out</button>
+      </div>
+    </div>
+
+    <!-- ============ MY LEDGER (sub page) ============ -->
+    <div class="screen" id="screen-ledger">
+      <div class="subpage-header">
+        <div class="back-btn" onclick="goTo('finance')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </div>
+        <div class="subpage-title">My Ledger</div>
+      </div>
+
+      <div class="month-selector">
+        <span class="side">‹</span>
+        <span>July 2026</span>
+        <span class="side">›</span>
+      </div>
+
+      <div class="summary-strip">
+        <div class="summary-box"><div class="lbl">Due</div><div class="val">₱50.00</div></div>
+        <div class="summary-box"><div class="lbl">Paid</div><div class="val">₱0.00</div></div>
+        <div class="summary-box"><div class="lbl">Balance</div><div class="val">₱50.00</div></div>
+      </div>
+      <div style="text-align:center;margin:-6px 0 12px;">
+        <span class="tag tag-unpaid">Status: Unpaid</span>
+      </div>
+
+      <div class="filter-tabs">
+        <div class="filter-tab active" data-f="monthly" onclick="switchLedgerFilter('monthly')">Monthly Dues</div>
+        <div class="filter-tab" data-f="fee" onclick="switchLedgerFilter('fee')">Membership Fee</div>
+        <div class="filter-tab" data-f="other" onclick="switchLedgerFilter('other')">Other Contributions</div>
+      </div>
+
+      <div id="ledger-list">
+        <div class="ledger-item">
+          <div class="ledger-left"><div class="lt">July 2026</div><div class="ls">Due: July 15, 2026</div></div>
+          <div class="ledger-right"><div class="amt">₱50.00</div><span class="tag tag-unpaid">Unpaid</span></div>
+        </div>
+        <div class="ledger-item">
+          <div class="ledger-left"><div class="lt">June 2026</div><div class="ls">Due: Jun 15, 2026</div></div>
+          <div class="ledger-right"><div class="amt">₱50.00</div><span class="tag tag-paid">Paid</span></div>
+        </div>
+        <div class="ledger-item">
+          <div class="ledger-left"><div class="lt">May 2026</div><div class="ls">Due: May 15, 2026</div></div>
+          <div class="ledger-right"><div class="amt">₱50.00</div><span class="tag tag-paid">Paid</span></div>
+        </div>
+        <div class="ledger-item">
+          <div class="ledger-left"><div class="lt">April 2026</div><div class="ls">Due: Apr 15, 2026</div></div>
+          <div class="ledger-right"><div class="amt">₱50.00</div><span class="tag tag-paid">Paid</span></div>
+        </div>
+        <div class="ledger-item">
+          <div class="ledger-left"><div class="lt">March 2026</div><div class="ls">Due: Mar 15, 2026</div></div>
+          <div class="ledger-right"><div class="amt">₱50.00</div><span class="tag tag-paid">Paid</span></div>
+        </div>
+        <div class="ledger-item">
+          <div class="ledger-left"><div class="lt">February 2026</div><div class="ls">Due: Feb 15, 2026</div></div>
+          <div class="ledger-right"><div class="amt">₱50.00</div><span class="tag tag-paid">Paid</span></div>
+        </div>
+      </div>
+
+      <div class="hint-box">
+        <span>ℹ️</span>
+        <span>Your payments through salary deduction are posted monthly after verification and approval.</span>
+      </div>
+    </div>
+
+    <!-- ============ PAYMENT HISTORY (sub page) ============ -->
+    <div class="screen" id="screen-paymenthistory">
+      <div class="subpage-header">
+        <div class="back-btn" onclick="goTo('finance')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </div>
+        <div class="subpage-title">Payment History</div>
+      </div>
+
+      <div class="filter-tabs" style="margin-top:14px;">
+        <div class="filter-tab active">All</div>
+        <div class="filter-tab">Membership Fee</div>
+        <div class="filter-tab">Monthly Dues</div>
+        <div class="filter-tab">Aid</div>
+      </div>
+
+      <div id="payhist-list">
+        <div class="payhist-item">
+          <div class="payhist-top"><span>Aug 2026</span><span class="tag tag-pending">Pending</span></div>
+          <div class="payhist-sub"><span>Monthly Dues (Salary Deduction)</span><span>₱50.00</span></div>
+          <div class="payhist-sub"><span>Jul 27, 2026 • 9:12 AM</span><span></span></div>
+        </div>
+        <div class="payhist-item">
+          <div class="payhist-top"><span>Jul 2026</span><span class="tag tag-approved">Approved</span></div>
+          <div class="payhist-sub"><span>Monthly Dues (OTC)</span><span>₱50.00</span></div>
+          <div class="payhist-sub"><span>Jul 20, 2026 • 10:35 AM</span><span></span></div>
+        </div>
+        <div class="payhist-item">
+          <div class="payhist-top"><span>Jun 2026</span><span class="tag tag-approved">Approved</span></div>
+          <div class="payhist-sub"><span>Monthly Dues (Salary Deduction)</span><span>₱50.00</span></div>
+          <div class="payhist-sub"><span>Jun 27, 2026 • 9:05 AM</span><span></span></div>
+        </div>
+        <div class="payhist-item">
+          <div class="payhist-top"><span>May 2026</span><span class="tag tag-approved">Approved</span></div>
+          <div class="payhist-sub"><span>Monthly Dues (OTC)</span><span>₱50.00</span></div>
+          <div class="payhist-sub"><span>May 21, 2026 • 11:42 AM</span><span></span></div>
+        </div>
+        <div class="payhist-item">
+          <div class="payhist-top"><span>Apr 2026</span><span class="tag tag-approved">Approved</span></div>
+          <div class="payhist-sub"><span>Monthly Dues (Salary Deduction)</span><span>₱50.00</span></div>
+          <div class="payhist-sub"><span>Apr 26, 2026 • 9:00 AM</span><span></span></div>
+        </div>
+        <div class="payhist-item">
+          <div class="payhist-top"><span>Mar 2026</span><span class="tag tag-approved">Approved</span></div>
+          <div class="payhist-sub"><span>Monthly Dues (OTC)</span><span>₱50.00</span></div>
+          <div class="payhist-sub"><span>Mar 20, 2026 • 10:22 AM</span><span></span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============ BOTTOM NAV ============ -->
+  <div class="bottomnav" id="bottomnav">
+    <button class="navbtn active" data-nav="home" onclick="goTo('home')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      Home
+    </button>
+    <button class="navbtn" data-nav="attendance" onclick="goTo('attendance')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Attendance
+    </button>
+    <button class="navbtn" data-nav="finance" onclick="goTo('finance')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7H5a2 2 0 010-4h12v4"/><path d="M3 5v14a2 2 0 002 2h16v-8H5"/></svg>
+      Finance
+    </button>
+    <button class="navbtn" data-nav="notifications" onclick="goTo('notifications')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+      Notifications
+      <span class="nav-badge" id="nav-badge">3</span>
+    </button>
+    <button class="navbtn" data-nav="profile" onclick="goTo('profile')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>
+      Profile
+    </button>
+  </div>
+
+</div>
+
+<script>
+  const mainTabs = ['home','attendance','finance','notifications','profile'];
+
+  function goTo(screen){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    const target = document.getElementById('screen-'+screen);
+    if(target){ target.classList.add('active'); target.scrollTop = 0; }
+
+    const isMain = mainTabs.includes(screen);
+    document.getElementById('bottomnav').style.display = isMain ? 'flex' : 'none';
+    if(isMain){
+      document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
+      const btn = document.querySelector('.navbtn[data-nav="'+screen+'"]');
+      if(btn) btn.classList.add('active');
+    }
+  }
+
+  function switchNotifTab(tab){
+    document.querySelectorAll('#screen-notifications .tab').forEach(t=>t.classList.remove('active'));
+    document.querySelector('#screen-notifications .tab[data-tab="'+tab+'"]').classList.add('active');
+    document.querySelectorAll('#notif-list .notif-item').forEach(item=>{
+      if(tab==='all'){ item.style.display='flex'; }
+      else if(tab==='unread'){ item.style.display = item.dataset.unread==='1' ? 'flex' : 'none'; }
+      else { item.style.display='flex'; } // "important" -> show all as placeholder
+    });
+  }
+
+  function markAllRead(){
+    document.querySelectorAll('#notif-list .unread-dot').forEach(d=>d.remove());
+    document.querySelectorAll('#notif-list .notif-item').forEach(i=>i.dataset.unread='0');
+    const badge = document.getElementById('nav-badge');
+    if(badge) badge.remove();
+    document.querySelectorAll('.badge').forEach(b=>b.remove());
+    const tabBadge = document.querySelector('.tab-badge');
+    if(tabBadge) tabBadge.remove();
+  }
+
+  function switchLedgerFilter(f){
+    document.querySelectorAll('#screen-ledger .filter-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelector('#screen-ledger .filter-tab[data-f="'+f+'"]').classList.add('active');
+    // Static demo data only shows monthly dues; other tabs show a friendly placeholder.
+    const list = document.getElementById('ledger-list');
+    if(f==='monthly'){
+      list.style.opacity = 1;
+    } else {
+      list.style.opacity = 0.35;
+    }
+  }
+</script>
+</body>
+</html>

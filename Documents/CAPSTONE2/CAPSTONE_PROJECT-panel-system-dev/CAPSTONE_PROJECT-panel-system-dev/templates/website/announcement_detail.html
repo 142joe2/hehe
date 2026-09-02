@@ -1,0 +1,51 @@
+{% extends "website/base.html" %}
+{% load static %}
+
+{% block title %}{{ announcement.title }}{% endblock %}
+
+{% block content %}
+    <!-- Page Banner -->
+    <section class="relative h-[320px] overflow-hidden">
+        <div class="absolute inset-0">
+            <img src="{% static 'img/isugym.jpg' %}" alt="ISU CAUFA" class="w-full h-full object-cover" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-black/40"></div>
+        </div>
+        <div class="relative z-10 h-full flex flex-col items-center justify-center text-white text-center px-6">
+            <p class="text-2xl sm:text-3xl md:text-4xl uppercase font-black tracking-[0.2em] sm:tracking-[0.3em] text-yellow-400 mb-5 drop-shadow">ISU CAUFA</p>
+            <h1 class="text-2xl sm:text-4xl md:text-6xl font-black tracking-tight sm:tracking-tighter mb-5 drop-shadow-lg max-w-5xl">{{ announcement.title }}</h1>
+            <div class="w-28 h-2 bg-brand-green"></div>
+            <div class="flex items-center gap-4 mt-6 text-sm md:text-base font-medium">
+                <span class="bg-brand-green px-3 py-1 rounded-full">{{ announcement.category }}</span>
+                <span><i class="fa-solid fa-calendar mr-1"></i> {{ announcement.published_at|date:"F d, Y" }}</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Announcement Content -->
+    <section class="bg-gradient-to-b from-[#fbfaf7] to-[#f3f1ea] py-16 px-6 sm:px-12">
+        <div class="max-w-4xl mx-auto">
+            <a href="{% url 'announcements_page' %}" class="inline-flex items-center gap-2 text-sm font-bold text-brand-green hover:text-brand-dark transition-colors mb-8">
+                <i class="fa-solid fa-arrow-left"></i> Back to Announcements
+            </a>
+
+            <div class="bg-white border border-black/5 rounded-2xl p-8 md:p-10 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)]">
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-brand-green bg-brand-surface px-2.5 py-1 rounded-full">{{ announcement.category }}</span>
+                </div>
+                <p class="text-sm text-gray-500 mb-6">
+                    <i class="fa-solid fa-user mr-1 text-brand-green/70"></i>
+                    {% if announcement.published_by_user_id_FK %}{{ announcement.published_by_user_id_FK.full_name }}{% else %}ISU CAUFA{% endif %}
+                    &nbsp;·&nbsp; {{ announcement.published_at|date:"F d, Y" }}
+                </p>
+                {% if announcement.image %}
+                <div class="mb-8 -mx-4 md:-mx-6 overflow-hidden rounded-2xl">
+                    <img src="{{ announcement.image.url }}" alt="{{ announcement.title }}" class="w-full max-h-[420px] object-cover" loading="lazy" onerror="this.closest('div').style.display='none'" />
+                </div>
+                {% endif %}
+                <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed whitespace-pre-line">
+                    {{ announcement.description }}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

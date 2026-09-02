@@ -1,0 +1,2153 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PIO</title>
+<script src="https://unpkg.com/htmx.org@2.0.4" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script>
+tailwind.config={theme:{extend:{colors:{brand:{green:'#004d26',dark:'#18181b',gray:'#e4e4e7',surface:'#f4f4f5'}}}}}
+</script>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Inter", sans-serif;
+  }
+
+  .swal2-container {
+    z-index: 9999 !important;
+  }
+
+  body,
+  html {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: #eef7ef;
+    color: #263238;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .app-container {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .sidebar {
+    width: 280px;
+    height: 100%;
+    background: linear-gradient(180deg, #1b5e20 0%, #14521b 100%);
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease, transform 0.3s ease;
+    flex-shrink: 0;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
+    z-index: 1010;
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .app-container.sidebar-collapsed .sidebar {
+    width: 76px;
+    overflow: hidden;
+  }
+
+  .sidebar-brand {
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+  }
+
+  .collapse-toggle-btn {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 6px;
+    transition: 0.2s;
+    flex-shrink: 0;
+    height: 40px;
+    width: 40px;
+  }
+
+  .collapse-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+  }
+
+  .sidebar-brand img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+  }
+
+  .brand-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+  }
+
+  .role-tag {
+    font-size: 0.72rem;
+    background: rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.9);
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 3px;
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 0;
+  }
+
+  .nav-section {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.72);
+    padding: 16px 18px 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: 0.3s;
+    border-left: 4px solid transparent;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .nav-item:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.16);
+  }
+
+  .nav-item.active {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.18);
+    border-left: 4px solid #00e676;
+    font-weight: 700;
+  }
+
+  .nav-item i {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+  }
+
+  .nav-item span {
+    transition: opacity 0.2s ease, width 0.2s ease;
+  }
+
+  .sidebar-footer {
+    width: 100%;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 16px 18px;
+  }
+
+  .sidebar-footer a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    color: rgba(255, 255, 255, 0.92);
+    text-decoration: none;
+    border-radius: 10px;
+    transition: 0.2s;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .sidebar-footer a i {
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  .sidebar-footer a:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+  }
+
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .toolbar {
+    height: 64px;
+    background: linear-gradient(90deg, #1b5e20 0%, #14521b 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+  }
+
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .menu-toggle-btn {
+    background: rgba(255, 255, 255, 0.16);
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 10px;
+    transition: 0.2s;
+    flex-shrink: 0;
+    height: 44px;
+    width: 44px;
+  }
+
+  .menu-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.24);
+    color: #ffffff;
+  }
+
+  .page-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ffffff;
+  }
+
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    background: #e1eedf;
+    border: 2px solid #1b5e20;
+    color: #1b5e20;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+
+  .user-info {
+    text-align: left;
+    min-width: 0;
+    line-height: 1.2;
+  }
+
+  .user-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+  }
+
+  .user-role {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .content-viewport {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    background: #eef7ef;
+  }
+
+  .panel {
+    min-width: 0;
+  }
+
+  .page {
+    display: none;
+  }
+
+  .page.active {
+    display: block;
+  }
+
+  .card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    border: 1px solid #dfe9df;
+    margin-bottom: 20px;
+    min-width: 0;
+  }
+
+  .card h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1b5e20;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #f6fbf6;
+    padding-bottom: 10px;
+  }
+
+  .panel-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #f6fbf6;
+    padding-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .panel-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1b5e20;
+  }
+
+  .panel-subtitle {
+    font-size: 0.85rem;
+    color: #757575;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #dfe9df;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  }
+
+  .stat-card .stat-icon {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+    color: #1b5e20;
+  }
+
+  .stat-card .stat-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1b5e20;
+  }
+
+  .stat-card .stat-label {
+    font-size: 0.8rem;
+    color: #757575;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-primary {
+    background: #1b5e20;
+    color: #ffffff;
+  }
+
+  .btn-primary:hover {
+    background: #2e7d32;
+  }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid #1b5e20;
+    color: #1b5e20;
+  }
+
+  .btn-outline:hover {
+    background: #e8f5e9;
+  }
+
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    border-radius: 6px;
+  }
+
+  .btn-danger {
+    background: #c62828;
+    color: #ffffff;
+  }
+
+  .btn-danger:hover {
+    background: #b71c1c;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: #546e7a;
+  }
+
+  .btn-ghost:hover {
+    background: #f6fbf6;
+    color: #1b5e20;
+  }
+
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  .icon-btn.edit {
+    background: #e8f5e9;
+    color: #1b5e20;
+  }
+
+  .icon-btn.edit:hover {
+    background: #1b5e20;
+    color: #ffffff;
+  }
+
+  .icon-btn.danger {
+    background: #fce8e8;
+    color: #c62828;
+  }
+
+  .icon-btn.danger:hover {
+    background: #c62828;
+    color: #ffffff;
+  }
+
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .pagination .pg-info {
+    font-size: 0.75rem;
+    color: #78909c;
+    font-weight: 600;
+    margin-right: auto;
+  }
+
+  .pagination button {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: 8px;
+    border: 1px solid #dfe9df;
+    background: #ffffff;
+    color: #546e7a;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pagination button:hover:not(:disabled) {
+    border-color: #1b5e20;
+    color: #1b5e20;
+  }
+
+  .pagination button.active {
+    background: #1b5e20;
+    border-color: #1b5e20;
+    color: #ffffff;
+  }
+
+  .pagination button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+  }
+
+  th {
+    padding: 12px 14px;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #757575;
+    background: #f6fbf6;
+    border-bottom: 1px solid #e8f5e9;
+  }
+
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f0f4f0;
+    color: #455a64;
+  }
+
+  tr:hover td {
+    background: #fafdfa;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #455a64;
+    margin-bottom: 6px;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #dfe9df;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: #1b5e20;
+    box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
+  }
+
+  .form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .badge-green {
+    background: #e8f5e9;
+    color: #1b5e20;
+  }
+
+  .badge-gray {
+    background: #f0f0f0;
+    color: #78909c;
+  }
+
+  .badge-red {
+    background: #fce8e8;
+    color: #c62828;
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+
+  .news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .news-card {
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .news-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+
+  .news-card-image {
+    aspect-ratio: 16/9;
+    background: #f0f0f0;
+    overflow: hidden;
+  }
+
+  .news-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .news-card-content {
+    padding: 16px;
+  }
+
+  .news-card-title {
+    font-weight: 700;
+    color: #1b5e20;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .news-card-summary {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+
+  .news-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: #999;
+  }
+
+  .gallery-item {
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    background: #f0f0f0;
+    aspect-ratio: 1;
+  }
+
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .gallery-item .gallery-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 8px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0;
+    transition: 0.2s;
+  }
+
+  .gallery-item:hover .gallery-overlay {
+    opacity: 1;
+  }
+
+  .gallery-item .gallery-actions {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: 0.2s;
+  }
+
+  .gallery-item:hover .gallery-actions {
+    opacity: 1;
+  }
+
+  .gallery-item .gallery-actions button {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .gallery-item .gallery-actions button:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+  .album-card {
+    padding: 16px;
+    border: 1px solid #e8f5e9;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+    background: #fff;
+  }
+
+  .album-card:hover {
+    border-color: #1b5e20;
+    box-shadow: 0 4px 12px rgba(27, 94, 32, 0.08);
+  }
+
+  .album-card .album-cover {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 8px;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #bbb;
+    font-size: 32px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .album-card .album-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .album-card h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #263238;
+  }
+
+  .album-card p {
+    font-size: 0.8rem;
+    color: #78909c;
+  }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open {
+    display: flex;
+  }
+
+  .modal {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 28px;
+    width: 90%;
+    max-width: 540px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+  }
+
+  .modal h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #1b5e20;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+
+  .photo-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .photo-preview-grid img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #78909c;
+  }
+
+  .empty-state i {
+    font-size: 2.2rem;
+    margin-bottom: 12px;
+    opacity: 0.6;
+  }
+
+  .empty-state p {
+    font-size: 0.9rem;
+  }
+
+  .description-text {
+    font-size: 0.85rem;
+    color: #455a64;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+
+  .app-container.sidebar-collapsed .sidebar-brand {
+    justify-content: center;
+    padding: 16px 10px;
+  }
+
+  .app-container.sidebar-collapsed .brand-text,
+  .app-container.sidebar-collapsed .nav-section,
+  .app-container.sidebar-collapsed .nav-item span,
+  .app-container.sidebar-collapsed .sidebar-footer a span {
+    display: none;
+  }
+
+  .app-container.sidebar-collapsed .nav-item {
+    justify-content: center;
+    padding: 12px 0;
+  }
+
+  .app-container.sidebar-collapsed .sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0;
+  }
+
+  .app-container.sidebar-collapsed .sidebar-footer a {
+    padding: 10px;
+    justify-content: center;
+    min-width: 44px;
+    width: 44px;
+  }
+
+  .app-container.sidebar-collapsed .sidebar-footer a i {
+    width: auto;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar,
+    .app-container.sidebar-collapsed .sidebar {
+      width: 64px;
+    }
+
+    .sidebar .brand-text,
+    .sidebar .nav-section,
+    .sidebar .nav-item span,
+    .sidebar-footer a span {
+      opacity: 0;
+      width: 0;
+      display: none;
+    }
+
+    .sidebar .sidebar-brand {
+      justify-content: center;
+      padding: 18px 12px;
+    }
+
+    .sidebar .nav-item {
+      justify-content: center;
+      padding: 10px 0;
+    }
+
+    .sidebar .sidebar-footer {
+      display: flex;
+      justify-content: center;
+      padding: 14px 0;
+    }
+
+    .sidebar .sidebar-footer a {
+      padding: 10px 0;
+      justify-content: center;
+    }
+
+    .toolbar {
+      padding: 0 16px;
+    }
+
+    .content-viewport {
+      padding: 16px;
+    }
+
+    .two-col {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app-container">
+
+<!-- Sidebar -->
+<aside class="sidebar">
+<div class="sidebar-brand">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <img src="{% static 'img/isu_caufa_official.png' %}" alt="Logo" />
+    <div class="brand-text">
+      <h2 class="brand-name">ISU CAUFA</h2>
+      <span class="role-tag">PIO Dashboard</span>
+    </div>
+  </div>
+  <button class="collapse-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle sidebar"><i class="fa-solid fa-angle-left"></i></button>
+</div>
+
+<nav class="sidebar-nav">
+<div class="nav-section">Website Management</div>
+<a class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard')"><i class="fa-solid fa-gauge-high"></i> <span>Dashboard</span></a>
+<a class="nav-item" data-page="announcements" onclick="switchPage('announcements')"><i class="fa-solid fa-bullhorn"></i> <span>Announcements</span></a>
+<a class="nav-item" data-page="news" onclick="switchPage('news')"><i class="fa-solid fa-newspaper"></i> <span>News & Highlights</span></a>
+<a class="nav-item" data-page="hero" onclick="switchPage('hero')"><i class="fa-solid fa-images"></i> <span>Hero Carousel</span></a>
+<a class="nav-item" data-page="about" onclick="switchPage('about')"><i class="fa-solid fa-building-columns"></i> <span>About Us</span></a>
+<a class="nav-item" data-page="contact" onclick="switchPage('contact')"><i class="fa-solid fa-address-card"></i> <span>Contact Info</span></a>
+
+<div class="nav-section">View</div>
+<a class="nav-item" data-page="events" onclick="switchPage('events')"><i class="fa-solid fa-calendar-days"></i> <span>Events</span></a>
+<a class="nav-item" data-page="officers" onclick="switchPage('officers')"><i class="fa-solid fa-users-gear"></i> <span>Officers</span></a>
+<a class="nav-item" data-page="resources" onclick="switchPage('resources')"><i class="fa-solid fa-folder-open"></i> <span>Resources</span></a>
+</nav>
+
+<div class="sidebar-footer">
+<a href="{% url 'home' %}" target="_blank"><i class="fa-solid fa-up-right-from-square"></i> <span>View Website</span></a>
+<a class="logout" href="#" onclick="confirmLogout(event)"><i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span></a>
+</div>
+</aside>
+
+<!-- Main -->
+<div class="main-content">
+<div class="toolbar">
+  <div class="toolbar-left">
+    <h1 class="page-title" id="page-title">Dashboard</h1>
+  </div>
+  <div class="toolbar-right">
+    <div class="user-profile">
+      <div class="user-avatar">{{ officer.full_name|default:'PIO'|slice:':1' }}</div>
+      <div class="user-info">
+        <div class="user-name">{{ officer.full_name|default:'PIO' }}</div>
+        <div class="user-role">Public Information Officer</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="content-viewport">
+<div class="panel">
+
+<!-- ======================== DASHBOARD HOME ======================== -->
+<div class="page active" id="page-dashboard">
+<div class="stat-grid">
+<div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-bullhorn"></i></div><div class="stat-number" id="dash-announcements">0</div><div class="stat-label">Announcements</div></div>
+<div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-newspaper"></i></div><div class="stat-number" id="dash-news">0</div><div class="stat-label">News Articles</div></div>
+<div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-calendar-days"></i></div><div class="stat-number" id="dash-events">0</div><div class="stat-label">Upcoming Events</div></div>
+<div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-photo-film"></i></div><div class="stat-number" id="dash-photos">0</div><div class="stat-label">Photos</div></div>
+</div>
+
+<div class="two-col">
+<div class="card"><h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Announcements</h3>
+<div id="dash-announcements-list"><div class="empty-state"><i class="fa-solid fa-bullhorn"></i><p>No announcements yet</p></div></div></div>
+<div class="card"><h3><i class="fa-solid fa-newspaper"></i> Recent News</h3>
+<div id="dash-news-list"><div class="empty-state"><i class="fa-solid fa-newspaper"></i><p>No news yet</p></div></div></div>
+</div>
+</div>
+
+<!-- ======================== ANNOUNCEMENTS ======================== -->
+<div class="page" id="page-announcements">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+<h3 style="font-size:14px;font-weight:700;text-transform:uppercase">All Announcements</h3>
+<button class="btn btn-primary" onclick="openAnnouncementModal()"><i class="fa-solid fa-plus"></i> New</button>
+</div>
+<div class="card">
+<table><thead><tr><th>Title</th><th>Category</th><th>Date</th><th>Status</th><th style="width:140px;text-align:right">Actions</th></tr></thead>
+<tbody id="announcements-table-body"><tr><td colspan="5"><div class="empty-state"><i class="fa-solid fa-bullhorn"></i><p>Loading...</p></div></td></tr></tbody>
+</table>
+<div class="pagination" id="announcements-pagination"></div></div></div>
+
+<!-- ======================== NEWS & HIGHLIGHTS ======================== -->
+<div class="page" id="page-news">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+<h3 style="font-size:14px;font-weight:700;text-transform:uppercase;margin:0">News & Highlights</h3>
+<button class="btn btn-primary" onclick="openNewsModal()"><i class="fa-solid fa-plus"></i> Create News</button>
+</div>
+<div class="card">
+<table><thead><tr><th>Title</th><th>Category</th><th>Date</th><th>Featured</th><th>Status</th><th style="width:110px;text-align:right">Actions</th></tr></thead>
+<tbody id="news-table-body"><tr><td colspan="6"><div class="empty-state"><i class="fa-solid fa-newspaper"></i><p>Loading...</p></div></td></tr></tbody>
+</table>
+<div class="pagination" id="news-pagination"></div></div>
+</div>
+
+<!-- ======================== HERO CAROUSEL ======================== -->
+<div class="page" id="page-hero">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+<h3 style="font-size:14px;font-weight:700;text-transform:uppercase;margin:0">Hero Carousel</h3>
+<button class="btn btn-primary" onclick="openHeroModal()"><i class="fa-solid fa-plus"></i> Add Slide</button>
+</div>
+<div class="card">
+<table><thead><tr><th>Image</th><th>Title</th><th>Sort Order</th><th>Status</th><th style="width:140px">Actions</th></tr></thead>
+<tbody id="hero-table-body"><tr><td colspan="5"><div class="empty-state"><i class="fa-solid fa-images"></i><p>Loading...</p></div></td></tr></tbody>
+</table>
+<div class="pagination" id="hero-pagination"></div></div>
+</div>
+
+<!-- ======================== ABOUT US ======================== -->
+<div class="page" id="page-about">
+<div class="card">
+<h3><i class="fa-solid fa-pen-to-square"></i> About Us Content</h3>
+<form id="about-form">
+<div class="form-group"><label>Mission</label><textarea name="mission" rows="3" placeholder="e.g. To foster unity, growth, and service among faculty...">{{ mission }}</textarea></div>
+<div class="form-group"><label>Vision</label><textarea name="vision" rows="3" placeholder="e.g. A strong and empowered faculty association...">{{ vision }}</textarea></div>
+<div class="form-group"><label>Preamble</label><textarea name="history" rows="3" placeholder="e.g. A short preamble of the association...">{{ history }}</textarea></div>
+<div class="form-group"><label>Objectives</label><textarea name="objectives" rows="4" placeholder="e.g. Promote professional development, protect welfare...">{{ objectives }}</textarea></div>
+<div class="form-group"><label>Core Values</label><textarea name="core_values" rows="3" placeholder="e.g. Unity, Integrity, Service, Excellence...">{{ core_values }}</textarea></div>
+<div class="form-group"><label>Organizational Structure</label><textarea name="org_structure" rows="3" placeholder="e.g. Description of the organizational structure...">{{ org_structure }}</textarea></div>
+<div class="form-group"><label>Organization Description</label><textarea name="org_description" rows="3" placeholder="e.g. A short paragraph describing the association...">{{ org_description }}</textarea></div>
+<div><button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button></div>
+</form>
+</div></div>
+
+<!-- ======================== CONTACT INFO ======================== -->
+<div class="page" id="page-contact">
+<div class="card">
+<h3><i class="fa-solid fa-address-card"></i> Contact Information</h3>
+<form id="contact-form">
+<div class="two-col">
+<div class="form-group"><label>Email</label><input type="email" name="contact_email" value="{{ site_email }}" placeholder="e.g. isucaufa@gmail.com" /></div>
+<div class="form-group"><label>Phone</label><input type="text" name="contact_phone" value="{{ site_phone }}" placeholder="e.g. (078) 652-1234" /></div>
+</div>
+<div class="form-group"><label>Office Address</label><textarea name="office_address" rows="2" placeholder="e.g. Isabela State University - Cauayan Campus, Cauayan City, Isabela">{{ site_address }}</textarea></div>
+<div class="form-group"><label>Facebook URL</label><input type="url" name="facebook_url" value="{{ facebook_url }}" placeholder="https://facebook.com/yourpage" /></div>
+<div><button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button></div>
+</form>
+</div></div>
+
+<!-- ======================== EVENTS ======================== -->
+<div class="page" id="page-events">
+<div class="card"><h3><i class="fa-solid fa-calendar-days"></i> All Events</h3>
+<table><thead><tr><th>Title</th><th>Date</th><th>Venue</th><th>Type</th><th>Status</th></tr></thead>
+<tbody id="events-table-body"><tr><td colspan="5"><div class="empty-state"><i class="fa-solid fa-calendar-days"></i><p>Loading...</p></div></td></tr></tbody>
+</table>
+<div class="pagination" id="events-pagination"></div></div></div>
+
+<!-- ======================== OFFICERS ======================== -->
+<div class="page" id="page-officers">
+<div class="card">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+<h3 style="margin:0"><i class="fa-solid fa-users-gear"></i> Officers Directory</h3>
+<button class="btn btn-primary" onclick="openOfficerModal()"><i class="fa-solid fa-user-plus"></i> Add Officer</button>
+</div>
+<table><thead><tr><th style="text-align:center">Photo</th><th>Full Name</th><th>Position</th><th>Category</th><th>Department</th><th>School Year</th><th style="width:110px;text-align:right">Actions</th></tr></thead>
+<tbody id="officers-table-body"><tr><td colspan="7"><div class="empty-state"><i class="fa-solid fa-users-gear"></i><p>Loading...</p></div></td></tr></tbody>
+</table>
+<div class="pagination" id="officers-pagination"></div>
+</div>
+</div>
+
+<!-- ======================== RESOURCES ======================== -->
+<div class="page" id="page-resources">
+<div class="card"><h3><i class="fa-solid fa-folder-open"></i> Public Documents</h3>
+<table><thead><tr><th>Title</th><th>Type</th><th>File</th><th>Uploaded</th></tr></thead>
+<tbody id="resources-table-body"><tr><td colspan="4"><div class="empty-state"><i class="fa-solid fa-folder-open"></i><p>Loading...</p></div></td></tr></tbody>
+</table>
+<div class="pagination" id="resources-pagination"></div></div></div>
+
+</div></div></div>
+
+<!-- ======================== MODALS ======================== -->
+<div class="modal-overlay" id="announcement-modal">
+<div class="modal">
+<h2 id="announcement-modal-title">New Announcement</h2>
+<form id="announcement-form">
+<input type="hidden" name="announcement_id" id="announcement-id" />
+<div class="form-group"><label>Title</label><input type="text" name="title" id="announcement-title" required /></div>
+<div class="form-group"><label>Category</label>
+<div style="display:flex;gap:8px">
+<select name="category" id="announcement-category"></select>
+<button class="btn btn-outline" type="button" onclick="openManageCategories()" title="Manage categories"><i class="fa-solid fa-gear"></i> Manage</button>
+</div></div>
+<div class="form-group"><label>Description</label><textarea name="description" id="announcement-description" rows="4" required></textarea></div>
+<div class="form-group"><label>Image (optional)</label><input type="file" name="image" id="announcement-image" accept="image/*" /></div>
+<div class="form-group"><img id="announcement-image-preview" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Announcement image preview" style="display:none;max-width:180px;border-radius:8px;border:1px solid rgba(0,0,0,0.1)" /></div>
+<div class="form-group"><label>Expiry Date (optional)</label><input type="date" name="expiry_date" id="announcement-expiry" /></div>
+<div class="modal-actions">
+<button class="btn btn-ghost" type="button" onclick="closeModal('announcement-modal')">Cancel</button>
+<button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+</div>
+</form>
+</div></div>
+
+<div class="modal-overlay" id="news-modal">
+<div class="modal" style="max-width:600px">
+<h2 id="news-modal-title">Create News Article</h2>
+<form id="news-form">
+<input type="hidden" name="news_id" id="news-id" />
+<div class="form-group"><label>Title</label><input type="text" name="title" id="news-title" required /></div>
+<div class="form-group"><label>Category</label>
+<div style="display:flex;gap:8px">
+<select name="category" id="news-category"></select>
+<button class="btn btn-outline" type="button" onclick="openNewsCategories()" title="Manage categories"><i class="fa-solid fa-gear"></i> Manage</button>
+</div></div>
+<div class="form-group"><label>Summary</label><textarea name="summary" id="news-summary" rows="2" required placeholder="Brief summary for article cards"></textarea></div>
+<div class="form-group"><label>Content</label><textarea name="content" id="news-content" rows="6" required placeholder="Full article content (supports HTML)"></textarea></div>
+<div class="two-col">
+<div class="form-group"><label>Event Date (optional)</label><input type="date" name="event_date" id="news-event-date" /></div>
+<div class="form-group"><label>Event Time (optional)</label><input type="time" name="event_time" id="news-event-time" /></div>
+</div>
+<div class="form-group"><label>Venue (optional)</label><input type="text" name="venue" id="news-venue" placeholder="Event location" /></div>
+<div class="form-group"><label>Featured Image</label><input type="file" name="featured_image" id="news-featured-image" accept="image/*" /></div>
+<div class="form-group"><label>Gallery Images (multiple)</label><input type="file" name="gallery_images" id="news-gallery-images" accept="image/*" multiple /></div>
+<div id="news-gallery-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
+<input type="hidden" name="remove_gallery_ids" id="news-remove-gallery-ids" value="" />
+<div class="form-group"><label>Video URL (optional)</label><input type="url" name="video_url" id="news-video-url" placeholder="Any video link (YouTube, Vimeo, Dailymotion, or any URL)" /></div>
+<div class="form-group" style="display:flex;gap:16px;align-items:center">
+<label style="margin:0"><input type="checkbox" name="is_featured" id="news-is-featured"> Featured in homepage</label>
+<label style="margin:0"><input type="checkbox" name="is_published" id="news-is-published" checked> Published</label>
+</div>
+<div class="modal-actions">
+<button class="btn btn-ghost" type="button" onclick="closeModal('news-modal')">Cancel</button>
+<button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+</div>
+    </form>
+    </div></div>
+
+    <div class="modal-overlay" id="hero-modal">
+    <div class="modal" style="max-width:560px">
+    <h2 id="hero-modal-title">Add Hero Slide</h2>
+    <form id="hero-form">
+    <input type="hidden" name="hero_id" id="hero-id" />
+    <div class="form-group"><label>Title</label><input type="text" name="title" id="hero-title" required /></div>
+    <div class="form-group"><label>Subtitle</label><textarea name="subtitle" id="hero-subtitle" rows="2" placeholder="Short text shown on the slide"></textarea></div>
+    <div class="form-group"><label>Image (recommended 1920x550)</label><input type="file" name="image" id="hero-image" accept="image/*" /></div>
+    <div id="hero-image-preview" style="margin-top:8px;max-width:260px;display:none"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Hero slide preview" style="width:100%;border-radius:8px;border:1px solid #e5e7eb" /></div>
+    <div class="two-col">
+    <div class="form-group"><label>Button Text</label><input type="text" name="button_text" id="hero-button-text" value="Read More" /></div>
+    <div class="form-group"><label>Sort Order</label><input type="number" name="sort_order" id="hero-sort-order" value="0" /></div>
+    </div>
+    <div class="form-group"><label>Button Link</label><input type="text" name="button_url" id="hero-button-url" placeholder="/news/some-article/ or https://..." /></div>
+    <div class="form-group" style="display:flex;gap:16px;align-items:center">
+    <label style="margin:0"><input type="checkbox" name="is_active" id="hero-is-active" checked> Active on homepage</label>
+    </div>
+    <div class="modal-actions">
+    <button class="btn btn-ghost" type="button" onclick="closeModal('hero-modal')">Cancel</button>
+    <button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+    </div>
+    </form>
+    </div></div>
+
+    <div class="modal-overlay" id="manage-categories-modal">
+    <div class="modal" style="max-width:500px">
+    <h2><i class="fa-solid fa-tags"></i> Manage Categories</h2>
+    <div class="form-group">
+    <label>Add New Category</label>
+    <div style="display:flex;gap:8px">
+    <input type="text" id="new-category-name" placeholder="Category name" />
+    <button class="btn btn-primary" type="button" onclick="createCategory()"><i class="fa-solid fa-plus"></i> Add</button>
+    </div>
+    </div>
+    <div style="max-height:320px;overflow-y:auto">
+    <table><thead><tr><th>Category</th><th style="width:120px;text-align:right">Actions</th></tr></thead>
+    <tbody id="manage-categories-body"><tr><td colspan="2"><div class="empty-state"><i class="fa-solid fa-tags"></i><p>Loading...</p></div></td></tr></tbody>
+    </table>
+    </div>
+    <div class="modal-actions" style="margin-top:14px">
+    <button class="btn btn-ghost" type="button" onclick="closeModal('manage-categories-modal')">Done</button>
+    </div>
+    </div></div>
+
+    <div class="modal-overlay" id="manage-news-categories-modal">
+    <div class="modal" style="max-width:500px">
+    <h2><i class="fa-solid fa-tags"></i> Manage News Categories</h2>
+    <div class="form-group">
+    <label>Add New Category</label>
+    <div style="display:flex;gap:8px">
+    <input type="text" id="new-news-category-name" placeholder="Category name" />
+    <button class="btn btn-primary" type="button" onclick="createNewsCategory()"><i class="fa-solid fa-plus"></i> Add</button>
+    </div>
+    </div>
+    <div style="max-height:320px;overflow-y:auto">
+    <table><thead><tr><th>Category</th><th style="width:120px;text-align:right">Actions</th></tr></thead>
+    <tbody id="manage-news-categories-body"><tr><td colspan="2"><div class="empty-state"><i class="fa-solid fa-tags"></i><p>Loading...</p></div></td></tr></tbody>
+    </table>
+    </div>
+    <div class="modal-actions" style="margin-top:14px">
+    <button class="btn btn-ghost" type="button" onclick="closeModal('manage-news-categories-modal')">Done</button>
+    </div>
+    </div></div>
+
+    <div class="modal-overlay" id="officer-modal">
+<div class="modal" style="max-width:600px">
+<h2 id="officer-modal-title">Add Officer</h2>
+<form id="officer-form">
+<input type="hidden" name="officer_profile_id" id="officer-id" />
+<div class="form-group"><label>Photo</label><input type="file" name="photo" id="officer-photo" accept="image/*" /></div>
+<div class="form-group"><label>Full Name *</label><input type="text" name="full_name" id="officer-full-name" required /></div>
+<div class="form-group"><label>Position *</label>
+<select name="position" id="officer-position" required style="display:none"></select>
+<input type="text" name="position_free" id="officer-position-free" placeholder="e.g. Adviser, Board Member" required /></div>
+<div class="form-group"><label>Category *</label>
+<select name="category" id="officer-category" required onchange="toggleOfficerPositionField()">
+<option value="Executive Officer">Executive Officer</option>
+<option value="Board of Directors">Board of Directors</option>
+</select></div>
+<div class="form-group"><label>College / Department</label>
+<select name="department" id="officer-department">
+<option value="">Select College / Department</option>
+<option value="CCJE">CCJE</option>
+<option value="CCSICT">CCSICT</option>
+<option value="CBM">CBM</option>
+<option value="CED">CED</option>
+<option value="IAT">IAT</option>
+<option value="PS">PS</option>
+<option value="SAS">SAS</option>
+</select></div>
+<div class="form-group"><label>School Year</label><input type="text" name="school_year" id="officer-school-year" placeholder="e.g. 2025-2026" /></div>
+<div class="modal-actions">
+<button class="btn btn-ghost" type="button" onclick="closeModal('officer-modal')">Cancel</button>
+<button class="btn btn-primary" id="officer-save-btn" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+</div>
+</form>
+</div></div>
+
+<script>
+const CSRF = '{{ csrf_token }}';
+
+// ---- Page switching ----
+function toggleSidebar() {
+document.querySelector('.app-container').classList.toggle('sidebar-collapsed');
+}
+function confirmLogout(event) {
+  event.preventDefault();
+  Swal.fire({
+    icon: 'question',
+    title: 'Logout?',
+    text: 'Are you sure you want to sign out?',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, logout',
+    cancelButtonText: 'Cancel',
+    reverseButtons: true,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = '{% url "logout" %}';
+    }
+  });
+}
+function switchPage(page, updateHash = true) {
+const validPages = ['dashboard','announcements','news','hero','about','contact','events','officers','resources'];
+if (!validPages.includes(page)) page = 'dashboard';
+if (updateHash && window.location.hash !== '#'+page) window.location.hash = page;
+document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+document.getElementById('page-'+page)?.classList.add('active');
+document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
+const titles = {dashboard:'Dashboard',announcements:'Announcements',news:'News & Highlights',hero:'Hero Carousel',about:'About Us',contact:'Contact Info',events:'Events',officers:'Officers',resources:'Resources'};
+document.getElementById('page-title').textContent = titles[page] || page;
+if (page === 'announcements') loadAnnouncements();
+if (page === 'news') loadNews();
+if (page === 'hero') loadHero();
+if (page === 'events') loadEvents();
+if (page === 'officers') loadOfficers();
+if (page === 'resources') loadResources();
+}
+window.addEventListener('hashchange', () => switchPage(window.location.hash.slice(1), false));
+
+// ---- Modal helpers ----
+function openModal(id) { document.getElementById(id).classList.add('open') }
+function closeModal(id) { document.getElementById(id).classList.remove('open') }
+document.querySelectorAll('.modal-overlay').forEach(m => { m.addEventListener('click',e => { if(e.target===m) m.classList.remove('open') }) });
+
+// ---- Pagination helper (client-side, 10 per page) ----
+const paginationState = {};
+const PAGE_SIZE = 10;
+function setupPagination(key, tbodyId, pagId, renderRow, emptyHtml) {
+paginationState[key] = { tbodyId, pagId, renderRow, emptyHtml, data: [], page: 1 };
+}
+function setPagedData(key, items) {
+const p = paginationState[key];
+if (!p) return;
+p.data = items || [];
+p.page = 1;
+renderPage(key);
+}
+function renderPage(key) {
+const p = paginationState[key];
+if (!p) return;
+const tbody = document.getElementById(p.tbodyId);
+if (!tbody) return;
+if (!p.data.length) { tbody.innerHTML = p.emptyHtml; const pe = document.getElementById(p.pagId); if (pe) pe.innerHTML = ''; return; }
+const pages = Math.max(1, Math.ceil(p.data.length / PAGE_SIZE));
+if (p.page > pages) p.page = pages;
+if (p.page < 1) p.page = 1;
+const start = (p.page - 1) * PAGE_SIZE;
+const slice = p.data.slice(start, start + PAGE_SIZE);
+tbody.innerHTML = slice.map(p.renderRow).join('');
+const pe = document.getElementById(p.pagId);
+if (!pe) return;
+if (pages <= 1) { pe.innerHTML = ''; return; }
+let html = `<span class="pg-info">Showing ${start+1}–${start+slice.length} of ${p.data.length}</span>`;
+html += `<button ${p.page<=1?'disabled':''} onclick="paginate('${key}', ${p.page-1})" title="Previous"><i class="fa-solid fa-chevron-left"></i></button>`;
+for (let i=1;i<=pages;i++) {
+if (pages > 7 && Math.abs(i-p.page) > 2 && i !== 1 && i !== pages) {
+if (i === 2 || i === pages-1) html += `<span style="color:#999;padding:0 2px">…</span>`;
+continue;
+}
+html += `<button class="${i===p.page?'active':''}" onclick="paginate('${key}', ${i})">${i}</button>`;
+}
+html += `<button ${p.page>=pages?'disabled':''} onclick="paginate('${key}', ${p.page+1})" title="Next"><i class="fa-solid fa-chevron-right"></i></button>`;
+pe.innerHTML = html;
+}
+function paginate(key, page) {
+const p = paginationState[key];
+if (!p) return;
+p.page = page;
+renderPage(key);
+}
+
+// ---- Dashbaord ----
+async function loadDashboard() {
+try {
+const [a, n] = await Promise.all([
+fetch('/api/pio/announcements/list/').then(r=>r.json()),
+fetch('/api/pio/news/list/').then(r=>r.json()),
+]);
+document.getElementById('dash-announcements').textContent = a.total || 0;
+document.getElementById('dash-news').textContent = n.total || 0;
+document.getElementById('dash-events').textContent = '-';
+document.getElementById('dash-photos').textContent = '-';
+const alist = document.getElementById('dash-announcements-list');
+if (alist && a.announcements?.length) {
+  const pageSize = 5;
+  const totalPages = Math.max(1, Math.ceil(a.announcements.length / pageSize));
+  const renderAnnouncementsPage = (page) => {
+    const pageIndex = Math.max(1, Math.min(page, totalPages));
+    const start = (pageIndex - 1) * pageSize;
+    const items = a.announcements.slice(start, start + pageSize);
+    alist.innerHTML = items.map(x => `<div style="border-bottom:1px solid #f0f0f0;padding:8px 0"><strong>${x.title}</strong><br><span style="font-size:11px;color:#888">${x.published_at}</span></div>`).join('');
+    if (totalPages > 1) {
+      const paginationHtml = `<div class="homepage-pagination" style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">` +
+        Array.from({length: totalPages}, (_, i) => `<button type="button" class="homepage-page-button" data-page="${i+1}" style="padding:6px 10px;border:1px solid #cbd5e1;border-radius:6px;background:${i+1===pageIndex?'#1f2937':'#fff'};color:${i+1===pageIndex?'#fff':'#111'};cursor:pointer">${i+1}</button>`).join('') +
+        `</div>`;
+      alist.insertAdjacentHTML('beforeend', paginationHtml);
+      alist.querySelectorAll('.homepage-page-button').forEach(btn => {
+        btn.addEventListener('click', () => renderAnnouncementsPage(Number(btn.dataset.page)));
+      });
+    }
+  };
+  renderAnnouncementsPage(1);
+}
+const nlist = document.getElementById('dash-news-list');
+if (n.news?.length) {
+nlist.innerHTML = n.news.slice(0,3).map(x => `<div style="border-bottom:1px solid #f0f0f0;padding:8px 0"><strong>${x.title}</strong><br><span style="font-size:11px;color:#888">${x.published_at}</span></div>`).join('');
+}
+} catch(e) {}
+}
+
+// ---- Announcements ----
+setupPagination('announcements', 'announcements-table-body', 'announcements-pagination',
+a => `<tr>
+<td><strong>${a.title}</strong></td>
+<td><span class="badge badge-green">${a.category}</span></td>
+<td>${a.published_at}</td>
+<td><span class="badge ${a.is_active?'badge-green':'badge-gray'}">${a.is_active?'Active':'Inactive'}</span></td>
+<td style="white-space:nowrap;text-align:right">
+<button class="icon-btn edit" onclick="editAnnouncement(${a.announcement_id})" title="Edit"><i class="fa-solid fa-pen"></i></button>
+<button class="icon-btn edit" onclick="toggleAnnouncement(${a.announcement_id})" title="Toggle">${a.is_active?'<i class="fa-solid fa-eye-slash"></i>':'<i class="fa-solid fa-eye"></i>'}</button>
+<button class="icon-btn danger" onclick="deleteAnnouncement(${a.announcement_id})" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
+</td>
+</tr>`,
+'<tr><td colspan="5"><div class="empty-state"><i class="fa-solid fa-bullhorn"></i><p>No announcements</p></div></td></tr>');
+
+async function loadAnnouncements() {
+try {
+const r = await fetch('/api/pio/announcements/list/');
+const d = await r.json();
+setPagedData('announcements', d.announcements || []);
+} catch(e) { document.getElementById('announcements-table-body').innerHTML = '<tr><td colspan="5"><div class="empty-state"><p>Error loading</p></div></td></tr>' }
+}
+
+async function openAnnouncementModal(data) {
+document.getElementById('announcement-id').value = data?.announcement_id || '';
+document.getElementById('announcement-title').value = data?.title || '';
+const catSel = document.getElementById('announcement-category');
+const catVal = data?.category || 'General Announcement';
+if (catVal && ![...catSel.options].some(o => o.value === catVal)) {
+catSel.insertAdjacentHTML('afterbegin', `<option value="${catVal.replace(/"/g,'&quot;')}">${catVal}</option>`);
+}
+catSel.value = catVal;
+document.getElementById('announcement-description').value = data?.description || '';
+document.getElementById('announcement-expiry').value = data?.expiry_date || '';
+const imgInput = document.getElementById('announcement-image');
+const preview = document.getElementById('announcement-image-preview');
+imgInput.value = '';
+if (data?.image_url) { preview.src = data.image_url; preview.style.display = 'block'; }
+else { preview.style.display = 'none'; }
+document.getElementById('announcement-modal-title').textContent = data?.announcement_id ? 'Edit Announcement' : 'New Announcement';
+openModal('announcement-modal');
+}
+
+document.getElementById('announcement-image')?.addEventListener('change', function() {
+const preview = document.getElementById('announcement-image-preview');
+if (this.files && this.files[0]) { preview.src = URL.createObjectURL(this.files[0]); preview.style.display = 'block'; }
+else preview.style.display = 'none';
+});
+
+async function editAnnouncement(id) {
+try {
+const r = await fetch('/api/pio/announcements/list/');
+const d = await r.json();
+const a = d.announcements?.find(x => x.announcement_id === id);
+if (a) openAnnouncementModal(a);
+} catch(e) {}
+}
+
+async function toggleAnnouncement(id) {
+try {
+await fetch(`/api/pio/announcements/${id}/toggle/`, {method:'POST',headers:{'X-CSRFToken':CSRF}});
+loadAnnouncements(); loadDashboard();
+} catch(e) { Swal.fire({icon:'error',title:'Error',text:'Failed to toggle'}) }
+}
+
+async function deleteAnnouncement(id) {
+const c = await Swal.fire({title:'Delete this announcement?',icon:'warning',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#dc2626'});
+if (!c.isConfirmed) return;
+try {
+await fetch(`/api/pio/announcements/${id}/delete/`, {method:'POST',headers:{'X-CSRFToken':CSRF}});
+loadAnnouncements(); loadDashboard();
+Swal.fire({icon:'success',title:'Deleted',timer:1500,showConfirmButton:false});
+} catch(e) { Swal.fire({icon:'error',title:'Error'}) }
+}
+
+document.getElementById('announcement-form')?.addEventListener('submit', async function(e) {
+e.preventDefault();
+const fd = new FormData(this);
+try {
+const r = await fetch('/api/pio/announcements/create/', {method:'POST',headers:{'X-CSRFToken':CSRF},body:fd});
+const d = await r.json();
+if (d.ok) { closeModal('announcement-modal'); this.reset(); document.getElementById('announcement-image-preview').style.display = 'none'; loadAnnouncements(); loadDashboard(); Swal.fire({icon:'success',title:'Saved',timer:1200,showConfirmButton:false}) }
+else Swal.fire({icon:'error',title:'Error',text:d.error});
+} catch(e) { Swal.fire({icon:'error',title:'Error'}) }
+});
+
+// ---- Announcement Categories ----
+let announcementCategories = [];
+async function loadAnnouncementCategories() {
+try {
+const r = await fetch('/api/pio/announcement-categories/list/');
+const d = await r.json();
+announcementCategories = d.categories || [];
+const sel = document.getElementById('announcement-category');
+const prev = sel.value;
+sel.innerHTML = announcementCategories.map(c => `<option value="${c.name.replace(/"/g,'&quot;')}">${c.name}</option>`).join('');
+if (announcementCategories.some(c => c.name === prev)) sel.value = prev;
+} catch(e) {}
+}
+
+function openManageCategories() {
+loadManageCategories();
+openModal('manage-categories-modal');
+}
+
+async function loadManageCategories() {
+const tbody = document.getElementById('manage-categories-body');
+try {
+const r = await fetch('/api/pio/announcement-categories/list/');
+const d = await r.json();
+if (!d.categories?.length) { tbody.innerHTML = '<tr><td colspan="2"><div class="empty-state"><i class="fa-solid fa-tags"></i><p>No categories yet. Add one above.</p></div></td></tr>'; return; }
+tbody.innerHTML = d.categories.map(c => `<tr>
+<td><strong>${c.name}</strong></td>
+<td style="text-align:right;white-space:nowrap">
+<button class="icon-btn edit" onclick="renameCategory(${c.category_id_PK}, '${(c.name||'').replace(/'/g,"\\'")}')" title="Rename"><i class="fa-solid fa-pen"></i></button>
+<button class="icon-btn danger" onclick="deleteCategory(${c.category_id_PK}, '${(c.name||'').replace(/'/g,"\\'")}')" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
+</td>
+</tr>`).join('');
+} catch(e) {}
+}
+
+async function createCategory() {
+const name = document.getElementById('new-category-name').value.trim();
+if (!name) return;
+try {
+const r = await fetch('/api/pio/announcement-categories/create/', {method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify({name})});
+const d = await r.json();
+if (d.ok) { document.getElementById('new-category-name').value = ''; loadManageCategories(); loadAnnouncementCategories(); Swal.fire({icon:'success',title:'Added',timer:1000,showConfirmButton:false}); }
+else Swal.fire({icon:'error',title:'Error',text:d.error});
+} catch(e) { Swal.fire({icon:'error',title:'Error'}) }
+}
+
+async function renameCategory(id, name) {
+const { value: newName } = await Swal.fire({title:'Rename category',input:'text',inputValue:name,showCancelButton:true,confirmButtonText:'Rename',inputValidator: v => !v.trim() ? 'Name is required' : null});
+if (newName === undefined) return;
+try {
+const r = await fetch('/api/pio/announcement-categories/rename/', {method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify({category_id:id, name:newName.trim()})});
+const d = await r.json();
+if (d.ok) { loadManageCategories(); loadAnnouncementCategories(); Swal.fire({icon:'success',title:'Renamed',timer:1000,showConfirmButton:false}); }
+else Swal.fire({icon:'error',title:'Error',text:d.error});
+} catch(e) { Swal.fire({icon:'error',title:'Error'}) }
+}
+
+async function deleteCategory(id, name) {
+const c = await Swal.fire({title:`Delete "${name}"?`,icon:'warning',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#dc2626',text:'Existing announcements will keep their category label.'});
+if (!c.isConfirmed) return;
+try {
+const r = await fetch('/api/pio/announcement-categories/delete/', {method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify({category_id:id})});
+const d = await r.json();
+if (d.ok) { loadManageCategories(); loadAnnouncementCategories(); Swal.fire({icon:'success',title:'Deleted',timer:1000,showConfirmButton:false}); }
+else Swal.fire({icon:'error',title:'Error',text:d.error});
+} catch(e) { Swal.fire({icon:'error',title:'Error'}) }
+}
+
+loadAnnouncementCategories();
+
+// ---- News & Highlights ----
+async function loadNews() {
+const tbody = document.getElementById('news-table-body');
+try {
+const r = await fetch('/api/pio/news/list/');
+const d = await r.json();
+if (!d.news?.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fa-solid fa-newspaper"></i><p>No news articles yet. Create one!</p></div></td></tr>'; return; }
+tbody.innerHTML = d.news.map(n => `<tr>
+<td><strong>${n.title}</strong></td>
+<td><span class="badge badge-green">${n.category || 'Uncategorized'}</span></td>
+<td>${n.published_at || 'Draft'}</td>
+<td>${n.is_featured ? '<i class="fa-solid fa-star text-yellow-500"></i>' : '-'}</td>
+<td><span class="badge ${n.is_published ? 'badge-green' : 'badge-yellow'}">${n.is_published ? 'Published' : 'Draft'}</span></td>
+<td style="white-space:nowrap;text-align:right">
+<button class="icon-btn edit" onclick="editNews(${n.news_id})" title="Edit"><i class="fa-solid fa-pen"></i></button>
+<button class="icon-btn danger" onclick="deleteNews(${n.news_id})" title="Delete"><i class="fa-solid fa-trash"></i></button>
+</td>
+</tr>`).join('');
+document.getElementById('dash-news').textContent = d.news.length;
+} catch(e) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fa-solid fa-exclamation-circle"></i><p>Error loading news</p></div></td></tr>'; }
+}
+
+async function openNewsModal(newsId = null) {
+document.getElementById('news-modal-title').textContent = newsId ? 'Edit News Article' : 'Create News Article';
+document.getElementById('news-id').value = newsId || '';
+document.getElementById('news-title').value = '';
+document.getElementById('news-summary').value = '';
+document.getElementById('news-content').value = '';
+document.getElementById('news-event-date').value = '';
+document.getElementById('news-event-time').value = '';
+document.getElementById('news-venue').value = '';
+document.getElementById('news-featured-image').value = '';
+document.getElementById('news-gallery-images').value = '';
+document.getElementById('news-gallery-preview').innerHTML = '';
+document.getElementById('news-remove-gallery-ids').value = '';
+document.getElementById('news-video-url').value = '';
+document.getElementById('news-is-featured').checked = false;
+document.getElementById('news-is-published').checked = true;
+
+await loadNewsCategories();
+openModal('news-modal');
+
+if (newsId) {
+try {
+const r = await fetch(`/api/pio/news/${newsId}/`);
+const d = await r.json();
+if (d.ok) {
+const n = d.news;
+document.getElementById('news-title').value = n.title;
+document.getElementById('news-summary').value = n.summary;
+document.getElementById('news-content').value = n.content;
+document.getElementById('news-event-date').value = n.event_date || '';
+document.getElementById('news-event-time').value = n.event_time || '';
+document.getElementById('news-venue').value = n.venue || '';
+document.getElementById('news-video-url').value = n.video_url || '';
+document.getElementById('news-is-featured').checked = n.is_featured;
+document.getElementById('news-is-published').checked = n.is_published;
+if (n.category) document.getElementById('news-category').value = n.category_id;
+if (n.gallery?.length) {
+const preview = document.getElementById('news-gallery-preview');
+preview.innerHTML = n.gallery.map(g => `
+<div style="position:relative;width:90px;height:90px;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb">
+<img src="${g.image_url}" alt="" style="width:100%;height:100%;object-fit:cover" />
+<button type="button" onclick="removeNewsGallery(${g.gallery_id}, this)" style="position:absolute;top:4px;right:4px;width:22px;height:22px;border:none;border-radius:50%;background:#dc2626;color:#fff;cursor:pointer;font-size:12px;line-height:1">&times;</button>
+</div>`).join('');
+}
+}
+} catch(e) {}
+}
+}
+
+async function editNews(newsId) {
+openNewsModal(newsId);
+}
+
+function removeNewsGallery(galleryId, btn) {
+const input = document.getElementById('news-remove-gallery-ids');
+const ids = input.value ? input.value.split(',') : [];
+if (!ids.includes(String(galleryId))) ids.push(galleryId);
+input.value = ids.join(',');
+btn.closest('div').remove();
+}
+
+async function deleteNews(newsId) {
+const c = await Swal.fire({title:'Delete this news article?',icon:'warning',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#dc2626'});
+if (!c.isConfirmed) return;
+try {
+const r = await fetch(`/api/pio/news/${newsId}/delete/`, {method:'POST',headers:{'X-CSRFToken':CSRF}});
+const d = await r.json();
+if (d.ok) { loadNews(); Swal.fire({icon:'success',title:'Deleted',timer:1000,showConfirmButton:false}); }
+else Swal.fire({icon:'error',title:'Error',text:d.error});
+} catch(e) { Swal.fire({icon:'error',title:'Error'}) }
+}
+
+async function compressImageFile(file, maxDim=1280, quality=0.8) {
+return new Promise(resolve => {
+if (!file || !file.type || !file.type.startsWith('image/')) return resolve(file);
+const img = new Image();
+const url = URL.createObjectURL(file);
+img.onload = function() {
+URL.revokeObjectURL(url);
+let w = img.naturalWidth, h = img.naturalHeight;
+if (!w || !h) return resolve(file);
+if (Math.max(w,h) <= maxDim && file.size < 300*1024) return resolve(file);
+const scale = Math.min(1, maxDim / Math.max(w,h));
+w = Math.round(w*scale); h = Math.round(h*scale);
+const canvas = document.createElement('canvas');
+canvas.width = w; canvas.height = h;
+const ctx = canvas.getContext('2d');
+ctx.fillStyle = '#fff';
+ctx.fillRect(0,0,w,h);
+ctx.drawImage(img,0,0,w,h);
+canvas.toBlob(function(blob){
+if (blob) resolve(new File([blob], (file.name||'image').replace(/\.[^.]+$/,'.jpg')||'image.jpg', {type:'image/jpeg'}));
+else resolve(file);
+}, 'image/jpeg', quality);
+};
+img.onerror = function(){ URL.revokeObjectURL(url); resolve(file); };
+img.src = url;
+});
+}
+
+document.getElementById('news-form')?.addEventListener('submit', async function(e) {
+e.preventDefault();
+const submitBtn = this.querySelector('button[type="submit"]');
+if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Uploading...'; }
+try {
+const orig = new FormData(this);
+const fd = new FormData();
+for (const [k,v] of orig.entries()) {
+if (k !== 'featured_image' && k !== 'gallery_images') fd.append(k,v);
+}
+const feat = orig.get('featured_image');
+if (feat && feat.size) fd.append('featured_image', await compressImageFile(feat));
+const gals = orig.getAll('gallery_images').filter(f => f && f.size);
+for (const g of gals) fd.append('gallery_images', await compressImageFile(g));
+const r = await fetch('/api/pio/news/create/', {method:'POST',headers:{'X-CSRFToken':CSRF},body:fd});
+const d = await r.json();
+if (d.ok) { closeModal('news-modal'); loadNews(); Swal.fire({icon:'success',title:'Saved',timer:1000,showConfirmButton:false}); }
+else Swal.fire({icon:'error',title:'Error',text:d.error});
+} catch(e) { Swal.fire({icon:'error',title:'Error',text:'Upload failed'}); }
+finally { if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Save'; } }
+});
+
+async function loadHero() {
+const tbody = document.getElementById('hero-table-body');
+try {
+const r = await fetch('/api/pio/hero/list/');
+const d = await r.json();
+if (!d.slides?.length) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><i class="fa-solid fa-images"></i><p>No hero slides yet. Add one!</p></div></td></tr>'; return; }
+tbody.innerHTML = d.slides.map(s => `<tr>
+<td>${s.image_url ? `<img src="${s.image_url}" alt="" style="width:90px;height:48px;object-fit:cover;border-radius:6px" />` : '<span class="badge badge-yellow">No image</span>'}</td>
+<td><strong>${s.title}</strong></td>
+<td>${s.sort_order}</td>
+<td><span class="badge ${s.is_active ? 'badge-green' : 'badge-yellow'}">${s.is_active ? 'Active' : 'Inactive'}</span></td>
+<td style="white-space:nowrap;text-align:right">
+<button class="icon-btn edit" onclick="toggleHero(${s.hero_id})" title="${s.is_active ? 'Deactivate' : 'Activate'}"><i class="fa-solid ${s.is_active ? 'fa-eye-slash' : 'fa-eye'}"></i></button>
+<button class="icon-btn edit" onclick="editHero(${s.hero_id})" title="Edit"><i class="fa-solid fa-pen"></i></button>
+<button class="icon-btn danger" onclick="deleteHero(${s.hero_id})" title="Delete"><i class="fa-solid fa-trash"></i></button>
+</td>
+</tr>`).join('');
+} catch(e) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><i class="fa-solid fa-exclamation-circle"></i><p>Error loading hero slides</p></div></td></tr>'; }
+}
+
+async function openHeroModal(heroId = null) {
+document.getElementById('hero-modal-title').textContent = heroId ? 'Edit Hero Slide' : 'Add Hero Slide';
+document.getElementById('hero-id').value = heroId || '';
+document.getElementById('hero-title').value = '';
+document.getElementById('hero-subtitle').value = '';
+document.getElementById('hero-image').value = '';
+document.getElementById('hero-button-text').value = 'Read More';
+document.getElementById('hero-button-url').value = '';
+document.getElementById('hero-sort-order').value = '0';
+document.getElementById('hero-is-active').checked = true;
+const preview = document.getElementById('hero-image-preview');
+preview.style.display = 'none';
+preview.querySelector('img').src = '';
+
+openModal('hero-modal');
+
+if (heroId) {
+try {
+const r = await fetch(`/api/pio/hero/${heroId}/`);
+const d = await r.json();
+if (d.ok) {
+const s = d.slide;
+document.getElementById('hero-title').value = s.title;
+document.getElementById('hero-subtitle').value = s.subtitle || '';
+document.getElementById('hero-button-text').value = s.button_text || 'Read More';
+document.getElementById('hero-button-url').value = s.button_url || '';
+document.getElementById('hero-sort-order').value = s.sort_order;
+document.getElementById('hero-is-active').checked = s.is_active;
+if (s.image_url) {
+preview.querySelector('img').src = s.image_url;
+preview.style.display = 'block';
+}
+}
+} catch(e) {}
+}
+}
+
+async function editHero(heroId) { openHeroModal(heroId); }
+
+document.getElementById('hero-image')?.addEventListener('change', function() {
+const preview = document.getElementById('hero-image-preview');
+if (this.files?.length) {
+preview.querySelector('img').src = URL.createObjectURL(this.files[0]);
+preview.style.display = 'block';
+}
+});
+
+async function toggleHero(heroId) {
+try {
+const r = await fetch(`/api/pio/hero/${heroId}/toggle/`, {method:'POST',headers:{'X-CSRFToken':CSRF}});
+const d = await r.json();
+if (d.ok) { loadHero(); }
+else Swal.fire({icon:'error',title:'Error',text:d.error});
+} catch(e) { Swal.fire({icon:'error',title:'Error'}) }
+}
+
+async function deleteHero(heroId) {
+const c = await Swal.fire({title:'Delete this hero slide?',icon:'warning',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#dc2626'});
+if (!c.isConfirmed) return;
+try {
+const r = await fetch(`/api/pio/hero/${heroId}/delete/`, {method:'POST',headers:{'X-CSRFToken':CSRF}});
+const d = await r.json();
+if (d.ok) { loadHero(); Swal.fire({icon:'success',title:'Deleted',timer:1000,showConfirmButton:false}); }
+else Swal.fire({icon:'error',title:'Error',text:d.error});
+} catch(e) { Swal.fire({icon:'error',title:'Error'}) }
+}
+
+document.getElementById('hero-form')?.addEventListener('submit', async function(e) {
+e.preventDefault();
+const fd = new FormData(this);
+try {
+const r = await fetch('/api/pio/hero/create/', {method:'POST',headers:{'X-CSRFToken':CSRF},body:fd});
+const d = await r.json();
+if (d.ok) { closeModal('hero-modal'); loadHero(); Swal.fire({icon:'success',title:'Saved',timer:1000,showConfirmButton:false}); }
+else Swal.fire({icon:'error',title:'Error',text:d.error});
+} catch(e) { Swal.fire({icon:'error',title:'Error'}) }
+});
+
+
+async function loadNewsCategories() {
+const select = document.getElementById('news-category');
+try {
+const r = await fetch('/api/pio/news-categories/list/');
+const d = await r.json();
+select.innerHTML = '<option value="">Select category</option>' + (d.categories?.map(c => `<option value="${c.category_id}">${c.name}</option>`).join('') || '');
+} catch(e) {}
+}
+
+function openNewsCategories() {
+openModal('manage-news-categories-modal');
+loadNewsCategoriesList();
+}
+
+async function loadNewsCategoriesList() {
+const tbody = document.getElementById('manage-news-categories-body');
+try {
+const r = await fetch('/api/pio/news-categories/list/');
+const d = await r.json();
+if (!d.categories?.length) { tbody.innerHTML = '<tr><td colspan="2"><div class="empty-state"><i class="fa-solid fa-tags"></i><p>No categories yet</p></div></td></tr>'; return; }
+tbody.innerHTML = d.categories.map(c => `<tr>
+<td>${c.name}</td>
+<td style="text-align:right;white-space:nowrap">
+<button class="icon-btn edit" onclick="renameNewsCategory(${c.category_id}, '${c.name}')" title="Rename"><i class="fa-solid fa-pen"></i></button>
+<button class="icon-btn danger" onclick="deleteNewsCategory(${c.category_id}, '${c.name}')" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
+</td>
+</tr>`).join('');
+} catch(e) {}
+}
+
+async function createNewsCategory() {
+const name = document.getElementById('new-news-category-name').value.trim();
+if (!name) return;
+try {
+const r = await fetch('/api/pio/news-categories/create/', {method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify({name})});
+const d = await r.json();
+if (d.ok) { document.getElementById('new-news-category-name').value = ''; loadNewsCategoriesList(); loadNewsCategories(); Swal.fire({icon:'success',title:'Created',timer:1000,showConfirmButton:false}); }
+else Swal.fire({icon:'error',title:'Error',text:d.error});
+} catch(e) { Swal.fire({icon:'error',title:'Error'}) }
+}
+
+async function renameNewsCategory(id, name) {
+const { value: newName } = await Swal.fire({title:'Rename category',input:'text',inputValue:name,showCancelButton:true,confirmButtonText:'Rename',inputValidator: v => !v.trim() ? 'Name is required' : null});
+if (newName === undefined) return;
+try {
+const r = await fetch('/api/pio/news-categories/rename/', {method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify({category_id:id, name:newName.trim()})});
+const d = await r.json();
+if (d.ok) { loadNewsCategoriesList(); loadNewsCategories(); Swal.fire({icon:'success',title:'Renamed',timer:1000,showConfirmButton:false}); }
+else Swal.fire({icon:'error',title:'Error',text:d.error});
+} catch(e) { Swal.fire({icon:'error',title:'Error'}) }
+}
+
+async function deleteNewsCategory(id, name) {
+const c = await Swal.fire({title:`Delete "${name}"?`,icon:'warning',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#dc2626',text:'Existing news articles will be uncategorized.'});
+if (!c.isConfirmed) return;
+try {
+const r = await fetch('/api/pio/news-categories/delete/', {method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify({category_id:id})});
+const d = await r.json();
+if (d.ok) { loadNewsCategoriesList(); loadNewsCategories(); Swal.fire({icon:'success',title:'Deleted',timer:1000,showConfirmButton:false}); }
+else Swal.fire({icon:'error',title:'Error',text:d.error});
+} catch(e) { Swal.fire({icon:'error',title:'Error'}) }
+}
+
+document.getElementById('album-form')?.addEventListener('submit', async function(e) {
+e.preventDefault();
+const fd = new FormData(this);
+const data = Object.fromEntries(fd);
+try {
+const r = await fetch('/api/pio/albums/create/', {method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify(data)});
+const d = await r.json();
+if (d.ok) { closeModal('album-modal'); this.reset(); loadAlbums(); loadDashboard(); Swal.fire({icon:'success',title:'Created',timer:1200,showConfirmButton:false}) }
+else Swal.fire({icon:'error',title:'Error',text:d.error});
+} catch(e) {}
+});
+function openAlbumModal() { openModal('album-modal') }
+
+// ---- About ----
+document.getElementById('about-form')?.addEventListener('submit', async function(e) {
+e.preventDefault();
+const fd = new FormData(this);
+const data = Object.fromEntries(fd);
+try {
+const r = await fetch('/api/pio/about/save/', {method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify(data)});
+const d = await r.json();
+if (d.ok) Swal.fire({icon:'success',title:'Saved!',timer:1500,showConfirmButton:false});
+else Swal.fire({icon:'error',title:'Error',text:d.error});
+} catch(e) { Swal.fire({icon:'error',title:'Error'}) }
+});
+
+// ---- Contact ----
+document.getElementById('contact-form')?.addEventListener('submit', async function(e) {
+e.preventDefault();
+const fd = new FormData(this);
+const data = Object.fromEntries(fd);
+try {
+const r = await fetch('/api/pio/about/save/', {method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify(data)});
+const d = await r.json();
+if (d.ok) Swal.fire({icon:'success',title:'Saved!',timer:1500,showConfirmButton:false});
+else Swal.fire({icon:'error',title:'Error',text:d.error});
+} catch(e) { Swal.fire({icon:'error',title:'Error'}) }
+});
+
+// ---- Events ----
+setupPagination('events', 'events-table-body', 'events-pagination',
+e => `<tr>
+<td><strong>${e.title}</strong></td>
+<td>${e.event_date}</td>
+<td>${e.venue}</td>
+<td><span class="badge badge-green">${e.event_type}</span></td>
+<td><span class="badge ${e.status==='Upcoming'?'badge-green':e.status==='Completed'?'badge-gray':'badge-red'}">${e.status}</span></td>
+</tr>`,
+'<tr><td colspan="5"><div class="empty-state"><i class="fa-solid fa-calendar-days"></i><p>No events</p></div></td></tr>');
+
+async function loadEvents() {
+try {
+const r = await fetch('/api/pio/events/list/');
+const d = await r.json();
+setPagedData('events', d.events || []);
+} catch(e) {}
+}
+
+// ---- Officers ----
+setupPagination('officers', 'officers-table-body', 'officers-pagination',
+o => `<tr style="vertical-align:middle">
+<td style="text-align:center">${o.photo_url ? `<img src="${o.photo_url}" alt="${o.full_name}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;display:inline-block">` : '<div style="width:40px;height:40px;border-radius:50%;background:#004d26;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800">'+(o.full_name||'?').charAt(0).toUpperCase()+'</div>'}</td>
+<td><strong>${o.full_name}</strong></td>
+<td>${o.position}</td>
+<td><span class="badge badge-green">${o.category}</span></td>
+<td>${o.department || '-'}</td>
+<td><strong>${o.school_year || '-'}</strong></td>
+<td style="white-space:nowrap;text-align:right">
+<button class="icon-btn edit" title="Edit" onclick="openOfficerModal(${o.officer_profile_id})"><i class="fa-solid fa-pen"></i></button>
+<button class="icon-btn danger" title="Delete" onclick="deleteOfficer(${o.officer_profile_id}, '${(o.full_name||'').replace(/'/g,"\\'")}')"><i class="fa-solid fa-trash"></i></button>
+</td>
+</tr>`,
+'<tr><td colspan="7"><div class="empty-state"><i class="fa-solid fa-users-gear"></i><p>No officers found. Click "Add Officer" to create one.</p></div></td></tr>');
+
+async function loadOfficers() {
+try {
+const r = await fetch('/api/pio/officers/list/');
+const d = await r.json();
+currentOfficers = d.officers || [];
+setPagedData('officers', currentOfficers);
+} catch(e) {}
+}
+
+const EXEC_POSITIONS = ['President', 'Vice President', 'Secretary', 'Treasurer', 'Auditor', 'Business Manager', 'Public Information Officer'];
+
+function toggleOfficerPositionField() {
+const cat = document.getElementById('officer-category').value;
+const isExec = cat === 'Executive Officer';
+const isBoard = cat === 'Board of Directors';
+const positionSelect = document.getElementById('officer-position');
+const positionFree = document.getElementById('officer-position-free');
+positionSelect.style.display = isExec ? '' : 'none';
+positionFree.style.display = isExec ? 'none' : '';
+positionSelect.disabled = isBoard;
+positionFree.disabled = isExec || isBoard;
+positionSelect.required = isExec && !isBoard;
+positionFree.required = !isExec && !isBoard;
+positionFree.placeholder = isBoard ? 'Position unavailable for Board of Directors' : 'e.g. Adviser, Board Member';
+const saveButton = document.getElementById('officer-save-btn');
+saveButton.disabled = false;
+saveButton.title = '';
+if (isBoard) {
+positionSelect.value = '';
+positionFree.value = '';
+}
+if (isExec) populateExecPositionOptions();
+}
+
+function populateExecPositionOptions(selected) {
+const sel = document.getElementById('officer-position');
+const editId = document.getElementById('officer-id').value;
+const used = new Set();
+currentOfficers.forEach(o => {
+if (String(o.officer_profile_id) !== String(editId) && (o.category || '') === 'Executive Officer' && o.position) {
+used.add(o.position.trim().toUpperCase());
+}
+});
+sel.innerHTML = '';
+let selVal = selected || '';
+EXEC_POSITIONS.forEach(p => {
+if (used.has(p.toUpperCase())) return;
+const opt = document.createElement('option');
+opt.value = p;
+opt.textContent = p;
+sel.appendChild(opt);
+});
+if (selected) {
+const match = [...sel.options].find(o => o.value.toUpperCase() === selected.trim().toUpperCase());
+if (match) { sel.value = match.value; }
+else {
+const opt = document.createElement('option');
+opt.value = selected.trim();
+opt.textContent = selected.trim();
+sel.appendChild(opt);
+sel.value = opt.value;
+}
+} else if (sel.options.length > 0) {
+sel.value = sel.options[0].value;
+}
+}
+
+function openOfficerModal(id) {
+document.getElementById('officer-form').reset();
+document.getElementById('officer-id').value = '';
+document.getElementById('officer-modal-title').textContent = 'Add Officer';
+if (id) {
+const row = currentOfficers?.find(o => o.officer_profile_id === id);
+if (row) {
+document.getElementById('officer-modal-title').textContent = 'Edit Officer';
+document.getElementById('officer-id').value = row.officer_profile_id;
+document.getElementById('officer-full-name').value = row.full_name || '';
+document.getElementById('officer-category').value = row.category || 'Executive Officer';
+toggleOfficerPositionField();
+document.getElementById('officer-department').value = row.department || '';
+document.getElementById('officer-school-year').value = row.school_year || '';
+const cat2 = row.category || 'Executive Officer';
+if (cat2 === 'Executive Officer') populateExecPositionOptions(row.position);
+else {
+document.getElementById('officer-position-free').value = row.position || '';
+}
+}
+} else {
+toggleOfficerPositionField();
+}
+openModal('officer-modal');
+}
+
+let currentOfficers = [];
+let savingOfficer = false;
+async function saveOfficer(e) {
+e.preventDefault();
+if (savingOfficer) return;
+const saveButton = document.getElementById('officer-save-btn');
+ savingOfficer = true;
+saveButton.disabled = true;
+const cat = document.getElementById('officer-category').value;
+const pos = cat === 'Board of Directors' ? 'Board Member' : cat === 'Executive Officer'
+? document.getElementById('officer-position').value
+: document.getElementById('officer-position-free').value.trim();
+if (!pos) { Swal.fire({icon:'warning',title:'Select a position',text:'Please select or enter a position.'}); return; }
+const fd = new FormData(document.getElementById('officer-form'));
+fd.delete('position');
+fd.delete('position_free');
+fd.append('position', pos);
+const pid = document.getElementById('officer-id').value;
+fd.delete('officer_profile_id');
+if (pid) fd.append('officer_profile_id', pid);
+try {
+const r = await fetch('/api/pio/officers/save/', {
+method: 'POST',
+headers: { 'X-CSRFToken': CSRF },
+body: fd
+});
+const d = await r.json();
+if (!r.ok || d.error) throw new Error(d.error || 'Save failed');
+closeModal('officer-modal');
+loadOfficers();
+Swal.fire({icon:'success',title:pid?'Updated':'Added',timer:1200,showConfirmButton:false});
+} catch(err) { Swal.fire({icon:'error',title:'Error',text:err.message}); }
+finally { savingOfficer = false; toggleOfficerPositionField(); }
+}
+
+async function deleteOfficer(id, name) {
+const c = await Swal.fire({title:`Delete "${name}"?`,icon:'warning',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#dc2626',text:'This cannot be undone.'});
+if (!c.isConfirmed) return;
+try {
+const r = await fetch(`/api/pio/officers/${id}/delete/`, {
+method: 'POST',
+headers: { 'X-CSRFToken': CSRF }
+});
+const d = await r.json();
+if (!r.ok || d.error) throw new Error(d.error || 'Delete failed');
+loadOfficers();
+Swal.fire({icon:'success',title:'Deleted',timer:1200,showConfirmButton:false});
+} catch(err) { Swal.fire({icon:'error',title:'Error',text:err.message}); }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+document.getElementById('officer-form').addEventListener('submit', saveOfficer);
+});
+
+// ---- Resources ----
+setupPagination('resources', 'resources-table-body', 'resources-pagination',
+doc => `<tr>
+<td><strong>${doc.title}</strong></td>
+<td><span class="badge badge-green">${doc.document_type}</span></td>
+<td>${doc.file_url ? `<a href="${doc.file_url}" target="_blank" style="color:#004d26;font-weight:600"><i class="fa-solid fa-download"></i> ${doc.file_name||'Download'}</a>` : '—'}</td>
+<td>${doc.uploaded_at}</td>
+</tr>`,
+'<tr><td colspan="4"><div class="empty-state"><i class="fa-solid fa-folder-open"></i><p>No documents</p></div></td></tr>');
+
+async function loadResources() {
+try {
+const r = await fetch('/api/pio/resources/list/');
+const d = await r.json();
+setPagedData('resources', d.resources || []);
+} catch(e) {}
+}
+
+// ---- Init ----
+loadDashboard();
+loadHero();
+switchPage(window.location.hash ? window.location.hash.slice(1) : 'dashboard', false);
+</script>
+</body>
+</html>

@@ -1,0 +1,448 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SUPERADMIN DASHBOARD</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+      * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Inter", sans-serif; }
+      body, html { height: 100%; width: 100%; overflow: hidden; background: #f6fbf6; color: #263238; }
+      .app-container { display: flex; width: 100vw; height: 100vh; }
+      .sidebar { width: 280px; height: 100%; background: #1b5e20; color: #ffffff; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12); transition: width 0.3s ease; }
+      .sidebar.collapsed { width: 70px; }
+      .sidebar-brand { padding: 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.12); }
+      .brand-title-wrapper { display: flex; align-items: center; gap: 10px; }
+      .logo-mark { width: 40px; height: 40px; border-radius: 8px; background: rgba(255, 255, 255, 0.15); flex-shrink: 0; }
+      .logo-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+      .brand-name { font-size: 0.95rem; font-weight: 700; color: #ffffff; }
+      .role-tag { font-size: 0.72rem; background: rgba(255, 255, 255, 0.12); padding: 2px 8px; border-radius: 4px; }
+      .menu-item { padding: 12px 18px; color: #ffffff; font-weight: 500; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+      .menu-item.active { background: rgba(255, 255, 255, 0.12); border-left: 4px solid #a5d6a7; }
+      .menu-icon { flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+      .menu-subitem { padding: 10px 18px 10px 42px; color: rgba(255, 255, 255, 0.85); font-weight: 400; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+      .menu-subitem:hover { background: rgba(255, 255, 255, 0.08); }
+      .menu-subitem.active { background: rgba(255, 255, 255, 0.12); color: #ffffff; border-left: 4px solid #a5d6a7; }
+      .sub-icon { flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+      .menu-chevron { margin-left: auto; transition: transform 0.3s; }
+      .menu-chevron.rotated { transform: rotate(180deg); }
+      .submenu { display: none; }
+      .submenu.open { display: block; }
+      .panel-section { display: none; }
+      .panel-section.active { display: block; }
+      .sidebar.collapsed .brand-text { display: none; }
+      .sidebar.collapsed .menu-item span { display: none; }
+      .sidebar.collapsed .menu-subitem span { display: none; }
+      .sidebar.collapsed .menu-chevron { display: none; }
+      .sidebar.collapsed .submenu { display: none !important; }
+      .sidebar.collapsed .menu-item { justify-content: center; padding: 12px 0; }
+      .sidebar.collapsed .menu-subitem { justify-content: center; padding: 12px 0; }
+      .sidebar.collapsed .menu-icon { margin: 0; }
+      .sidebar.collapsed .sidebar-brand { justify-content: center; padding: 18px 0; }
+      .sidebar.collapsed .sidebar-footer { display: flex; justify-content: center; padding: 12px 0; border-top: none; }
+      .sidebar-footer { padding: 16px 18px; border-top: 1px solid rgba(255, 255, 255, 0.12); }
+      .logout-btn { width: 100%; padding: 12px 16px; background: #ffffff; color: #1b5e20; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+      .main-content { flex: 1; display: flex; flex-direction: column; }
+      .toolbar { height: 64px; background: #1b5e20; border-bottom: 1px solid rgba(255, 255, 255, 0.12); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+      .toolbar-left { display: flex; align-items: center; gap: 12px; }
+      .menu-toggle-btn { background: rgba(255, 255, 255, 0.1); border: none; color: #ffffff; padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+      .menu-toggle-btn:hover { background: rgba(255, 255, 255, 0.2); }
+      .page-title { font-size: 1.1rem; font-weight: 700; color: #ffffff; }
+      .content-viewport { flex: 1; overflow-y: auto; padding: 24px; background: #eef7ef; }
+      .dashboard-panel { background: #ffffff; border-radius: 14px; padding: 24px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); border: 1px solid #dfe9df; margin-bottom: 20px; }
+      .panel-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 2px solid #f6fbf6; padding-bottom: 10px; }
+      .panel-title { font-size: 1rem; font-weight: 700; color: #1b5e20; }
+      .form-group { margin-bottom: 16px; }
+      .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: #263238; margin-bottom: 6px; }
+      .form-input { width: 100%; padding: 10px 14px; border: 1px solid #dfe9df; border-radius: 8px; font-size: 0.9rem; }
+      .btn { padding: 10px 20px; border-radius: 6px; border: none; font-weight: 500; cursor: pointer; font-size: 0.85rem; }
+      .btn-primary { background: #1b5e20; color: #ffffff; }
+      .btn-primary:hover { background: #2e7d32; }
+      .btn-secondary { background: #e8f5e9; color: #1b5e20; }
+      .btn-danger { background: #dc2626; color: #ffffff; }
+      .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+      .status-badge.active { background: #e8f5e9; color: #1b5e20; }
+      .status-badge.inactive { background: #fee2e2; color: #991b1b; }
+      .alert { padding: 12px 14px; border-radius: 8px; margin-bottom: 16px; }
+      .alert.success { background: #ecfdf5; color: #166534; border: 1px solid #d1fae5; }
+      .alert.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-title-wrapper">
+            <div class="logo-mark">
+              <img src="/static/img/isu_caufa_official.png" alt="ISU CAUFA Logo">
+            </div>
+            <div class="brand-text">
+              <span class="brand-name">ISU CAUFA</span>
+              <span class="role-tag">SuperAdmin</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-scroller">
+          <nav>
+            <div class="menu-item" onclick="toggleSubmenu('account-submenu', this)">
+              <svg class="menu-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+                <path d="M16 3.13a4 4 0 010 7.75"/>
+              </svg>
+              <span>Account Management</span>
+              <svg class="menu-chevron" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+            </div>
+            <div class="submenu open" id="account-submenu">
+              <div class="menu-subitem active" onclick="showPanel('superadmin-panel', this)">
+                <svg class="sub-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>Superadmin Account</span>
+              </div>
+              <div class="menu-subitem" onclick="showPanel('president-panel', this)">
+                <svg class="sub-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>President Account</span>
+              </div>
+              <div class="menu-subitem" onclick="showPanel('system-backfill-panel', this)">
+                <svg class="sub-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>System Backfill Account</span>
+              </div>
+            </div>
+            <div class="menu-item" onclick="showPanel('safety-threshold-panel', this)">
+              <svg class="menu-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v20M2 12h20"/>
+                <path d="M12 2l4 4m-4-4L8 6m4-4v20"/>
+              </svg>
+              <span>Fund Safety Threshold</span>
+            </div>
+          </nav>
+        </div>
+
+        <div class="sidebar-footer">
+          <button class="logout-btn" onclick="logout()">
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Toolbar -->
+        <header class="toolbar">
+          <div class="toolbar-left">
+            <button class="menu-toggle-btn" onclick="toggleSidebar()">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12h18M3 6h18M3 18h18"/>
+              </svg>
+            </button>
+            <h1 class="page-title">SuperAdmin Dashboard</h1>
+          </div>
+        </header>
+
+        <!-- Content Viewport -->
+        <div class="content-viewport">
+          {% if form_feedback %}
+            <div class="alert {{ form_feedback.level }}">{{ form_feedback.message }}</div>
+          {% endif %}
+
+          <!-- Superadmin Account Panel -->
+          <div class="dashboard-panel panel-section active" id="superadmin-panel">
+            <div class="panel-header-row">
+              <div>
+                <h2 class="panel-title">Superadmin Account</h2>
+                <span class="status-badge {{ superadmin_account.status|lower }}">{{ superadmin_account.status }}</span>
+              </div>
+            </div>
+            <form method="post" action="" onsubmit="event.preventDefault();">
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="account_update">
+              <input type="hidden" name="account_key" value="superadmin">
+              <div class="form-group">
+                <label class="form-label">Full name</label>
+                <input class="form-input" name="account_full_name" type="text" value="{{ superadmin_account.full_name }}" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Username</label>
+                <input class="form-input" name="account_username" type="text" value="{{ superadmin_account.username }}" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Password</label>
+                <input class="form-input" name="account_password" type="password" placeholder="Leave blank to keep current password" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input class="form-input" name="account_email" type="email" value="{{ superadmin_account.email }}" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Status</label>
+                <select class="form-input" name="account_status">
+                  <option value="Active" {% if superadmin_account.status == "Active" %}selected{% endif %}>Active</option>
+                  <option value="Inactive" {% if superadmin_account.status == "Inactive" %}selected{% endif %}>Inactive</option>
+                </select>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="confirmFormSubmit(this, 'Save Superadmin Account')">Save Superadmin Account</button>
+            </form>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 16px 0;">
+            <form method="post" action="" onsubmit="event.preventDefault();">
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="toggle_account_status">
+              <input type="hidden" name="account_key" value="superadmin">
+              {% if superadmin_account.status == "Active" %}
+                <button type="button" class="btn btn-danger" onclick="confirmFormSubmit(this, 'Deactivate Superadmin')">Deactivate Superadmin</button>
+              {% else %}
+                <button type="button" class="btn btn-secondary" onclick="confirmFormSubmit(this, 'Activate Superadmin')">Activate Superadmin</button>
+              {% endif %}
+            </form>
+          </div>
+
+          <!-- President Account Panel -->
+          <div class="dashboard-panel panel-section" id="president-panel">
+            <div class="panel-header-row">
+              <div>
+                <h2 class="panel-title">President Account</h2>
+                <span class="status-badge {{ president_account.status|lower }}">{{ president_account.status }}</span>
+              </div>
+            </div>
+            {% if president_exists %}
+              <p style="margin-bottom:12px; color: #64748b; font-size: 0.85rem;">A president account already exists.</p>
+            {% endif %}
+            <form method="post" action="" onsubmit="event.preventDefault();">
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="account_update">
+              <input type="hidden" name="account_key" value="president">
+              <div class="form-group">
+                <label class="form-label">Full name</label>
+                <input class="form-input" name="account_full_name" type="text" value="{{ president_account.full_name }}" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Username</label>
+                <input class="form-input" name="account_username" type="text" value="{{ president_account.username }}" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Password</label>
+                <input class="form-input" name="account_password" type="password" placeholder="Leave blank to keep current password" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input class="form-input" name="account_email" type="email" value="{{ president_account.email }}" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Status</label>
+                <select class="form-input" name="account_status">
+                  <option value="Active" {% if president_account.status == "Active" %}selected{% endif %}>Active</option>
+                  <option value="Inactive" {% if president_account.status == "Inactive" %}selected{% endif %}>Inactive</option>
+                </select>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="confirmFormSubmit(this, 'Save President Account')">Save President Account</button>
+            </form>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 16px 0;">
+            <form method="post" action="" onsubmit="event.preventDefault();">
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="toggle_account_status">
+              <input type="hidden" name="account_key" value="president">
+              {% if president_account.status == "Active" %}
+                <button type="button" class="btn btn-danger" onclick="confirmFormSubmit(this, 'Deactivate President')">Deactivate President</button>
+              {% else %}
+                <button type="button" class="btn btn-secondary" onclick="confirmFormSubmit(this, 'Activate President')">Activate President</button>
+              {% endif %}
+            </form>
+          </div>
+
+          <!-- System Backfill Account Panel -->
+          <div class="dashboard-panel panel-section" id="system-backfill-panel">
+            <div class="panel-header-row">
+              <div>
+                <h2 class="panel-title">System Backfill Account</h2>
+                <span class="status-badge {{ system_backfill_account.status|lower }}">{{ system_backfill_account.status }}</span>
+              </div>
+            </div>
+            <form method="post" action="" onsubmit="event.preventDefault();">
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="account_update">
+              <input type="hidden" name="account_key" value="system_backfill">
+              <div class="form-group">
+                <label class="form-label">Full name</label>
+                <input class="form-input" name="account_full_name" type="text" value="{{ system_backfill_account.full_name }}" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Username</label>
+                <input class="form-input" name="account_username" type="text" value="{{ system_backfill_account.username }}" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Password</label>
+                <input class="form-input" name="account_password" type="password" placeholder="Leave blank to keep current password" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input class="form-input" name="account_email" type="email" value="{{ system_backfill_account.email }}" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Status</label>
+                <select class="form-input" name="account_status">
+                  <option value="Active" {% if system_backfill_account.status == "Active" %}selected{% endif %}>Active</option>
+                  <option value="Inactive" {% if system_backfill_account.status == "Inactive" %}selected{% endif %}>Inactive</option>
+                </select>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="confirmFormSubmit(this, 'Save System Backfill Account')">Save System Backfill Account</button>
+            </form>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 16px 0;">
+            <form method="post" action="" onsubmit="event.preventDefault();">
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="toggle_account_status">
+              <input type="hidden" name="account_key" value="system_backfill">
+              {% if system_backfill_account.status == "Active" %}
+                <button type="button" class="btn btn-danger" onclick="confirmFormSubmit(this, 'Deactivate System Backfill')">Deactivate System Backfill</button>
+              {% else %}
+                <button type="button" class="btn btn-secondary" onclick="confirmFormSubmit(this, 'Activate System Backfill')">Activate System Backfill</button>
+              {% endif %}
+            </form>
+          </div>
+
+          <!-- Safety Threshold Settings Panel -->
+          <div class="dashboard-panel panel-section" id="safety-threshold-panel">
+            <div class="panel-header-row">
+              <div>
+                <h2 class="panel-title">Fund Safety Threshold Settings</h2>
+              </div>
+            </div>
+            <p style="margin-bottom: 16px; color: #64748b; font-size: 0.9rem;">Set the minimum fund balance threshold. Operations that would reduce the fund below this amount will be blocked.</p>
+            {% if threshold_feedback %}
+              <div class="alert {{ threshold_feedback.level }}">{{ threshold_feedback.message }}</div>
+            {% endif %}
+            <form method="post" action="" onsubmit="event.preventDefault();">
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="safety_threshold">
+              <div class="form-group">
+                <label class="form-label">Safety Threshold Amount (₱)</label>
+                <input class="form-input" name="safety_threshold_amount" type="number" step="0.01" min="0" value="{{ safety_threshold|default:'0.00' }}" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Enable Safety Threshold</label>
+                <select class="form-input" name="safety_threshold_enabled">
+                  <option value="true" {% if safety_threshold_enabled == 'true' %}selected{% endif %}>Enabled</option>
+                  <option value="false" {% if safety_threshold_enabled == 'false' %}selected{% endif %}>Disabled</option>
+                </select>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="confirmFormSubmit(this, 'Save Safety Threshold Settings')">Save Safety Threshold Settings</button>
+            </form>
+          </div>
+
+        </div>
+      </main>
+    </div>
+
+    <script>
+      function logout() {
+        Swal.fire({
+          icon: 'question',
+          title: 'Logout?',
+          text: 'Are you sure you want to sign out?',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, logout',
+          cancelButtonText: 'Cancel',
+          confirmButtonColor: '#c62828'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = '/logout/';
+          }
+        });
+      }
+
+      function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('collapsed');
+      }
+
+      function toggleSubmenu(submenuId, menuItem) {
+        const submenu = document.getElementById(submenuId);
+        const chevron = menuItem.querySelector('.menu-chevron');
+        
+        if (submenu.classList.contains('open')) {
+          submenu.classList.remove('open');
+          chevron.classList.remove('rotated');
+        } else {
+          submenu.classList.add('open');
+          chevron.classList.add('rotated');
+        }
+      }
+
+      function showPanel(panelId, subMenuItem) {
+        // Hide all panels
+        document.querySelectorAll('.panel-section').forEach(panel => {
+          panel.classList.remove('active');
+        });
+
+        // Show selected panel
+        document.getElementById(panelId).classList.add('active');
+
+        // Update active state of menu items
+        document.querySelectorAll('.menu-subitem').forEach(item => {
+          item.classList.remove('active');
+        });
+        subMenuItem.classList.add('active');
+      }
+
+      function confirmFormSubmit(button, actionName) {
+        Swal.fire({
+          title: 'Confirm Action',
+          text: `Are you sure you want to ${actionName.toLowerCase()}?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#1b5e20',
+          cancelButtonColor: '#dc2626',
+          confirmButtonText: 'Yes, proceed'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Use AJAX to submit form to prevent resubmission on refresh
+            const form = button.form;
+            const formData = new FormData(form);
+            
+            fetch(form.action, {
+              method: 'POST',
+              body: formData,
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            }).then(response => {
+              if (response.ok) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Success',
+                  text: `${actionName} completed successfully`,
+                  timer: 2000,
+                  showConfirmButton: false
+                }).then(() => {
+                  // Redirect to same page with GET to prevent resubmission dialog
+                  window.location.href = window.location.pathname;
+                });
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Failed to complete the action'
+                });
+              }
+            }).catch(error => {
+              // Fallback to normal form submission if AJAX fails
+              form.submit();
+            });
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1072 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ISU CAUFA FMIS — Member Onboarding</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0F5A36">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="{% static 'js/html5-qrcode.min.js' %}"></script>
+<script src="{% static 'js/jsQR.js' %}"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#F5F7F8;overflow:hidden}
+body{font-family:'Inter',sans-serif;color:#1C1C1E;-webkit-font-smoothing:antialiased;max-width:430px;margin:0 auto;position:relative;overflow-wrap:break-word;}
+
+/* Main Screens */
+.screen{display:none;flex-direction:column;height:100vh;height:100dvh;position:relative;background:#F5F7F8;overflow:hidden;min-height:0}
+.screen.active{display:flex;animation:slideInUp .45s cubic-bezier(.22,1,.36,1)}
+@keyframes slideInUp{from{opacity:0;transform:translateY(30px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* Header with Modern Design */
+.header{background:linear-gradient(180deg,#0F5A36 0%,#0A3D20 100%);padding:max(40px,env(safe-area-inset-top,0)+20px) 20px 28px;text-align:center;flex-shrink:0;position:relative;box-shadow:0 4px 20px rgba(15,90,54,.15)}
+.header::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:28px;background:#F5F7F8;border-radius:28px 28px 0 0}
+
+/* Splash Screen */
+.splash-header{background:linear-gradient(180deg,#0F5A36 0%,#072916 100%);padding:20px;text-align:center;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;overflow-y:auto}
+.splash-logo{width:180px;height:180px;max-width:50vw;max-height:50vw;border-radius:50px;background:rgba(255,255,255,.12);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;margin-bottom:32px;border:1.5px solid rgba(255,255,255,.2);box-shadow:0 8px 32px rgba(0,0,0,.15);overflow:hidden}
+.splash-logo svg{width:36px;height:36px;stroke:#fff;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.splash-title{font-family:'Manrope';font-weight:800;font-size:28px;color:#fff;letter-spacing:-.5px;margin-bottom:6px;text-shadow:0 2px 4px rgba(0,0,0,.1);overflow-wrap:break-word}
+.splash-sub{font-size:14px;color:rgba(255,255,255,.75);font-weight:500;margin-bottom:28px;line-height:1.4}
+.splash-desc{font-size:13px;color:rgba(255,255,255,.6);line-height:1.6;max-width:300px;margin-bottom:36px;padding:0 8px}
+.splash-version{font-size:11px;color:rgba(255,255,255,.35);margin-top:36px}
+
+/* Progress Indicator */
+.progress-bar{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 16px 10px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.05);flex-shrink:0}
+.progress-dot{width:10px;height:10px;border-radius:50%;background:#E5E7EB;transition:all .4s cubic-bezier(.22,1,.36,1)}
+.progress-dot.active{width:32px;background:#0F5A36;border-radius:6px}
+.progress-dot.done{background:#22C55E}
+
+/* Content Area */
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:12px 16px 16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;min-height:0;}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:2px}
+
+/* Card Styling */
+.card{background:#fff;border-radius:18px;padding:20px 16px;box-shadow:0 4px 12px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.04)}
+.card h2{font-family:'Manrope';font-weight:700;font-size:18px;color:#1C1C1E;margin-bottom:6px;letter-spacing:-.3px}
+.card p.sub{font-size:13px;color:#636366;line-height:1.5;margin-bottom:16px}
+.card ul{list-style:none;padding:0}
+.card ul li{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #F2F2F7;font-size:13px;color:#1C1C1E;font-weight:500;overflow-wrap:break-word}
+.card ul li:last-child{border-bottom:none}
+.card ul li svg{width:22px;height:22px;flex-shrink:0}
+.check-circle{stroke:#22C55E;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* Welcome Hero */
+.welcome-hero{background:linear-gradient(135deg,#EAF7EE 0%,#F0FDF4 100%);border-radius:20px;padding:28px 20px;text-align:center;margin-bottom:4px;border:1px solid rgba(15,90,54,.08)}
+.welcome-hero svg{width:80px;height:80px;stroke:#0F5A36;fill:none;stroke-width:1.2;margin-bottom:12px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.05))}
+.welcome-hero h1{font-family:'Manrope';font-weight:800;font-size:24px;color:#0F5A36;margin-bottom:4px;letter-spacing:-.3px}
+.welcome-hero p{font-size:13px;color:#4B5563;line-height:1.5;font-weight:500}
+
+/* Step Badge */
+.step-badge{display:inline-flex;align-items:center;gap:6px;background:#EAF7EE;color:#0F5A36;padding:6px 16px;border-radius:100px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+
+/* Upload Area */
+.upload-area{border:2px dashed #D1D5DB;border-radius:16px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .3s cubic-bezier(.22,1,.36,1);background:#FAFAFA}
+.upload-area:hover,.upload-area.dragover{border-color:#0F5A36;background:#EAF7EE;box-shadow:0 4px 12px rgba(15,90,54,.1)}
+.upload-area svg{width:48px;height:48px;stroke:#9CA3AF;margin-bottom:12px;display:block;margin:0 auto 12px;transition:stroke .3s}
+.upload-area:hover svg{stroke:#0F5A36}
+.upload-area p{font-size:15px;font-weight:600;color:#1C1C1E;margin-bottom:4px}
+.upload-area span{font-size:12px;color:#8E8E93;display:block}
+
+/* Preview */
+.upload-preview{width:140px;height:140px;border-radius:50%;object-fit:cover;margin:0 auto 20px;display:none;border:5px solid #22C55E;box-shadow:0 8px 24px rgba(34,197,94,.3)}
+
+/* QR Container */
+.qr-container{display:flex;flex-direction:column;align-items:center;gap:16px;padding:16px 0}
+.qr-container canvas,.qr-container img{width:160px;max-width:70vw;height:auto;aspect-ratio:1;border-radius:16px;background:#fff;padding:10px;box-shadow:0 8px 24px rgba(0,0,0,.12),inset 0 0 0 1px rgba(0,0,0,.04)}
+.qr-badge{display:inline-flex;align-items:center;gap:6px;background:#22C55E;color:#fff;padding:6px 14px;border-radius:100px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+
+/* PIN Inputs */
+.pin-inputs{display:flex;gap:8px;justify-content:center;margin:24px 0;flex-wrap:nowrap;width:100%;max-width:360px;margin-left:auto;margin-right:auto}
+.pin-inputs input{flex:1;aspect-ratio:1;max-width:48px;height:auto;min-height:48px;border:2px solid #E5E7EB;border-radius:14px;text-align:center;font-size:22px;font-family:'Manrope';font-weight:800;outline:none;transition:all .2s;background:#FAFAFA;color:#0F5A36}
+.pin-inputs input:focus{border-color:#0F5A36;background:#fff;box-shadow:0 0 0 4px rgba(15,90,54,.12)}
+.pin-inputs input:hover{border-color:#0F5A3650}
+
+/* Form Groups */
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:12px;font-weight:700;color:#636366;margin-bottom:10px;text-transform:uppercase;letter-spacing:.3px}
+.form-group input{width:100%;padding:14px;border:1.5px solid #E5E7EB;border-radius:12px;font-size:16px;outline:none;transition:all .2s;background:#FAFAFA;font-family:'Inter';color:#1C1C1E;min-height:48px;}
+.form-group input::placeholder{color:#B8BCC4}
+.form-group input:focus{border-color:#0F5A36;background:#fff;box-shadow:0 0 0 4px rgba(15,90,54,.1)}
+.form-group input:hover{border-color:#0F5A3650}
+
+/* Actions */
+.actions{padding:12px 16px calc(12px + env(safe-area-inset-bottom,16px));background:#fff;border-top:1px solid #F2F2F7;display:flex;flex-direction:column;gap:10px;flex-shrink:0;box-shadow:0 -4px 12px rgba(0,0,0,.04);width:100%}
+.actions-row{display:flex;gap:8px}
+.actions-row .btn{flex:1}
+
+/* Buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;border:none;padding:14px 18px;border-radius:14px;font-family:'Inter';font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;letter-spacing:-.2px;min-height:48px;width:100%;}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:#0F5A36;color:#fff;box-shadow:0 8px 24px rgba(15,90,54,.35);border:1px solid #0F5A36}
+.btn-primary:hover{background:#0B4A2B;box-shadow:0 12px 28px rgba(15,90,54,.4)}
+.btn-secondary{background:#F2F2F7;color:#1C1C1E;border:1px solid #E5E7EB;min-height:48px;padding:16px 24px;}
+.btn-secondary:hover{background:#E5E7EB}
+.btn-ghost{background:transparent;color:#636366;font-weight:600;border:1px solid #E5E7EB;border-radius:12px;padding:14px 20px;font-size:13px;min-height:44px;width:auto;}
+.btn-ghost:hover{background:#F2F2F7}
+.btn-success{background:#22C55E;color:#fff;box-shadow:0 8px 24px rgba(34,197,94,.35);border:1px solid #22C55E}
+.btn-success:hover{background:#16A34A;box-shadow:0 12px 28px rgba(34,197,94,.4)}
+.btn-skip{background:transparent;color:#8E8E93;font-weight:500;font-size:13px;padding:12px 16px;border:none;min-height:44px;width:auto;}
+.btn-skip:hover{color:#0F5A36}
+
+/* Finish Screen */
+.finish-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;text-align:center;padding:24px 20px;background:linear-gradient(180deg,#fff 0%,#F5F7F8 100%);overflow-y:auto}
+.finish-screen .check-big{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#EAF7EE,#F0FDF4);display:flex;align-items:center;justify-content:center;margin-bottom:24px;box-shadow:0 8px 32px rgba(34,197,94,.2);flex-shrink:0}
+.finish-screen .check-big svg{width:40px;height:40px;stroke:#22C55E;stroke-width:2}
+.finish-screen h1{font-family:'Manrope';font-weight:800;font-size:26px;color:#1C1C1E;margin-bottom:6px;letter-spacing:-.3px;overflow-wrap:break-word}
+.finish-screen p.sub{font-size:14px;color:#636366;margin-bottom:24px;line-height:1.5;font-weight:500}
+.finish-checklist{width:100%;max-width:300px;margin-bottom:32px;background:#fff;border-radius:16px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.finish-checklist-item{display:flex;align-items:center;gap:14px;padding:12px 0;font-size:14px;color:#1C1C1E;border-bottom:1px solid #F2F2F7;font-weight:500}
+.finish-checklist-item:last-child{border-bottom:none}
+.finish-checklist-item svg{width:22px;height:22px;stroke:#22C55E;stroke-width:2.5;flex-shrink:0}
+
+/* Utilities */
+.hidden{display:none!important}
+.error-text{color:#DC2626;font-size:12px;font-weight:600;margin-top:6px;display:none;text-align:center;letter-spacing:-.2px}
+
+/* Toggle Switches */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #F2F2F7;gap:8px}
+.toggle-row:last-child{border-bottom:none}
+.toggle-row-info{text-align:left;flex:1;min-width:0;overflow-wrap:break-word}
+.toggle-row-info strong{font-size:14px;font-weight:600;color:#1C1C1E;display:block;margin-bottom:2px}
+.toggle-row-info span{font-size:12px;color:#8E8E93;font-weight:400}
+.toggle{position:relative;width:48px;height:28px;background:#E5E7EB;border-radius:14px;cursor:pointer;transition:background .3s;border:none;flex-shrink:0;box-shadow:inset 0 2px 4px rgba(0,0,0,.06)}
+.toggle.on{background:#22C55E}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .3s;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+.toggle.on::after{transform:translateX(20px)}
+
+/* Member Card */
+.member-card{background:linear-gradient(135deg,#0F5A36 0%,#0A3D20 100%);border-radius:16px;padding:16px;color:#fff;display:flex;flex-direction:column;gap:12px;margin-bottom:8px;box-shadow:0 8px 24px rgba(15,90,54,.2)}
+.member-card-row{display:flex;align-items:center;gap:16px}
+.member-card-avatar{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;border:2px solid rgba(255,255,255,.2)}
+.member-card-info h3{font-size:16px;font-weight:700;margin-bottom:2px}
+.member-card-info p{font-size:12px;opacity:.8;font-weight:400}
+.member-card-badge{background:#22C55E;color:#0F5A36;padding:6px 14px;border-radius:100px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;gap:5px;align-self:flex-start;text-transform:uppercase;letter-spacing:.3px;box-shadow:0 4px 12px rgba(34,197,94,.3)}
+
+/* Presentation Mode */
+.presentation-container{display:none;height:100vh;background:#1a1a2e;padding:32px;overflow:hidden;flex-direction:column}
+.presentation-container.active{display:flex}
+.presentation-header{text-align:center;margin-bottom:24px}
+.presentation-header h1{font-family:'Manrope';font-size:32px;font-weight:800;color:#fff;margin-bottom:8px}
+.presentation-header p{color:#999;font-size:14px}
+.presentation-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px;flex:1;overflow-y:auto;align-content:start}
+.presentation-screen{background:#f5f7f8;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);display:flex;flex-direction:column;height:600px;border:2px solid #0F5A36}
+.presentation-screen-label{background:#0F5A36;color:#fff;padding:12px;font-size:12px;font-weight:700;text-align:center;text-transform:uppercase;letter-spacing:.3px}
+.presentation-screen-content{flex:1;overflow-y:auto;font-size:11px}
+.presentation-screen-content .card{margin:8px;font-size:11px}
+.presentation-screen-content .card p{font-size:11px}
+
+@media (max-width: 480px) {
+  body{font-size:14px}
+  .splash-header{padding:16px}
+  .splash-logo{width:140px;height:140px;max-width:40vw;max-height:40vw;margin-bottom:24px;border-radius:50%}
+  .splash-title{font-size:24px}
+  .splash-sub{font-size:13px;margin-bottom:20px}
+  .splash-desc{font-size:12px;max-width:none;padding:0 4px}
+  .splash-version{margin-top:24px}
+  .header{padding:max(32px,env(safe-area-inset-top,0)+12px) 16px 24px}
+  .header h1{font-size:18px}
+  .header p{font-size:12px}
+  .card{padding:16px 12px;border-radius:14px}
+  .card h2{font-size:16px}
+  .card p.sub{font-size:12px}
+  .content{padding:10px 12px 12px;gap:10px}
+  .welcome-hero{padding:22px 14px}
+  .welcome-hero svg{width:60px;height:60px}
+  .welcome-hero h1{font-size:20px}
+  .welcome-hero p{font-size:12px}
+  .step-badge{font-size:10px;padding:5px 12px}
+  .upload-area{padding:20px 12px}
+  .upload-area svg{width:36px;height:36px}
+  .upload-area p{font-size:14px}
+  .upload-area span{font-size:11px}
+  .upload-preview{width:110px;height:110px}
+  .qr-container{gap:12px;padding:12px 0}
+  .qr-container canvas,.qr-container img{width:140px;max-width:65vw}
+  .pin-inputs{gap:6px;max-width:300px}
+  .pin-inputs input{font-size:18px;min-height:42px}
+  .form-group input{padding:12px;font-size:15px;min-height:44px}
+  .actions{padding:10px 12px calc(10px + env(safe-area-inset-bottom,12px));gap:8px}
+  .actions-row{gap:6px}
+  .btn{padding:12px 14px;font-size:13px;min-height:44px;border-radius:12px}
+  .member-card{padding:12px;gap:8px}
+  .member-card-avatar{width:44px;height:44px;font-size:16px}
+  .member-card-info h3{font-size:14px}
+  .member-card-info p{font-size:11px}
+  .member-card-badge{font-size:10px;padding:4px 10px}
+  .finish-screen{padding:20px 16px}
+  .finish-screen h1{font-size:22px}
+  .finish-screen p.sub{font-size:13px}
+  .finish-checklist{max-width:none;padding:14px}
+  .finish-checklist-item{padding:10px 0;font-size:13px}
+  .toggle-row{padding:10px 0}
+  .toggle-row-info strong{font-size:13px}
+  .toggle-row-info span{font-size:11px}
+  .toggle{width:42px;height:24px}
+  .toggle::after{width:18px;height:18px}
+  .toggle.on::after{transform:translateX(18px)}
+  .member-card-row{gap:12px}
+  #qrPreview{width:180px;height:180px}
+}
+</style>
+</head>
+<body data-member-id="{{ member_id }}" data-csrf="{{ csrf_token }}" data-member-full-name="{{ full_name|escapejs }}" data-member-type="{{ member_type|escapejs }}" data-member-position="{{ position|escapejs }}" data-member-department="{{ department|escapejs }}" data-has-pin="{{ has_pin|yesno:'true,false' }}">
+
+<!-- SCREEN 0: SPLASH -->
+<div id="screen-splash" class="screen active">
+  <div class="splash-header">
+    <div class="splash-logo">
+      <img src="{% static 'img/isu_caufa_official.png' %}" alt="ISU CAUFA Official Logo" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+    </div>
+    <div class="splash-title">ISU CAUFA</div>
+    <div class="splash-sub">Faculty Association<br>Member Portal</div>
+    <div class="splash-desc">Welcome to the official ISU CAUFA Member Portal. Complete your profile to unlock all faculty association services.</div>
+    <button class="btn btn-primary" onclick="goToStep(1)" style="padding:16px 32px;border-radius:14px;font-size:15px;min-width:200px;width:auto;max-width:90vw">GET STARTED</button>
+    <!--<div class="splash-version">Version 1.0</div>-->
+  </div>
+</div>
+
+<!-- SCREEN 1: WELCOME -->
+<div id="screen-welcome" class="screen">
+  <div class="header" style="padding:52px 24px 32px">
+    <h1 style="font-family:'Manrope';font-weight:800;font-size:22px;color:#fff;margin-bottom:4px">Welcome!</h1>
+    <p style="font-size:13px;color:rgba(255,255,255,.65);line-height:1.4">Let's complete your profile setup</p>
+  </div>
+  <div class="progress-bar">
+    <span class="progress-dot active"></span>
+    <span class="progress-dot"></span>
+    <span class="progress-dot"></span>
+    <span class="progress-dot"></span>
+    <span class="progress-dot"></span>
+  </div>
+  <div class="content" style="justify-content:flex-start">
+    <div class="welcome-hero">
+      <svg viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="50" cy="32" r="14"/>
+        <path d="M28 85c0-12.2 9.8-22 22-22s22 9.8 22 22"/>
+        <path d="M62 20c6 3.5 10 10.5 10 18s-4 14.5-10 18" stroke-width=".8"/>
+        <path d="M38 20c-6 3.5-10 10.5-10 18s4 14.5 10 18" stroke-width=".8"/>
+      </svg>
+      <h1>Welcome!</h1>
+      <p>Congratulations! Your membership has been approved. Complete your profile before using the application.</p>
+    </div>
+    <div class="card">
+      <div class="step-badge">Step 1 of 5</div>
+      <h2>You'll complete:</h2>
+      <ul>
+        <li><svg class="check-circle" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Upload Profile Picture</li>
+        <li><svg class="check-circle" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Digital Member QR</li>
+        <li><svg class="check-circle" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Security PIN</li>
+        <li><svg class="check-circle" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Contact Information</li>
+      </ul>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-primary" onclick="goToStep(2)">Continue</button>
+  </div>
+</div>
+
+<!-- SCREEN 2: PROFILE PHOTO -->
+<div id="screen-photo" class="screen">
+  <div class="header" style="padding:52px 24px 32px">
+    <h1 style="font-family:'Manrope';font-weight:800;font-size:20px;color:#fff;margin-bottom:4px;overflow-wrap:break-word">Profile Picture</h1>
+    <p style="font-size:13px;color:rgba(255,255,255,.65)">Upload a clear photo</p>
+  </div>
+  <div class="progress-bar">
+    <span class="progress-dot done"></span>
+    <span class="progress-dot active"></span>
+    <span class="progress-dot"></span>
+    <span class="progress-dot"></span>
+    <span class="progress-dot"></span>
+  </div>
+  <div class="content">
+    <div class="card" style="text-align:center">
+      <div class="step-badge" style="margin:0 auto 16px">Step 2 of 5</div>
+      <img id="profilePreview" class="upload-preview" alt="Preview">
+      <div id="uploadArea" class="upload-area" onclick="document.getElementById('fileInput').click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        <p>Tap to upload photo</p>
+        <span>JPG, PNG • Max 5MB</span>
+      </div>
+      <input id="fileInput" type="file" accept="image/*" class="hidden" onchange="previewFile(event)">
+      <p id="photoError" class="error-text"></p>
+    </div>
+  </div>
+  <div class="actions">
+    <div class="actions-row">
+      <button class="btn btn-secondary" onclick="goToStep(1)">Back</button>
+      <button class="btn btn-primary" id="photoContinue" onclick="continuePhoto()">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3: DIGITAL QR -->
+<div id="screen-qr" class="screen">
+  <div class="header" style="padding:52px 24px 32px">
+    <h1 style="font-family:'Manrope';font-weight:800;font-size:20px;color:#fff;margin-bottom:4px;overflow-wrap:break-word">Digital Member QR</h1>
+    <p style="font-size:13px;color:rgba(255,255,255,.65)">Your unique member ID</p>
+  </div>
+  <div class="progress-bar">
+    <span class="progress-dot done"></span>
+    <span class="progress-dot done"></span>
+    <span class="progress-dot active"></span>
+    <span class="progress-dot"></span>
+    <span class="progress-dot"></span>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="step-badge">Step 3 of 5</div>
+      <div class="member-card">
+        <div class="member-card-badge">MEMBER</div>
+        <div class="member-card-info">
+          <h3 id="qrMemberName">Member Name</h3>
+          <p id="qrMemberInfo">Faculty ID • Department</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card" style="text-align:center">
+      <div id="qrDisplayArea" style="display:none;padding:20px 0">
+        <img id="qrPreview" alt="QR Code" style="width:220px;height:220px;border-radius:18px;box-shadow:0 8px 32px rgba(0,0,0,.15);margin:0 auto;display:block">
+        <button onclick="resetQrUpload()" class="btn btn-ghost" style="margin-top:14px">Change QR Code</button>
+      </div>
+      
+      <div id="uploadQrArea" class="upload-area" onclick="document.getElementById('qrFileInput').click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="M21 15l-5-5L5 21"/>
+        </svg>
+        <p>Tap to upload QR Code</p>
+        <span>JPG, PNG • Max 5MB</span>
+      </div>
+      <input id="qrFileInput" type="file" accept="image/*" class="hidden" onchange="previewQrFile(event)">
+      <p id="qrError" class="error-text"></p>
+      <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:12px;margin-top:12px;text-align:left;">
+        <p style="font-size:12px;font-weight:700;color:#9A3412;margin:0 0 4px;">Important</p>
+        <p style="font-size:11px;color:#C2410C;margin:0;line-height:1.5">Upload a softcopy of your own QR code. Do not share or use another member's QR code — this ensures accurate attendance scanning and avoids check-in conflicts.</p>
+      </div>
+    </div>
+  </div>
+  <div class="actions">
+    <div class="actions-row">
+      <button class="btn btn-secondary" onclick="goToStep(2)">Back</button>
+      <button class="btn btn-primary" onclick="continueQr()">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 4: SECURITY PIN -->
+<div id="screen-pin" class="screen">
+  <div class="header" style="padding:52px 24px 32px">
+    <h1 id="pinTitle" style="font-family:'Manrope';font-weight:800;font-size:20px;color:#fff;margin-bottom:4px;overflow-wrap:break-word">Create Security PIN</h1>
+    <p id="pinSubtitle" style="font-size:13px;color:rgba(255,255,255,.65)">Set a 6-digit PIN for faster login</p>
+  </div>
+  <div class="progress-bar">
+    <span class="progress-dot done"></span>
+    <span class="progress-dot done"></span>
+    <span class="progress-dot done"></span>
+    <span class="progress-dot active"></span>
+    <span class="progress-dot"></span>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="step-badge">Step 4 of 5</div>
+      <div id="currentPinGroup" class="form-group hidden">
+        <label>Current PIN</label>
+        <div class="pin-inputs">
+          <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" class="pin-box" data-group="current" data-idx="0" oninput="pinInput(this,0)">
+          <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" class="pin-box" data-group="current" data-idx="1" oninput="pinInput(this,1)">
+          <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" class="pin-box" data-group="current" data-idx="2" oninput="pinInput(this,2)">
+          <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" class="pin-box" data-group="current" data-idx="3" oninput="pinInput(this,3)">
+          <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" class="pin-box" data-group="current" data-idx="4" oninput="pinInput(this,4)">
+          <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" class="pin-box" data-group="current" data-idx="5" oninput="pinInput(this,5)">
+        </div>
+      </div>
+      <div class="form-group">
+        <label id="newPinLabel">New PIN</label>
+        <div class="pin-inputs">
+          <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" class="pin-box" data-group="new" data-idx="0" oninput="pinInput(this,0)">
+          <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" class="pin-box" data-group="new" data-idx="1" oninput="pinInput(this,1)">
+          <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" class="pin-box" data-group="new" data-idx="2" oninput="pinInput(this,2)">
+          <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" class="pin-box" data-group="new" data-idx="3" oninput="pinInput(this,3)">
+          <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" class="pin-box" data-group="new" data-idx="4" oninput="pinInput(this,4)">
+          <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" class="pin-box" data-group="new" data-idx="5" oninput="pinInput(this,5)">
+        </div>
+      </div>
+      <p id="pinError" class="error-text"></p>
+      <p id="pinHelpText" style="font-size:12px;color:#8E8E93;text-align:center;margin-bottom:16px">Create a secure 6-digit PIN for faster login.</p>
+      <div style="background:#FAFAFA;border-radius:14px;padding:16px">
+        <p style="font-size:12px;font-weight:700;color:#636366;margin-bottom:8px">Your PIN is used for:</p>
+        <ul style="list-style:none;padding:0">
+          <li style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;color:#1C1C1E;border:none"><svg width="16" height="16" viewBox="0 0 24 24" style="stroke:#22C55E;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg> Quick Login</li>
+          <li style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;color:#1C1C1E;border:none"><svg width="16" height="16" viewBox="0 0 24 24" style="stroke:#22C55E;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg> Attendance Verification</li>
+          <li style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;color:#1C1C1E;border:none"><svg width="16" height="16" viewBox="0 0 24 24" style="stroke:#22C55E;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg> Secure Transactions</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="actions">
+    <div class="actions-row">
+      <button class="btn btn-secondary" onclick="goToStep(3)">Back</button>
+      <button class="btn btn-primary" onclick="continuePin()">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 5: CONTACT INFO -->
+<div id="screen-contact" class="screen">
+  <div class="header" style="padding:52px 24px 32px">
+    <h1 style="font-family:'Manrope';font-weight:800;font-size:20px;color:#fff;margin-bottom:4px;overflow-wrap:break-word">Contact Information</h1>
+    <p style="font-size:13px;color:rgba(255,255,255,.65)">Emergency contact details</p>
+  </div>
+  <div class="progress-bar">
+    <span class="progress-dot done"></span>
+    <span class="progress-dot done"></span>
+    <span class="progress-dot done"></span>
+    <span class="progress-dot done"></span>
+    <span class="progress-dot active"></span>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="step-badge">Step 5 of 5</div>
+      <div class="form-group">
+        <label>Mobile Number</label>
+        <input type="tel" id="contactNumber" placeholder="09XX XXX XXXX" maxlength="11">
+      </div>
+      <div class="form-group">
+        <label>Emergency Contact Name</label>
+        <input type="text" id="emergencyContact" placeholder="Full name">
+      </div>
+      <div class="form-group">
+        <label>Emergency Contact Number</label>
+        <input type="tel" id="emergencyNumber" placeholder="09XX XXX XXXX" maxlength="11">
+      </div>
+    </div>
+  </div>
+  <div class="actions">
+    <div class="actions-row">
+      <button class="btn btn-secondary" onclick="goToStep(4)">Back</button>
+      <button class="btn btn-success" onclick="finishSetup()">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 6: COMPLETE -->
+<div id="screen-complete" class="screen">
+  <div class="finish-screen">
+    <div class="check-big"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <h1>You're All Set!</h1>
+    <p class="sub">Your profile has been successfully completed.</p>
+    <div class="finish-checklist">
+      <div class="finish-checklist-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Profile Picture Uploaded</div>
+      <div class="finish-checklist-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> QR Code Activated</div>
+      <div class="finish-checklist-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> PIN Created</div>
+      <div class="finish-checklist-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Contact Information Saved</div>
+    </div>
+    <button class="btn btn-success" onclick="goToDashboard()" style="padding:16px 32px;font-size:15px;min-width:200px;width:auto;max-width:90vw">GO TO DASHBOARD</button>
+  </div>
+</div>
+
+<script>
+var currentStep = 0;
+var bodyDataset = document.body.dataset;
+var memberId = Number(bodyDataset.memberId) || null;
+var csrf = bodyDataset.csrf || '';
+var memberFullName = bodyDataset.memberFullName || '';
+var memberType = bodyDataset.memberType || '';
+var memberPosition = bodyDataset.memberPosition || '';
+var memberDepartment = bodyDataset.memberDepartment || '';
+var hasPin = bodyDataset.hasPin === 'true';
+var screenNames = ['screen-splash','screen-welcome','screen-photo','screen-qr','screen-pin','screen-contact','screen-complete'];
+var pendingPhotoFile = null;
+var pendingQrFile = null;
+var pendingQrData = null;
+
+function decodeQrClientSide(file) {
+  return new Promise(function(resolve) {
+    if (typeof Html5Qrcode === 'function') {
+      var qrEl = document.getElementById('client-qr-decode');
+      if (!qrEl) {
+        qrEl = document.createElement('div');
+        qrEl.id = 'client-qr-decode';
+        qrEl.style.display = 'none';
+        document.body.appendChild(qrEl);
+      }
+      try {
+        var scanner = new Html5Qrcode('client-qr-decode');
+        scanner.scanFileV2(file, false).then(function(result) {
+          try { scanner.clear(); } catch (e) {}
+          resolve(result && result.decodedText ? String(result.decodedText).trim() : '');
+        }).catch(function() {
+          try { scanner.clear(); } catch (e) {}
+          resolveWithJsQR(file, resolve);
+        });
+        return;
+      } catch (e) {
+        resolveWithJsQR(file, resolve);
+        return;
+      }
+    }
+    resolveWithJsQR(file, resolve);
+  });
+}
+function resolveWithJsQR(file, resolve) {
+  if (typeof jsQR !== 'function') { resolve(''); return; }
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      var img = new Image();
+      img.onload = function() {
+        try {
+          var scale = Math.min(1, 640 / img.width);
+          var canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(img.width * scale));
+          canvas.height = Math.max(1, Math.round(img.height * scale));
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          var id = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          var code = jsQR(id.data, id.width, id.height, { inversionAttempts: 'attemptBoth' });
+          resolve(code ? (code.data || '').trim() : '');
+        } catch (err) { resolve(''); }
+      };
+      img.onerror = function() { resolve(''); };
+      img.src = ev.target.result;
+    } catch (err) { resolve(''); }
+  };
+  reader.onerror = function() { resolve(''); };
+  reader.readAsDataURL(file);
+}
+var pendingPin = '';
+var pendingCurrentPin = '';
+
+function saveProgress() {
+  if (currentStep < 6) {
+    sessionStorage.setItem('onboardingStep', currentStep);
+    
+    // Only save data that can be restored (text data, not File objects or binary data)
+    if (pendingPin) {
+      sessionStorage.setItem('pendingPin', pendingPin);
+    }
+    if (pendingCurrentPin) {
+      sessionStorage.setItem('pendingCurrentPin', pendingCurrentPin);
+    }
+    
+    // Save contact info only if on contact screen (step 5)
+    if (currentStep === 5) {
+      var contactNum = document.getElementById('contactNumber');
+      var emergencyContact = document.getElementById('emergencyContact');
+      var emergencyNum = document.getElementById('emergencyNumber');
+      if (contactNum) sessionStorage.setItem('contactNumber', contactNum.value);
+      if (emergencyContact) sessionStorage.setItem('emergencyContact', emergencyContact.value);
+      if (emergencyNum) sessionStorage.setItem('emergencyNumber', emergencyNum.value);
+    }
+  }
+}
+
+function restoreProgress() {
+  var saved = sessionStorage.getItem('onboardingStep');
+  if (saved && parseInt(saved) > 0 && parseInt(saved) < 6) {
+    currentStep = parseInt(saved);
+    
+    // Clear any stale previews from sessionStorage (File objects are lost on refresh)
+    sessionStorage.removeItem('pendingPhotoData');
+    sessionStorage.removeItem('pendingQrData');
+    
+    // Reset preview displays to force re-upload
+    var photoPreview = document.getElementById('profilePreview');
+    if (photoPreview) {
+      photoPreview.src = '';
+      photoPreview.style.display = 'none';
+      document.querySelector('#uploadArea p').textContent = 'Upload photo';
+      document.querySelector('#uploadArea svg').style.opacity = '1';
+    }
+    var qrPreview = document.getElementById('qrPreview');
+    if (qrPreview) {
+      qrPreview.src = '';
+      document.getElementById('qrDisplayArea').style.display = 'none';
+      document.getElementById('uploadQrArea').style.display = 'block';
+    }
+    
+    // Restore PIN data
+    var savedPin = sessionStorage.getItem('pendingPin');
+    if (savedPin) {
+      pendingPin = savedPin;
+    }
+    var savedCurrentPin = sessionStorage.getItem('pendingCurrentPin');
+    if (savedCurrentPin) {
+      pendingCurrentPin = savedCurrentPin;
+    }
+    
+    // Restore contact info only if we were on step 5
+    if (currentStep === 5) {
+      var savedContact = sessionStorage.getItem('contactNumber');
+      var contactNumEl = document.getElementById('contactNumber');
+      if (savedContact && contactNumEl) contactNumEl.value = savedContact;
+      
+      var savedEmergency = sessionStorage.getItem('emergencyContact');
+      var emergencyContactEl = document.getElementById('emergencyContact');
+      if (savedEmergency && emergencyContactEl) emergencyContactEl.value = savedEmergency;
+      
+      var savedEmergencyNum = sessionStorage.getItem('emergencyNumber');
+      var emergencyNumEl = document.getElementById('emergencyNumber');
+      if (savedEmergencyNum && emergencyNumEl) emergencyNumEl.value = savedEmergencyNum;
+    }
+    
+    goToStep(currentStep);
+  }
+}
+
+function initializeMemberInfo() {
+  document.getElementById('qrMemberName').textContent = memberFullName || 'Member';
+  document.getElementById('qrMemberInfo').textContent = (memberPosition ? memberPosition + ' • ' : '') + (memberDepartment || 'Department');
+  var badge = document.querySelector('.member-card-badge');
+  badge.textContent = (memberType || 'MEMBER').toUpperCase();
+}
+
+function showPinScreenState() {
+  var currentPinGroup = document.getElementById('currentPinGroup');
+  var pinTitle = document.getElementById('pinTitle');
+  var pinSubtitle = document.getElementById('pinSubtitle');
+  var pinHelpText = document.getElementById('pinHelpText');
+  if (!currentPinGroup || !pinTitle || !pinSubtitle || !pinHelpText) return;
+  if (hasPin) {
+    currentPinGroup.classList.remove('hidden');
+    pinTitle.textContent = 'Change Security PIN';
+    pinSubtitle.textContent = 'Enter your current PIN then choose a new 6-digit PIN.';
+    pinHelpText.textContent = 'Provide your current PIN to verify your identity before changing it.';
+  } else {
+    currentPinGroup.classList.add('hidden');
+    pinTitle.textContent = 'Create Security PIN';
+    pinSubtitle.textContent = 'Set a 6-digit PIN for faster login';
+    pinHelpText.textContent = 'Create a secure 6-digit PIN for faster login.';
+  }
+}
+
+window.addEventListener('load', function() {
+  initializeMemberInfo();
+  showPinScreenState();
+  restoreProgress();
+});
+
+function goToStep(n) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  var id = screenNames[n] || screenNames[6];
+  document.getElementById(id).classList.add('active');
+  currentStep = n;
+  saveProgress();
+  if (n === 4) showPinScreenState();
+  window.scrollTo(0, 0);
+}
+
+function previewFile(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    var err = document.getElementById('photoError');
+    err.textContent = 'File too large. Max 5MB.';
+    err.style.display = 'block';
+    return;
+  }
+  document.getElementById('photoError').style.display = 'none';
+  pendingPhotoFile = file;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var preview = document.getElementById('profilePreview');
+    preview.src = ev.target.result;
+    preview.style.display = 'block';
+    document.querySelector('#uploadArea p').textContent = 'Change photo';
+    document.querySelector('#uploadArea svg').style.opacity = '0.3';
+  };
+  reader.readAsDataURL(file);
+}
+
+function continuePhoto() {
+  var photoPreview = document.getElementById('profilePreview');
+  
+  // Only accept actual File object - previews from refresh don't count
+  if (!pendingPhotoFile) {
+    var err = document.getElementById('photoError');
+    if (photoPreview && photoPreview.src && photoPreview.style.display !== 'none') {
+      // Preview exists but no file (refresh scenario) - clear it
+      err.textContent = 'Due to page refresh, please re-upload your profile picture.';
+      photoPreview.src = '';
+      photoPreview.style.display = 'none';
+      document.querySelector('#uploadArea p').textContent = 'Upload photo';
+      document.querySelector('#uploadArea svg').style.opacity = '1';
+      // Clear sessionStorage to prevent stale preview
+      sessionStorage.removeItem('pendingPhotoData');
+    } else {
+      err.textContent = 'Profile picture is required. Please upload a photo.';
+    }
+    err.style.display = 'block';
+    return;
+  }
+  
+  document.getElementById('photoError').style.display = 'none';
+  goToStep(3);
+}
+
+function skipPhoto() { goToStep(3); }
+
+function previewQrFile(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    var err = document.getElementById('qrError');
+    err.textContent = 'File too large. Max 5MB.';
+    err.style.display = 'block';
+    return;
+  }
+  document.getElementById('qrError').style.display = 'none';
+  pendingQrFile = file;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var preview = document.getElementById('qrPreview');
+    preview.src = ev.target.result;
+    document.getElementById('qrDisplayArea').style.display = 'block';
+    document.getElementById('uploadQrArea').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetQrUpload() {
+  document.getElementById('qrDisplayArea').style.display = 'none';
+  document.getElementById('uploadQrArea').style.display = 'block';
+  document.getElementById('qrFileInput').value = '';
+  document.getElementById('qrPreview').src = '';
+  document.getElementById('qrError').style.display = 'none';
+}
+
+function continueQr() {
+  var qrPreview = document.getElementById('qrPreview');
+  
+  // Only accept actual File object - previews from refresh don't count
+  if (!pendingQrFile) {
+    var err = document.getElementById('qrError');
+    if (qrPreview && qrPreview.src && document.getElementById('qrDisplayArea').style.display !== 'none') {
+      // Preview exists but no file (refresh scenario) - clear it
+      err.textContent = 'Due to page refresh, please re-upload your QR code.';
+      document.getElementById('qrDisplayArea').style.display = 'none';
+      document.getElementById('uploadQrArea').style.display = 'block';
+      qrPreview.src = '';
+      // Clear sessionStorage to prevent stale preview
+      sessionStorage.removeItem('pendingQrData');
+    } else {
+      err.textContent = 'QR code is required. Please upload your QR code image.';
+    }
+    err.style.display = 'block';
+    return;
+  }
+  
+  document.getElementById('qrError').style.display = 'none';
+  var btn = document.querySelector('#screen-qr .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Checking...'; }
+  decodeQrClientSide(pendingQrFile).then(function(decoded) {
+    if (decoded) pendingQrData = decoded;
+    var fd = new FormData();
+    fd.append('qr_code', pendingQrFile);
+    if (pendingQrData) fd.append('qr_data', pendingQrData);
+    fetch('/api/member/onboarding/qr/check/', {
+      method:'POST',
+      credentials:'same-origin',
+      headers:{'X-CSRFToken':csrf},
+      body:fd
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (btn) { btn.disabled = false; btn.textContent = 'Continue'; }
+        if (d && d.ok) {
+          goToStep(4);
+        } else {
+          var err = document.getElementById('qrError');
+          err.textContent = (d && d.error) ? d.error : 'QR code validation failed. Please try a different image.';
+          err.style.display = 'block';
+        }
+      })
+      .catch(function() {
+        if (btn) { btn.disabled = false; btn.textContent = 'Continue'; }
+        var err = document.getElementById('qrError');
+        err.textContent = 'Could not validate the QR code. Please check your connection and try again.';
+        err.style.display = 'block';
+      });
+  });
+}
+
+function pinInput(el, idx) {
+  el.value = el.value.replace(/[^0-9]/g, '');
+  document.getElementById('pinError').style.display = 'none';
+  if (el.value && idx < 5) {
+    const group = el.dataset.group || 'new';
+    const next = document.querySelector('.pin-box[data-group="' + group + '"][data-idx="' + (idx + 1) + '"]');
+    if (next) next.focus();
+  }
+}
+
+function handlePinKeydown(el, event) {
+  var group = el.dataset.group || 'new';
+  var idx = parseInt(el.dataset.idx, 10) || 0;
+  if (event.key === 'Backspace') {
+    if (!el.value && idx > 0) {
+      event.preventDefault();
+      var prev = document.querySelector('.pin-box[data-group="' + group + '"][data-idx="' + (idx - 1) + '"]');
+      if (prev) { prev.focus(); prev.value = ''; }
+    }
+  } else if (event.key === 'ArrowLeft') {
+    event.preventDefault();
+    if (idx > 0) {
+      var prev = document.querySelector('.pin-box[data-group="' + group + '"][data-idx="' + (idx - 1) + '"]');
+      if (prev) { prev.focus(); prev.select && prev.select(); }
+    }
+  } else if (event.key === 'ArrowRight') {
+    event.preventDefault();
+    if (idx < 5) {
+      var next = document.querySelector('.pin-box[data-group="' + group + '"][data-idx="' + (idx + 1) + '"]');
+      if (next) { next.focus(); next.select && next.select(); }
+    }
+  }
+}
+
+function handlePinPaste(el, event) {
+  event.preventDefault();
+  var text = (event.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+  if (!text) return;
+  var group = el.dataset.group || 'new';
+  var boxes = document.querySelectorAll('.pin-box[data-group="' + group + '"]');
+  var startIdx = parseInt(el.dataset.idx, 10) || 0;
+  for (var i = 0; i < boxes.length; i++) {
+    var c = (i >= startIdx) ? text[i - startIdx] : '';
+    boxes[i].value = (typeof c === 'string' && c) ? c : '';
+  }
+  var focusIdx = Math.min(startIdx + text.length, boxes.length) - 1;
+  if (focusIdx < 0) focusIdx = 0;
+  boxes[focusIdx].focus();
+  boxes[focusIdx].select && boxes[focusIdx].select();
+  document.getElementById('pinError').style.display = 'none';
+}
+
+document.querySelectorAll('.pin-box').forEach(function(box) {
+  box.addEventListener('keydown', function(ev) { handlePinKeydown(box, ev); });
+  box.addEventListener('paste', function(ev) { handlePinPaste(box, ev); });
+  box.addEventListener('click', function() { box.select && box.select(); });
+});
+
+function collectPin(group) {
+  var pins = [];
+  document.querySelectorAll('.pin-box[data-group="'+group+'"]').forEach(function(el) { pins.push(el.value); });
+  return pins.join('');
+}
+
+function continuePin() {
+  var newPin = collectPin('new');
+  if (newPin.length !== 6) {
+    var err = document.getElementById('pinError');
+    err.textContent = 'Please enter a complete new 6-digit PIN.';
+    err.style.display = 'block';
+    return;
+  }
+  var currentPin = '';
+  if (hasPin) {
+    currentPin = collectPin('current');
+    if (currentPin.length !== 6) {
+      var err = document.getElementById('pinError');
+      err.textContent = 'Please enter your current 6-digit PIN.';
+      err.style.display = 'block';
+      return;
+    }
+  }
+  var btn = document.querySelector('#screen-pin .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Checking...'; }
+  var payload = { pin: newPin };
+  if (currentPin) payload.current_pin = currentPin;
+  fetch('/api/member/onboarding/pin/check/', {
+    method:'POST',
+    credentials:'same-origin',
+    headers:{'Content-Type':'application/json','X-CSRFToken':csrf},
+    body:JSON.stringify(payload)
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Continue'; }
+      if (d && d.ok) {
+        pendingPin = newPin;
+        pendingCurrentPin = currentPin;
+        // Save PIN data to sessionStorage for persistence
+        sessionStorage.setItem('pendingPin', newPin);
+        if (currentPin) {
+          sessionStorage.setItem('pendingCurrentPin', currentPin);
+        }
+        goToStep(5);
+      } else {
+        var err = document.getElementById('pinError');
+        err.textContent = (d && d.error) ? d.error : 'PIN validation failed. Please try again.';
+        err.style.display = 'block';
+      }
+    })
+    .catch(function() {
+      if (btn) { btn.disabled = false; btn.textContent = 'Continue'; }
+      var err = document.getElementById('pinError');
+      err.textContent = 'Could not validate the PIN. Please check your connection and try again.';
+      err.style.display = 'block';
+    });
+}
+
+function finishSetup() {
+  // Validate required fields before proceeding
+  var contactNumber = document.getElementById('contactNumber').value.trim();
+  var emergencyContact = document.getElementById('emergencyContact').value.trim();
+  var emergencyNumber = document.getElementById('emergencyNumber').value.trim();
+  
+  if (!contactNumber) {
+    Swal.fire({ icon:'warning', title:'Missing Information', text:'Please enter your contact number.', confirmButtonColor:'#0F5A36' });
+    return;
+  }
+  if (!emergencyContact) {
+    Swal.fire({ icon:'warning', title:'Missing Information', text:'Please enter your emergency contact name.', confirmButtonColor:'#0F5A36' });
+    return;
+  }
+  if (!emergencyNumber) {
+    Swal.fire({ icon:'warning', title:'Missing Information', text:'Please enter your emergency contact number.', confirmButtonColor:'#0F5A36' });
+    return;
+  }
+  
+  // Check if profile photo was uploaded (File object only, not preview)
+  if (!pendingPhotoFile) {
+    Swal.fire({ icon:'warning', title:'Missing Information', text:'Please upload your profile picture.', confirmButtonColor:'#0F5A36' });
+    goToStep(2);
+    return;
+  }
+  
+  // Check if QR code was uploaded (File object only, not preview)
+  if (!pendingQrFile) {
+    Swal.fire({ icon:'warning', title:'Missing Information', text:'Please upload your QR code.', confirmButtonColor:'#0F5A36' });
+    goToStep(3);
+    return;
+  }
+  
+  // Check if PIN was set
+  if (!pendingPin) {
+    Swal.fire({ icon:'warning', title:'Missing Information', text:'Please set your security PIN.', confirmButtonColor:'#0F5A36' });
+    goToStep(4);
+    return;
+  }
+  
+  var data = {
+    contact_number: contactNumber,
+    emergency_contact: emergencyContact,
+    emergency_number: emergencyNumber
+  };
+  var submitBtn = document.querySelector('#screen-contact .actions .btn-success');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Saving...'; }
+
+  function showError(msg) {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Continue'; }
+    Swal.fire({ icon:'error', title:'Error', text:msg, confirmButtonColor:'#0F5A36' });
+  }
+
+  function postForm(url, formData) {
+    return fetch(url, { method:'POST', credentials:'same-origin', headers:{'X-CSRFToken':csrf}, body:formData })
+      .then(function(r) {
+        return r.json().then(function(json) {
+          return { ok: r.ok, status: r.status, data: json };
+        });
+      });
+  }
+  function postJson(url, body) {
+    return fetch(url, { method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json','X-CSRFToken':csrf}, body:JSON.stringify(body) })
+      .then(function(r) {
+        return r.json().then(function(json) {
+          return { ok: r.ok, status: r.status, data: json };
+        });
+      });
+  }
+
+  function getStepError(stepResult, fallbackText) {
+    if (!stepResult) return fallbackText;
+    var data = stepResult.data || {};
+    if (data.error) return data.error;
+    if (data.message) return data.message;
+    return fallbackText;
+  }
+
+  var steps = [];
+  if (pendingPhotoFile) {
+    var fdP = new FormData();
+    fdP.append('profile_picture', pendingPhotoFile);
+    steps.push(function() { return postForm('/api/member/onboarding/photo/', fdP); });
+  }
+  if (pendingQrFile) {
+    var fdQ = new FormData();
+    fdQ.append('qr_code', pendingQrFile);
+    if (pendingQrData) fdQ.append('qr_data', pendingQrData);
+    steps.push(function() { return postForm('/api/member/onboarding/qr/', fdQ); });
+  }
+  if (pendingPin) {
+    var pinPayload = { pin: pendingPin };
+    if (pendingCurrentPin) pinPayload.current_pin = pendingCurrentPin;
+    steps.push(function() { return postJson('/api/member/onboarding/pin/', pinPayload); });
+  }
+
+  var i = 0;
+  (function next() {
+    if (i < steps.length) {
+      var p = steps[i]();
+      i++;
+      p.then(function(stepResult) {
+        if (!stepResult || !stepResult.ok) {
+          var errorMsg = getStepError(stepResult, 'Failed to save your details. Please check your inputs and try again.');
+          if (i === 1 && pendingPhotoFile) {
+            errorMsg = getStepError(stepResult, 'Failed to upload profile photo. Please check the file size and format, then try again.');
+          } else if (i === 2 && pendingQrFile) {
+            errorMsg = getStepError(stepResult, 'Failed to upload QR code. Please check the file size and format, then try again.');
+          } else if (i === 3 && pendingPin) {
+            errorMsg = getStepError(stepResult, 'Failed to set PIN. Please check your current PIN and try again.');
+          }
+          showError(errorMsg);
+          return;
+        }
+        next();
+      }).catch(function(err) {
+        console.error('Upload error:', err);
+        var errorMsg = 'Failed to save your details. Please check your connection and try again.';
+        if (i === 1 && pendingPhotoFile) {
+          errorMsg = 'Network error uploading photo. Please check your connection and try again.';
+        } else if (i === 2 && pendingQrFile) {
+          errorMsg = 'Network error uploading QR code. Please check your connection and try again.';
+        } else if (i === 3 && pendingPin) {
+          errorMsg = 'Network error setting PIN. Please check your connection and try again.';
+        }
+        showError(errorMsg);
+      });
+      return;
+    }
+    postJson('/api/member/onboarding/complete/', data).then(function(d) {
+      if (d && d.ok) {
+        // Clear session data on successful completion
+        sessionStorage.clear();
+        document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+        document.getElementById('screen-complete').classList.add('active');
+      } else {
+        var completionError = getStepError(d, 'Failed to complete setup. Please check your connection and try again.');
+        showError(completionError);
+      }
+    }).catch(function(err) {
+      console.error('Completion error:', err);
+      showError('Failed to complete setup. Please check your connection and try again.');
+    });
+  })();
+}
+
+function goToDashboard() { window.location.href = '/member/'; }
+</script>
+</body>
+</html>

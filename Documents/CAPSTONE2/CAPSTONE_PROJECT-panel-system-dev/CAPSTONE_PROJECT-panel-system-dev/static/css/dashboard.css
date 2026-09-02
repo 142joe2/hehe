@@ -1,0 +1,336 @@
+/* Import Poppins Font Family */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
+/* ==========================================================================
+   GLOBAL RESET & BRAND VARIABLE PATHS
+   ========================================================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body,
+html {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: #f6fbf6; /* Your Light Pale Mint Brand BG */
+  color: #263238; /* Your Dark Charcoal Text */
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Master Layout Grid */
+.app-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* ==========================================================================
+   SIDEBAR COMPONENT
+   ========================================================================== */
+.sidebar {
+  width: 280px;
+  height: 100%;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.25s ease;
+  flex-shrink: 0;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
+  z-index: 1010;
+}
+
+/* Sidebar Collapsed Modifiers */
+.sidebar.collapsed {
+  width: 75px;
+}
+
+.sidebar.collapsed .logo-mark,
+.sidebar.collapsed .role-tag {
+  display: none;
+}
+
+/* Navigation Items Matrix */
+.menu-item {
+  padding: 12px 18px;
+  color: #263238;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  display: block;
+  transition: 0.3s;
+  border-left: 4px solid transparent;
+  white-space: nowrap;
+}
+
+.menu-item:hover {
+  color: #1b5e20;
+  text-shadow: 0 0 6px rgba(0, 230, 118, 0.4), 0 0 12px rgba(0, 230, 118, 0.2);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.menu-item.active {
+  color: #1b5e20;
+  background: #e8f5e9;
+  border-left: 4px solid #00e676;
+  font-weight: 600;
+}
+
+.sidebar.collapsed .menu-item {
+  text-align: center;
+  padding: 12px 0;
+  border-left: none;
+}
+
+/* Nested Folders UI */
+.nested-folder {
+  display: flex;
+  flex-direction: column;
+}
+
+.folder-header {
+  padding: 12px 18px;
+  color: #263238;
+  font-weight: 600;
+  user-select: none;
+  transition: 0.3s;
+}
+
+.folder-contents {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+  background: #f5f5f5;
+}
+
+.folder-contents.open {
+  max-height: 300px;
+}
+
+/* ==========================================================================
+   MAIN DASHBOARD WORKSPACE PANELS
+   ========================================================================== */
+.main-viewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Main Content Wrapper Window */
+.content-viewport {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background: #eef7ef; /* Pale Mint Section Color */
+}
+
+/* Modular Content Panel Containers */
+.dashboard-panel {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border: 1px solid #dfe9df;
+}
+
+/* Form inputs & styling based on contact form design definitions */
+.dashboard-form label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1b5e20;
+  margin-bottom: 6px;
+}
+
+.dashboard-form input,
+.dashboard-form select,
+.dashboard-form textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #cfdccc;
+  font: inherit;
+  background: #fbfdfb;
+  color: #263238;
+  transition: 0.2s;
+}
+
+.dashboard-form input:focus,
+.dashboard-form select:focus,
+.dashboard-form textarea:focus {
+  outline: none;
+  border-color: #1b5e20;
+  box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
+}
+
+/* Interactive Action Buttons */
+.btn-brand {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+  font-family: "Poppins", sans-serif;
+}
+
+.btn-brand-primary {
+  background: #1b5e20;
+  color: white;
+}
+
+.btn-brand-primary:hover {
+  background: #2e7d32;
+  transform: translateY(-1px);
+}
+
+.btn-brand-secondary {
+  background: #fbc02d;
+  color: #1b1b1b;
+}
+
+.btn-brand-secondary:hover {
+  background: #ffd54f;
+  transform: translateY(-1px);
+}
+
+/* Badges for System State Loops */
+.badge-zero {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+/* Smooth Navigation Animations */
+.module-fade-in {
+  animation: fadeInSlide 0.3s ease-out;
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   ENHANCED SIDEBAR COLLAPSE LAYOUT CONTROLS
+   ========================================================================== */
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menu-icon {
+  font-size: 1.15rem;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.folder-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chevron-icon {
+  font-size: 0.8rem;
+  transition: transform 0.25s ease;
+}
+
+/* Sub-navigation item indent tweaks */
+.folder-contents .menu-item {
+  padding-left: 22px;
+}
+
+.sub-icon {
+  font-size: 0.95rem;
+  opacity: 0.8;
+}
+
+/* --- COLLAPSED STATE MODIFIERS --- */
+.sidebar.collapsed .logo-mark,
+.sidebar.collapsed .menu-text,
+.sidebar.collapsed .chevron-icon,
+.sidebar.collapsed .folder-contents {
+  display: none !important; /* Forces total structural elimination */
+}
+
+.sidebar.collapsed {
+  width: 75px;
+}
+
+.sidebar.collapsed .sidebar-brand {
+  justify-content: center !important;
+  padding: 18px 0 !important;
+}
+
+.sidebar.collapsed .menu-item {
+  justify-content: center;
+  padding: 12px 0 !important;
+  border-left-width: 3px;
+}
+
+.sidebar.collapsed .folder-header {
+  justify-content: center !important;
+  padding: 12px 0 !important;
+}
+
+/* ==========================================================================
+   OVERVIEW 3x2 GRID CARDS
+   ========================================================================== */
+.overview-grid-3x2 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.overview-card {
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+}
+
+.overview-card .panel-header-row {
+  margin-bottom: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.overview-card .panel-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1b5e20;
+}
+
+.overview-card-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 10px;
+}
+
+.overview-card-placeholder {
+  color: #b0bec5;
+  font-size: 0.8rem;
+  font-style: italic;
+  text-align: center;
+}

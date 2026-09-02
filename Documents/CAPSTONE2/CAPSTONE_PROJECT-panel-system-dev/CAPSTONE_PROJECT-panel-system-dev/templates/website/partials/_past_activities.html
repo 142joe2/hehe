@@ -1,0 +1,47 @@
+{% if past_events %}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {% for e in past_events %}
+    <div class="bg-white border border-black/5 p-6 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+        <div class="flex flex-wrap items-center gap-3 mb-2">
+            <h3 class="font-black text-brand-dark leading-tight">{{ e.title }}</h3>
+            <span class="text-[9px] font-black uppercase tracking-wider text-white {% if e.status == 'Completed' %}bg-brand-green{% else %}bg-red-500{% endif %} px-2 py-0.5 rounded-full">{{ e.status }}</span>
+        </div>
+        <p class="text-[11px] font-medium text-gray-500 mb-3">{{ e.event_type }}</p>
+        <div class="flex flex-wrap gap-x-6 gap-y-1 text-[11px] font-medium text-gray-500">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-calendar text-brand-green"></i> {{ e.event_date|date:"F d, Y" }}</span>
+            <span class="flex items-center gap-2"><i class="fa-regular fa-clock text-brand-green"></i> {{ e.event_time|time:"g:i A" }}</span>
+            <span class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-brand-green"></i> {{ e.venue }}</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if past_events.paginator.num_pages > 1 %}
+<div class="flex items-center justify-center gap-3 mt-10">
+    {% if past_events.has_previous %}
+    <a href="?past_page={{ past_events.previous_page_number }}&events_page={{ events.number }}&section=past" aria-label="Previous page" class="w-11 h-11 rounded-full border border-black/10 bg-white text-brand-green flex items-center justify-center hover:bg-brand-green hover:text-white hover:border-brand-green transition-all shadow-sm">
+        <i class="fa-solid fa-chevron-left"></i>
+    </a>
+    {% else %}
+    <span class="w-11 h-11 rounded-full border border-black/10 bg-[#f7f6f2] text-gray-300 flex items-center justify-center" aria-hidden="true">
+        <i class="fa-solid fa-chevron-left"></i>
+    </span>
+    {% endif %}
+    <span class="text-[11px] font-black uppercase tracking-wider text-gray-500">Page {{ past_events.number }} of {{ past_events.paginator.num_pages }}</span>
+    {% if past_events.has_next %}
+    <a href="?past_page={{ past_events.next_page_number }}&events_page={{ events.number }}&section=past" aria-label="Next page" class="w-11 h-11 rounded-full border border-black/10 bg-white text-brand-green flex items-center justify-center hover:bg-brand-green hover:text-white hover:border-brand-green transition-all shadow-sm">
+        <i class="fa-solid fa-chevron-right"></i>
+    </a>
+    {% else %}
+    <span class="w-11 h-11 rounded-full border border-black/10 bg-[#f7f6f2] text-gray-300 flex items-center justify-center" aria-hidden="true">
+        <i class="fa-solid fa-chevron-right"></i>
+    </span>
+    {% endif %}
+</div>
+{% endif %}
+{% else %}
+<div class="text-center py-16 text-gray-400 bg-white border border-black/5 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)]">
+    <i class="fa-solid fa-clock-rotate-left text-4xl mb-3 block"></i>
+    <p class="text-[11px] font-bold uppercase">No past activities recorded yet.</p>
+</div>
+{% endif %}

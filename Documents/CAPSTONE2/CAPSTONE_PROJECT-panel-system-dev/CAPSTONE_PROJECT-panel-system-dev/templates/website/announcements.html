@@ -1,0 +1,28 @@
+﻿{% extends "website/base.html" %}
+{% load static %}
+
+{% block title %}Announcements{% endblock %}
+
+{% block content %}
+    <!-- Page Banner -->
+    <section class="relative h-[400px] overflow-hidden">
+        <div class="absolute inset-0">
+            <img src="{% static 'img/isugym.jpg' %}" alt="ISU CAUFA" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-black/40"></div>
+        </div>
+        <div class="relative z-10 h-full flex flex-col items-center justify-center text-white text-center px-6">
+            <p class="text-2xl sm:text-3xl md:text-4xl uppercase font-black tracking-[0.2em] sm:tracking-[0.3em] text-yellow-400 mb-5 drop-shadow">ISU CAUFA</p>
+            <h1 class="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight sm:tracking-tighter mb-5 drop-shadow-lg">Announcements</h1>
+            <div class="w-28 h-2 bg-brand-green"></div>
+        </div>
+    </section>
+
+    <!-- Announcements List -->
+    <section class="bg-gradient-to-b from-[#fbfaf7] to-[#f3f1ea] py-16 px-6 sm:px-12">
+        <div class="max-w-[1000px] mx-auto">
+            <div id="announcements-section" data-pagination-section="announcements">
+                {% include "website/partials/_announcements_list.html" %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

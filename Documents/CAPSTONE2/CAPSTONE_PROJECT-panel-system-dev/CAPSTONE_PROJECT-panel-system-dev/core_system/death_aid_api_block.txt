@@ -1,0 +1,157 @@
+# --- Death Aid (Claims) APIs (Treasurer) ---
+@require_POST
+def treasurer_death_aid_add(request: HttpRequest):
+    """Create a DEATH_AID row from the Treasurer death aid claim form."""
+    guard = require_role(request, role="Treasurer")
+    if guard is not None:
+        return guard
+
+    death_member = (request.POST.get("death_member") or "").strip()
+    death_deceased = (request.POST.get("death_deceased") or "").strip()
+    death_rel = (request.POST.get("death_rel") or "").strip()
+    death_type = (request.POST.get("death_type") or "").strip()
+    death_claimant = (request.POST.get("death_claimant") or "").strip()
+    death_contact = (request.POST.get("death_contact") or "").strip() or None
+    death_benefit = (request.POST.get("death_benefit") or "").strip()
+    death_date = (request.POST.get("death_date") or "").strip()
+
+    if not death_member:
+        return JsonResponse(
+            {"ok": False, "error": "Associated Member ID is required."}, status=400
+        )
+    if not death_deceased:
+        return JsonResponse(
+            {"ok": False, "error": "Deceased person name is required."}, status=400
+        )
+    if not death_rel:
+        return JsonResponse(
+            {"ok": False, "error": "Relationship to member is required."}, status=400
+        )
+    if not death_claimant:
+        return JsonResponse(
+            {"ok": False, "error": "Claimant name is required."}, status=400
+        )
+    if not death_benefit:
+        return JsonResponse(
+            {"ok": False, "error": "Benefit amount is required."}, status=400
+        )
+    if not death_date:
+        return JsonResponse(
+            {"ok": False, "error": "Date of death is required."}, status=400
+        )
+
+    death_member_clean = str(death_member).strip()
+    if death_member_clean.upper().startswith("M-"):
+        death_member_clean = death_member_clean[2:]
+
+    try:
+        member_pk = int(death_member_clean)
+    except ValueError:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "death_member must be a numeric MEMBER PK (e.g., 1) or 'M-1'.",
+            },
+            status=400,
+        )
+
+    try:
+        member_obj = Member.objects.get(member_id_PK=member_pk)
+    except Member.DoesNotExist:
+        return JsonResponse({"ok": False, "error": "Member not found."}, status=404)
+
+    claimant_obj, _ = Claimant.objects.get_or_create(
+        member_id_FK=member_obj,
+        full_name=death_claimant,
+        relationship_to_member=death_rel,
+        defaults={
+            "contact_number": death_contact,
+            "authorization_status": "Pending Authorization",
+        },
+    )
+
+    if death_contact is not None and not claimant_obj.contact_number:
+        claimant_obj.contact_number = death_contact
+        claimant_obj.save(update_fields=["contact_number"])
+
+    uploaded = request.FILES.get("death_photo_file")
+    if uploaded and getattr(uploaded, "size", 0) > 0:
+        from django.core.files.storage import default_storage
+
+        default_storage.save(
+            f"death_aid_uploads/{timezone.now().strftime('%Y%m%d')}_{uploaded.name}",
+            uploaded,
+        )
+
+    stored_officer_id = request.session.get("officer_id")
+    treasurer_user = None
+    if stored_officer_id is not None:
+        try:
+            treasurer_user = OfficerUser.objects.get(user_id_PK=int(stored_officer_id))
+        except Exception:
+            treasurer_user = None
+
+    try:
+        float(death_benefit)
+    except ValueError:
+        return JsonResponse({"ok": False, "error": "death_benefit must be a number."}, status=400)
+
+    death_aid = DeathAid.objects.create(
+        member_id_FK=member_obj,
+        claimant_id_FK=claimant_obj,
+        claim_date=death_date,
+        claim_type=death_type or "Immediate Family",
+        deceased_name=death_deceased,
+        relationship_to_member=death_rel,
+        benefit_amount=death_benefit,
+        document_status="Pending",
+        status="Pending Verification",
+        treasurer_validated_by_user_id_FK=treasurer_user,
+        auditor_verified_by_user_id_FK=None,
+        president_decided_by_user_id_FK=None,
+        released_by_user_id_FK=None,
+    )
+
+    TransactionVerification.objects.create(
+        table_name="death_aid",
+        record_id=death_aid.death_aid_id_PK,
+        verification_status="Pending",
+    )
+
+    return JsonResponse({"ok": True, "death_aid_id": death_aid.death_aid_id_PK})
+
+
+@require_GET
+def treasurer_death_aids_list(request: HttpRequest):
+    """Return DeathAid rows for the Treasurer death aid table."""
+    guard = require_role(request, role="Treasurer")
+    if guard is not None:
+        return guard
+
+    aids = (
+        DeathAid.objects.select_related("member_id_FK", "claimant_id_FK")
+        .order_by("-death_aid_id_PK")
+    )
+
+    rows = []
+    for a in aids:
+        rows.append(
+            {
+                "id": f"DTH-{a.death_aid_id_PK}",
+                "memberId": a.member_id_FK.member_id_PK,
+                "name": a.member_id_FK.full_name,
+                "claimant": a.claimant_id_FK.full_name if a.claimant_id_FK else "",
+                "deceased": a.deceased_name,
+                "relationship": a.relationship_to_member,
+                "claimType": a.claim_type,
+                "contact": a.claimant_id_FK.contact_number if a.claimant_id_FK else "",
+                "date": a.claim_date.isoformat() if a.claim_date else "",
+                "dateOfDeath": a.claim_date.isoformat() if a.claim_date else "",
+                "benefit_amount": float(a.benefit_amount) if a.benefit_amount is not None else 0,
+                "status": a.status or "Pending Verification",
+                "document_status": a.document_status or "Pending",
+            }
+        )
+
+    return JsonResponse({"ok": True, "death_aids": rows})
+

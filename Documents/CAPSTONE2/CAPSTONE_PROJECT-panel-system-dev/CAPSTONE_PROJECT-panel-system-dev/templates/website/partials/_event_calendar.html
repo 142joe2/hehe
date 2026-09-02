@@ -1,0 +1,52 @@
+{% if events %}
+<div class="space-y-10">
+    {% regroup events by event_date|date:"F Y" as event_months %}
+    {% for month in event_months %}
+    <div>
+        <h3 class="font-black uppercase tracking-tight text-brand-green text-sm mb-4 border-b border-black/5 pb-3">{{ month.grouper }}</h3>
+        <div class="space-y-3">
+            {% for e in month.list %}
+            <div class="flex items-center justify-between gap-4 border border-black/5 rounded-xl px-5 py-3 bg-white/70 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.10)] transition-all duration-200 hover:bg-white hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.14)]">
+                <div class="min-w-0">
+                    <p class="font-bold text-sm text-brand-dark">{{ e.title }}</p>
+                    <p class="text-[11px] text-gray-500 mt-1">
+                        {{ e.event_date|date:"D, M j" }} &middot; {{ e.event_time|time:"g:i A" }} &middot; {{ e.venue }}
+                    </p>
+                </div>
+                <span class="text-[9px] font-black uppercase tracking-wider text-white {% if e.status == 'Completed' %}bg-brand-green{% elif e.status == 'Cancelled' %}bg-red-500{% else %}bg-brand-dark{% endif %} px-2 py-1 rounded-full shrink-0">{{ e.status }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if events.paginator.num_pages > 1 %}
+<div class="flex items-center justify-center gap-3 mt-10">
+    {% if events.has_previous %}
+    <a href="?events_page={{ events.previous_page_number }}&past_page={{ past_events.number }}&section=calendar" aria-label="Previous page" class="w-11 h-11 rounded-full border border-black/10 bg-white text-brand-green flex items-center justify-center hover:bg-brand-green hover:text-white hover:border-brand-green transition-all shadow-sm">
+        <i class="fa-solid fa-chevron-left"></i>
+    </a>
+    {% else %}
+    <span class="w-11 h-11 rounded-full border border-black/10 bg-[#f7f6f2] text-gray-300 flex items-center justify-center" aria-hidden="true">
+        <i class="fa-solid fa-chevron-left"></i>
+    </span>
+    {% endif %}
+    <span class="text-[11px] font-black uppercase tracking-wider text-gray-500">Page {{ events.number }} of {{ events.paginator.num_pages }}</span>
+    {% if events.has_next %}
+    <a href="?events_page={{ events.next_page_number }}&past_page={{ past_events.number }}&section=calendar" aria-label="Next page" class="w-11 h-11 rounded-full border border-black/10 bg-white text-brand-green flex items-center justify-center hover:bg-brand-green hover:text-white hover:border-brand-green transition-all shadow-sm">
+        <i class="fa-solid fa-chevron-right"></i>
+    </a>
+    {% else %}
+    <span class="w-11 h-11 rounded-full border border-black/10 bg-[#f7f6f2] text-gray-300 flex items-center justify-center" aria-hidden="true">
+        <i class="fa-solid fa-chevron-right"></i>
+    </span>
+    {% endif %}
+</div>
+{% endif %}
+{% else %}
+<div class="text-center py-16 text-gray-400 bg-white/70 border border-black/5 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)]">
+    <i class="fa-solid fa-calendar text-4xl mb-3 block"></i>
+    <p class="text-[11px] font-bold uppercase">No events have been scheduled yet.</p>
+</div>
+{% endif %}

@@ -1,0 +1,59 @@
+{% if announcements %}
+<div class="space-y-6">
+    {% for a in announcements %}
+    <div class="bg-white border border-black/5 p-8 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] flex gap-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+        {% if a.image %}
+        <a href="{% url 'announcement_detail' a.announcement_id_PK %}" class="w-20 h-20 sm:w-28 sm:h-28 flex-shrink-0 overflow-hidden rounded-xl shadow-md shadow-brand-green/20 block">
+            <img src="{{ a.image.url }}" alt="{{ a.title }}" class="w-full h-full object-cover" loading="lazy" onerror="this.closest('a').style.display='none'" />
+        </a>
+        {% else %}
+        <div class="w-16 h-16 flex-shrink-0 bg-gradient-to-br from-brand-green to-green-700 text-white rounded-xl flex flex-col items-center justify-center leading-none shadow-md shadow-brand-green/20">
+            <span class="text-[10px] uppercase font-bold">{{ a.published_at|date:"M" }}</span>
+            <span class="text-2xl font-black">{{ a.published_at|date:"d" }}</span>
+            <span class="text-[8px] font-bold">{{ a.published_at|date:"Y" }}</span>
+        </div>
+        {% endif %}
+        <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-3 mb-2">
+                <span class="text-[9px] font-black uppercase tracking-wider text-brand-green bg-brand-surface px-2 py-0.5 rounded-full">{{ a.category }}</span>
+            </div>
+            <h2 class="font-black text-xl text-brand-dark leading-tight"><a href="{% url 'announcement_detail' a.announcement_id_PK %}" class="hover:text-brand-green transition-colors">{{ a.title }}</a></h2>
+            <p class="text-sm text-gray-600 mt-2 leading-relaxed whitespace-pre-line">{{ a.description }}</p>
+            <p class="text-[11px] font-medium text-gray-400 mt-4">
+                <i class="fa-solid fa-user mr-1"></i>
+                {% if a.published_by_user_id_FK %}{{ a.published_by_user_id_FK.full_name }}{% else %}ISU CAUFA{% endif %}
+            </p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if announcements.paginator.num_pages > 1 %}
+<div class="flex items-center justify-center gap-3 mt-10">
+    {% if announcements.has_previous %}
+    <a href="?page={{ announcements.previous_page_number }}&section=list" aria-label="Previous page" class="w-11 h-11 rounded-full border border-black/10 bg-white text-brand-green flex items-center justify-center hover:bg-brand-green hover:text-white hover:border-brand-green transition-all shadow-sm">
+        <i class="fa-solid fa-chevron-left"></i>
+    </a>
+    {% else %}
+    <span class="w-11 h-11 rounded-full border border-black/10 bg-[#f7f6f2] text-gray-300 flex items-center justify-center" aria-hidden="true">
+        <i class="fa-solid fa-chevron-left"></i>
+    </span>
+    {% endif %}
+    <span class="text-[11px] font-black uppercase tracking-wider text-gray-500">Page {{ announcements.number }} of {{ announcements.paginator.num_pages }}</span>
+    {% if announcements.has_next %}
+    <a href="?page={{ announcements.next_page_number }}&section=list" aria-label="Next page" class="w-11 h-11 rounded-full border border-black/10 bg-white text-brand-green flex items-center justify-center hover:bg-brand-green hover:text-white hover:border-brand-green transition-all shadow-sm">
+        <i class="fa-solid fa-chevron-right"></i>
+    </a>
+    {% else %}
+    <span class="w-11 h-11 rounded-full border border-black/10 bg-[#f7f6f2] text-gray-300 flex items-center justify-center" aria-hidden="true">
+        <i class="fa-solid fa-chevron-right"></i>
+    </span>
+    {% endif %}
+</div>
+{% endif %}
+{% else %}
+<div class="text-center py-20 text-gray-400 bg-white/70 border border-black/5 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)]">
+    <i class="fa-solid fa-bullhorn text-5xl mb-4 block"></i>
+    <p class="text-[12px] font-bold uppercase">No announcements have been published yet.</p>
+</div>
+{% endif %}

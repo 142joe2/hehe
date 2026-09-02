@@ -1,0 +1,94 @@
+﻿{% extends "website/base.html" %}
+{% load static %}
+
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+    <!-- Page Banner -->
+    <section class="relative h-[400px] overflow-hidden">
+        <div class="absolute inset-0">
+            <img src="{% static 'img/isugym.jpg' %}" alt="ISU CAUFA" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-black/40"></div>
+        </div>
+        <div class="relative z-10 h-full flex flex-col items-center justify-center text-white text-center px-6">
+            <p class="text-3xl md:text-4xl uppercase font-black tracking-[0.3em] text-yellow-400 mb-5 drop-shadow">ISU CAUFA</p>
+            <h1 class="text-6xl md:text-7xl font-black tracking-tighter mb-5 drop-shadow-lg">About Us</h1>
+            <div class="w-28 h-2 bg-brand-green"></div>
+        </div>
+    </section>
+
+    <!-- About Content -->
+    <section class="bg-gradient-to-b from-[#fbfaf7] to-[#f3f1ea] py-16 px-6 sm:px-12">
+        <div class="max-w-[1440px] mx-auto">
+            <div class="text-center mb-12">
+                <p class="text-[10px] uppercase font-black tracking-[0.2em] text-brand-green mb-2">Who We Are</p>
+                <h2 class="text-3xl md:text-4xl font-black tracking-tighter text-brand-dark">About ISU CAUFA</h2>
+                <div class="w-24 h-1.5 bg-brand-green mx-auto mt-4"></div>
+            </div>
+
+            {% if org_description %}
+            <p class="max-w-3xl mx-auto text-center text-sm text-gray-600 leading-relaxed mb-12">{{ org_description }}</p>
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                <div id="preamble" class="bg-[#f7f6f2] border border-black/5 p-8 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.04),0_10px_28px_-12px_rgba(16,24,40,0.10)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+                    <div class="w-12 h-12 bg-brand-green rounded-xl flex items-center justify-center text-white text-xl mb-4 shadow-md shadow-brand-green/20"><i class="fa-solid fa-landmark"></i></div>
+                    <h3 class="font-black uppercase tracking-tight text-brand-dark mb-3">Preamble</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        {% if history %}{{ history }}{% else %}<span class="text-gray-400 italic">This section is awaiting content from the Public Information Officer.</span>{% endif %}
+                    </p>
+                </div>
+
+                <div id="vision" class="bg-[#f7f6f2] border border-black/5 p-8 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.04),0_10px_28px_-12px_rgba(16,24,40,0.10)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+                    <div class="w-12 h-12 bg-brand-green rounded-xl flex items-center justify-center text-white text-xl mb-4 shadow-md shadow-brand-green/20"><i class="fa-solid fa-eye"></i></div>
+                    <h3 class="font-black uppercase tracking-tight text-brand-dark mb-3">Vision</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        {% if vision %}{{ vision }}{% else %}<span class="text-gray-400 italic">This section is awaiting content from the Public Information Officer.</span>{% endif %}
+                    </p>
+                </div>
+
+                <div id="mission" class="bg-[#f7f6f2] border border-black/5 p-8 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.04),0_10px_28px_-12px_rgba(16,24,40,0.10)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+                    <div class="w-12 h-12 bg-brand-green rounded-xl flex items-center justify-center text-white text-xl mb-4 shadow-md shadow-brand-green/20"><i class="fa-solid fa-bullseye"></i></div>
+                    <h3 class="font-black uppercase tracking-tight text-brand-dark mb-3">Mission</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        {% if mission %}{{ mission }}{% else %}<span class="text-gray-400 italic">This section is awaiting content from the Public Information Officer.</span>{% endif %}
+                    </p>
+                </div>
+
+                <div id="objectives" class="bg-[#f7f6f2] border border-black/5 p-8 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.04),0_10px_28px_-12px_rgba(16,24,40,0.10)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+                    <div class="w-12 h-12 bg-brand-green rounded-xl flex items-center justify-center text-white text-xl mb-4 shadow-md shadow-brand-green/20"><i class="fa-solid fa-list-check"></i></div>
+                    <h3 class="font-black uppercase tracking-tight text-brand-dark mb-3">Objectives</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        {% if objectives %}{{ objectives|linebreaksbr }}{% else %}<span class="text-gray-400 italic">This section is awaiting content from the Public Information Officer.</span>{% endif %}
+                    </p>
+                </div>
+
+                <div id="core-values" class="bg-[#f7f6f2] border border-black/5 p-8 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.04),0_10px_28px_-12px_rgba(16,24,40,0.10)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+                    <div class="w-12 h-12 bg-brand-green rounded-xl flex items-center justify-center text-white text-xl mb-4 shadow-md shadow-brand-green/20"><i class="fa-solid fa-gem"></i></div>
+                    <h3 class="font-black uppercase tracking-tight text-brand-dark mb-3">Core Values</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        {% if core_values %}{{ core_values|linebreaksbr }}{% else %}<span class="text-gray-400 italic">This section is awaiting content from the Public Information Officer.</span>{% endif %}
+                    </p>
+                </div>
+
+                <div id="org-structure" class="bg-[#f7f6f2] border border-black/5 p-8 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.04),0_10px_28px_-12px_rgba(16,24,40,0.10)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+                    <div class="w-12 h-12 bg-brand-green rounded-xl flex items-center justify-center text-white text-xl mb-4 shadow-md shadow-brand-green/20"><i class="fa-solid fa-sitemap"></i></div>
+                    <h3 class="font-black uppercase tracking-tight text-brand-dark mb-3">Organizational Structure</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        {% if org_structure %}{{ org_structure|linebreaksbr }}{% else %}<span class="text-gray-400 italic">This section is awaiting content from the Public Information Officer.</span>{% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div id="constitution" class="mt-12 bg-brand-dark text-white p-10 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.3)]">
+                <div>
+                    <h3 class="font-black uppercase tracking-tight mb-2">Constitution & By-Laws</h3>
+                    <p class="text-sm text-gray-300 max-w-xl">Access the official constitution, by-laws, and organizational documents of the ISU CAUFA.</p>
+                </div>
+                <a href="{% url 'resources_page' %}#constitution" class="bg-brand-green text-white px-8 py-3 rounded-full text-xs font-black uppercase tracking-[0.15em] hover:bg-white hover:text-brand-dark hover:shadow-lg transition-all w-fit shrink-0">
+                    View Documents <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+{% endblock %}

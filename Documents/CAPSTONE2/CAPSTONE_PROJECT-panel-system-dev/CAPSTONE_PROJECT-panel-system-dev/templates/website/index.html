@@ -1,0 +1,366 @@
+{% extends "website/base.html" %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <style>
+        .hero-slide { opacity: 0; visibility: hidden; transition: opacity 0.7s ease-in-out; }
+        .hero-slide.active { opacity: 1; visibility: visible; }
+    </style>
+
+    <!-- Hero Section -->
+    <section class="relative h-[clamp(480px,80vh,550px)] overflow-hidden" id="home">
+
+        <!-- Slide 1: Welcome (hardcoded) -->
+        <div class="hero-slide active absolute inset-0" data-index="0">
+            <div class="absolute inset-0">
+                <!-- Desktop background (wide design, desktop layout) -->
+                <div class="absolute inset-0 hidden sm:block bg-[#04120a]">
+                    <img src="{% static 'img/halfdesignISU.png' %}" alt="" class="w-full h-full object-cover object-right-center" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+                </div>
+                <!-- Mobile background (portrait-friendly photo) -->
+                <div class="absolute inset-0 sm:hidden">
+                    <img src="{% static 'img/isugym.jpg' %}" alt="" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+                </div>
+                <!-- Readability overlays -->
+                <div class="absolute inset-0 bg-black/40"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent"></div>
+                <div class="absolute inset-0 sm:hidden bg-gradient-to-t from-black/80 via-transparent to-black/30"></div>
+            </div>
+
+            <div class="relative z-10 h-full flex flex-col justify-center px-6 sm:px-12 lg:px-24 text-white max-w-4xl">
+                <p class="text-[clamp(1rem,4.5vw,1.5rem)] font-bold text-yellow-400 uppercase mb-3 tracking-wide">Welcome To</p>
+                <h2 class="text-[clamp(2.5rem,8vw,6rem)] font-black tracking-tighter mb-3 leading-none">ISU CAUFA</h2>
+                <div class="w-16 sm:w-24 h-1.5 bg-brand-green mb-5 sm:mb-7"></div>
+                <p class="text-[clamp(0.95rem,2.4vw,1.25rem)] font-medium max-w-xl mb-6 sm:mb-9 leading-relaxed">
+                    United for Progress, Inspired by Service. Empowering students to lead, serve, and create positive change in our community.
+                </p>
+                <div class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 sm:gap-4">
+                    <a href="{% url 'about_page' %}#about" class="bg-white text-brand-dark px-6 sm:px-9 py-3.5 sm:py-4 rounded-full text-sm font-black uppercase tracking-[0.15em] hover:bg-brand-green hover:text-white transition-all flex items-center justify-center sm:justify-start gap-3">
+                        Learn More About Us
+                        <i class="fa-solid fa-chevron-right text-[11px]"></i>
+                    </a>
+                    <button id="download-app-mobile" type="button" onclick="promptAppInstall()" class="hidden inline-flex items-center justify-center gap-2 bg-brand-green text-white rounded-full px-6 py-3.5 text-[13px] font-black uppercase tracking-[0.12em] shadow-lg shadow-brand-dark/20 app-install-trigger">
+                        <i class="fa-solid fa-download text-xs"></i>
+                        Download the ISU CAUFA App
+                    </button>
+                </div>
+            </div>
+            <button id="download-app-desktop" type="button" onclick="promptAppInstall()" class="hidden sm:inline-flex absolute right-4 sm:right-8 bottom-4 sm:bottom-8 z-20 items-center rounded-full bg-brand-green px-5 sm:px-6 py-3 text-sm sm:text-base font-black uppercase tracking-[0.18em] text-white shadow-2xl shadow-brand-dark/30 hover:bg-brand-dark transition-all app-install-trigger">
+                Download the ISU CAUFA App
+            </button>
+        </div>
+
+        <!-- Slide 2+: Hero slides managed by PIO -->
+        {% for slide in hero_slides %}
+        <div class="hero-slide absolute inset-0" data-index="{{ forloop.counter }}">
+            <div class="absolute inset-0">
+                {% if slide.image %}
+                <img src="{{ slide.image.url }}" alt="{{ slide.title }}" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+                {% else %}
+                <div class="w-full h-full bg-gradient-to-br from-brand-green via-green-800 to-brand-dark"></div>
+                {% endif %}
+                <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent"></div>
+            </div>
+
+            <div class="relative z-10 h-full flex flex-col justify-center px-6 sm:px-12 lg:px-24 text-white max-w-4xl">
+                <h2 class="text-[clamp(2rem,7vw,3.75rem)] font-black tracking-tighter mb-5 leading-tight">{{ slide.title }}</h2>
+                <div class="w-16 sm:w-24 h-1.5 bg-brand-green mb-5 sm:mb-7"></div>
+                {% if slide.subtitle %}
+                <p class="text-[clamp(0.95rem,2.4vw,1.25rem)] font-medium max-w-xl mb-6 sm:mb-9 leading-relaxed line-clamp-3">{{ slide.subtitle }}</p>
+                {% endif %}
+                {% if slide.button_url %}
+                <a href="{{ slide.button_url }}" class="bg-white text-brand-dark px-6 sm:px-9 py-3.5 sm:py-4 rounded-full text-sm font-black uppercase tracking-[0.15em] hover:bg-brand-green hover:text-white transition-all w-full sm:w-fit flex items-center justify-center sm:justify-start gap-4">
+                    {{ slide.button_text }}
+                    <i class="fa-solid fa-chevron-right text-[11px]"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Hero Controls -->
+        {% if hero_slides %}
+        <div class="absolute inset-x-0 bottom-20 md:bottom-8 flex justify-center gap-2 z-10">
+            <button class="hero-carousel-dot w-2 h-2 rounded-full bg-white/50 hover:bg-white"></button>
+            {% for slide_count in hero_slides %}
+            <button class="hero-carousel-dot w-2 h-2 rounded-full bg-white/50 hover:bg-white"></button>
+            {% endfor %}
+        </div>
+
+        <button class="hero-prev absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-white/30 flex items-center justify-center text-white hover:bg-white/10 transition-all z-10">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button class="hero-next absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-white/30 flex items-center justify-center text-white hover:bg-white/10 transition-all z-10">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+        {% endif %}
+    </section>
+
+    <!-- Main Content Grid -->
+    <main class="bg-gradient-to-b from-[#fbfaf7] to-[#f3f1ea] py-10 px-4 sm:px-6 lg:px-12 lg:py-16">
+        <div class="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+
+            <!-- Column 1: Announcements -->
+            <div class="lg:col-span-4 flex flex-col bg-white rounded-2xl p-5 sm:p-6 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] border border-black/5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+                <div class="flex justify-between items-center gap-3 mb-6 pb-4 border-b border-black/5">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-9 h-9 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green">
+                            <i class="fa-solid fa-bullhorn text-sm"></i>
+                        </span>
+                        <h3 class="text-base sm:text-lg font-black uppercase tracking-tight">Announcements</h3>
+                    </div>
+                    <a href="{% url 'announcements_page' %}" class="text-xs font-bold text-brand-green hover:text-brand-dark transition-colors whitespace-nowrap">View All <i class="fa-solid fa-arrow-right text-[9px]"></i></a>
+                </div>
+
+                <div class="flex-1 flex flex-col space-y-4">
+                    {% if announcements %}
+                    {% for a in announcements %}
+                    <a href="{% url 'announcement_detail' a.announcement_id_PK %}" class="flex-1 flex gap-3.5 group cursor-pointer announcement-card p-2 -m-2 rounded-xl hover:bg-brand-surface/70 transition-colors">
+                        <div class="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-gradient-to-br from-brand-green to-green-700 overflow-hidden rounded-xl shadow-sm flex items-center justify-center text-white text-2xl sm:text-3xl">
+                            {% if a.image %}
+                            <img src="{{ a.image.url }}" alt="{{ a.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" onerror="this.style.display='none'" />
+                            {% else %}
+                            <i class="fa-solid fa-bullhorn"></i>
+                            {% endif %}
+                        </div>
+                        <div class="min-w-0 flex flex-col justify-center">
+                            <h4 class="font-bold text-sm sm:text-base leading-snug group-hover:text-brand-green transition-colors line-clamp-1">{{ a.title }}</h4>
+                            <p class="text-[13px] text-gray-500 mt-0.5 line-clamp-1">{{ a.description }}</p>
+                            <div class="flex items-center gap-1.5 mt-1.5 text-[11px] font-bold text-gray-400">
+                                <i class="fa-solid fa-calendar text-brand-green/70"></i>
+                                <span>{{ a.published_at|date:"F d, Y" }}</span>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Column 2: News & Highlights -->
+            <div class="lg:col-span-4 flex flex-col bg-white rounded-2xl p-5 sm:p-6 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] border border-black/5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+                <div class="flex justify-between items-center gap-3 mb-6 pb-4 border-b border-black/5">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-9 h-9 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green">
+                            <i class="fa-solid fa-newspaper text-sm"></i>
+                        </span>
+                        <h3 class="text-base sm:text-lg font-black uppercase tracking-tight">News & Highlights</h3>
+                    </div>
+                    <a href="{% url 'news_page' %}" class="text-xs font-bold text-brand-green hover:text-brand-dark transition-colors whitespace-nowrap">View All <i class="fa-solid fa-arrow-right text-[9px]"></i></a>
+                </div>
+
+                <div class="flex-1 flex flex-col space-y-4">
+                    {% if featured_news %}
+                    {% for article in featured_news %}
+                    <a href="{% url 'news_detail' article.slug %}" class="flex-1 flex gap-3.5 group cursor-pointer news-card p-2 -m-2 rounded-xl hover:bg-brand-surface/70 transition-colors">
+                        <div class="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-gradient-to-br from-brand-green to-green-700 overflow-hidden rounded-xl shadow-sm flex items-center justify-center">
+                            {% if article.featured_image %}
+                            <img src="{{ article.featured_image.url }}" alt="{{ article.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" onerror="this.style.display='none'" />
+                            {% else %}
+                            <i class="fa-solid fa-newspaper text-2xl sm:text-3xl text-white/50"></i>
+                            {% endif %}
+                        </div>
+                        <div class="min-w-0 flex flex-col justify-center">
+                            <h4 class="font-bold text-sm sm:text-base leading-snug group-hover:text-brand-green transition-colors line-clamp-1">{{ article.title }}</h4>
+                            <p class="text-[13px] text-gray-500 mt-0.5 line-clamp-1">{{ article.summary }}</p>
+                            <div class="flex items-center gap-1.5 mt-1.5 text-[11px] font-bold text-gray-400">
+                                <i class="fa-solid fa-calendar text-brand-green/70"></i>
+                                <span>{{ article.published_at|date:"F d, Y" }}</span>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-8 text-gray-400">
+                        <i class="fa-solid fa-newspaper text-4xl mb-2 block"></i>
+                        <p class="text-sm font-bold uppercase">No news and highlights available.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Column 3: Quick Links -->
+            <div class="hidden lg:flex lg:col-span-4 flex-col bg-white rounded-2xl p-5 sm:p-6 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] border border-black/5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+                <div class="flex items-center gap-2.5 mb-6 pb-4 border-b border-black/5">
+                    <span class="w-9 h-9 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green">
+                        <i class="fa-solid fa-link text-sm"></i>
+                    </span>
+                    <h3 class="text-base sm:text-lg font-black uppercase tracking-tight">Quick Links</h3>
+                </div>
+                <div class="grid grid-cols-2 gap-3.5 flex-1 content-stretch">
+                    <a href="{% url 'about_page' %}#about" class="bg-[#f7f6f2] p-5 sm:p-6 rounded-xl flex flex-col items-center justify-center gap-2.5 hover:bg-brand-green hover:text-white hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 text-center">
+                        <i class="fa-solid fa-building-columns text-2xl sm:text-3xl"></i>
+                        <span class="text-xs sm:text-sm font-black uppercase leading-snug">About ISU CAUFA</span>
+                    </a>
+                    <a href="{% url 'officers_page' %}" class="bg-[#f7f6f2] p-5 sm:p-6 rounded-xl flex flex-col items-center justify-center gap-2.5 hover:bg-brand-green hover:text-white hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 text-center">
+                        <i class="fa-solid fa-users-gear text-2xl sm:text-3xl"></i>
+                        <span class="text-xs sm:text-sm font-black uppercase leading-snug">Officers</span>
+                    </a>
+                    <a href="{% url 'activities_page' %}" class="bg-[#f7f6f2] p-5 sm:p-6 rounded-xl flex flex-col items-center justify-center gap-2.5 hover:bg-brand-green hover:text-white hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 text-center">
+                        <i class="fa-solid fa-calendar-days text-2xl sm:text-3xl"></i>
+                        <span class="text-xs sm:text-sm font-black uppercase leading-snug">Activities & Events</span>
+                    </a>
+                    <a href="{% url 'gallery_page' %}" class="bg-[#f7f6f2] p-5 sm:p-6 rounded-xl flex flex-col items-center justify-center gap-2.5 hover:bg-brand-green hover:text-white hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 text-center">
+                        <i class="fa-solid fa-images text-2xl sm:text-3xl"></i>
+                        <span class="text-xs sm:text-sm font-black uppercase leading-snug">Gallery</span>
+                    </a>
+                    <a href="{% url 'resources_page' %}" class="bg-[#f7f6f2] p-5 sm:p-6 rounded-xl flex flex-col items-center justify-center gap-2.5 hover:bg-brand-green hover:text-white hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 text-center">
+                        <i class="fa-solid fa-download text-2xl sm:text-3xl"></i>
+                        <span class="text-xs sm:text-sm font-black uppercase leading-snug">Resources</span>
+                    </a>
+                    <a href="#contact" class="bg-[#f7f6f2] p-5 sm:p-6 rounded-xl flex flex-col items-center justify-center gap-2.5 hover:bg-brand-green hover:text-white hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 text-center">
+                        <i class="fa-solid fa-headset text-2xl sm:text-3xl"></i>
+                        <span class="text-xs sm:text-sm font-black uppercase leading-snug">Contact Us</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Column 4: Live Location -->
+            <div class="lg:col-span-8 bg-white rounded-2xl p-5 sm:p-6 lg:p-8 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] border border-black/5 self-start">
+                <div class="flex items-center gap-2.5 mb-5 pb-4 border-b border-black/5">
+                    <span class="w-9 h-9 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green">
+                        <i class="fa-solid fa-map-location-dot text-sm"></i>
+                    </span>
+                    <h3 class="text-base sm:text-lg font-black uppercase tracking-tight">Live Location</h3>
+                </div>
+                <div class="rounded-2xl overflow-hidden border border-black/5 min-h-[320px] lg:min-h-[400px]">
+                    <iframe
+                        src="https://maps.google.com/maps?q=Isabela%20State%20University%20Cauayan%20City&t=&z=14&ie=UTF8&iwloc=&output=embed"
+                        class="w-full h-full"
+                        style="min-height:320px;"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <p class="text-sm text-gray-500 mt-4">Explore the campus location, nearby landmarks, and directions directly from the homepage.</p>
+            </div>
+
+            <!-- Column 5: CTA & Placeholder -->
+            <div class="hidden lg:flex lg:col-span-4 flex-col gap-6 lg:gap-8">
+                <div class="flex-1 bg-gradient-to-br from-[#eef5ee] to-[#f8faf6] border border-brand-green/10 p-6 rounded-2xl flex flex-col items-center justify-center text-center shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(0,77,38,0.15)]">
+                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md shadow-brand-green/10 mb-3">
+                        <i class="fa-solid fa-handshake-angle text-2xl text-brand-green"></i>
+                    </div>
+                    <h3 class="text-lg font-black uppercase text-brand-dark mb-1.5">Be Part of the ISU-CAUFA!</h3>
+                    <p class="text-sm text-gray-500 mb-4">Together, let's build a stronger and better ISU CAUFA community.</p>
+                    <a href="{% url 'public_register' %}" class="bg-brand-dark text-white w-full py-3 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-brand-green hover:shadow-lg hover:shadow-brand-green/30 transition-all flex items-center justify-center gap-2">
+                        Join Us Today!
+                        <i class="fa-solid fa-chevron-right text-[11px]"></i>
+                    </a>
+                </div>
+                <div id="placeholder-card" class="flex-1 bg-white/70 backdrop-blur-sm border border-brand-green/15 rounded-2xl p-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_8px_24px_-12px_rgba(16,24,40,0.12)] text-left flex flex-col justify-center">
+                    <div class="text-xs uppercase tracking-[0.24em] text-brand-green font-black mb-3">Placeholder Card</div>
+                    <h4 class="text-lg font-bold text-brand-dark mb-2">Upcoming Feature</h4>
+                    <p class="text-sm text-gray-600 leading-6">A standalone placeholder card for future content. Use this area to highlight announcements, member benefits, or quick access to new tools.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Policy & Benefits -->
+        <section id="policy-benefits" class="mt-12 lg:mt-16">
+            <div class="max-w-[1440px] mx-auto">
+                <div class="mb-10">
+                    <p class="text-[10px] uppercase font-black tracking-[0.2em] text-brand-green mb-2">Bylaws</p>
+                    <h2 class="text-3xl md:text-4xl font-black tracking-tighter text-brand-dark">Policy & Benefits</h2>
+                    <div class="w-24 h-1.5 bg-brand-green mt-4"></div>
+                    <p class="text-sm text-gray-500 mt-4 max-w-2xl">Contributions and benefits governed by the ISU CAUFA By-Laws. Amounts shown are the official policy constants currently in effect.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
+                    {% for group in policy_constants %}
+                    <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] border border-black/5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)] flex flex-col">
+                        <div class="flex items-center gap-2.5 mb-2">
+                            <span class="w-9 h-9 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green">
+                                {% if forloop.counter == 1 %}
+                                <i class="fa-solid fa-id-card text-sm"></i>
+                                {% elif forloop.counter == 2 %}
+                                <i class="fa-solid fa-kit-medical text-sm"></i>
+                                {% else %}
+                                <i class="fa-solid fa-dove text-sm"></i>
+                                {% endif %}
+                            </span>
+                            <h3 class="text-base font-black uppercase tracking-tight">{{ group.name }}</h3>
+                        </div>
+                        <p class="text-[11px] text-gray-500 uppercase tracking-wide mb-5">{{ group.subtitle }}</p>
+
+                        <div class="flex-1 flex flex-col gap-2.5">
+                            {% for item in group.items %}
+                            <div class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg bg-[#f7f6f2]">
+                                <span class="text-xs font-bold text-gray-600">{{ item.label }}</span>
+                                <span class="text-sm font-black text-brand-green">₱{{ item.value|floatformat:0|default:"0" }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </main>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        // ======= Hero Carousel Controls =======
+        const slides = document.querySelectorAll('.hero-slide');
+        const dots = document.querySelectorAll('.hero-carousel-dot');
+        const prevBtn = document.querySelector('.hero-prev');
+        const nextBtn = document.querySelector('.hero-next');
+        let currentSlide = 0;
+        let autoTimer = null;
+
+        function showSlide(index) {
+            if (!slides.length) return;
+            currentSlide = (index + slides.length) % slides.length;
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === currentSlide);
+            });
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('bg-brand-green', i === currentSlide);
+                dot.classList.toggle('bg-white/50', i !== currentSlide);
+            });
+        }
+
+        if (prevBtn) prevBtn.addEventListener('click', () => { showSlide(currentSlide - 1); restartAuto(); });
+        if (nextBtn) nextBtn.addEventListener('click', () => { showSlide(currentSlide + 1); restartAuto(); });
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => { showSlide(index); restartAuto(); });
+        });
+
+        function restartAuto() {
+            if (autoTimer) clearInterval(autoTimer);
+            if (slides.length > 1) autoTimer = setInterval(() => showSlide(currentSlide + 1), 6000);
+        }
+        restartAuto();
+
+        // ======= Hero Swipe Gestures (mobile) =======
+        (function () {
+            var hero = document.getElementById('home');
+            if (!hero) return;
+            var startX = 0, startY = 0, swiping = false;
+            hero.addEventListener('touchstart', function (e) {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                swiping = false;
+            }, { passive: true });
+            hero.addEventListener('touchmove', function (e) {
+                var dx = Math.abs(e.touches[0].clientX - startX);
+                var dy = Math.abs(e.touches[0].clientY - startY);
+                if (dx > dy && dx > 10) { e.preventDefault(); swiping = true; }
+            }, { passive: false });
+            hero.addEventListener('touchend', function (e) {
+                if (!swiping) return;
+                var dx = e.changedTouches[0].clientX - startX;
+                if (Math.abs(dx) > 50) {
+                    if (dx < 0) showSlide(currentSlide + 1);
+                    else showSlide(currentSlide - 1);
+                    restartAuto();
+                }
+            }, { passive: true });
+        })();
+    </script>
+{% endblock %}

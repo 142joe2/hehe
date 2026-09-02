@@ -1,0 +1,2802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISU CAUFA FMIS - Auditor Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+  :root{
+    --green:#1e8f4e; --green-dark:#16703c; --green-light:#e7f6ec;
+    --blue:#2f6fed; --blue-dark:#1e4eb3; --blue-light:#eaf1ff;
+    --amber:#f0a020; --amber-light:#fdf3e1;
+    --red:#e34d4d; --red-light:#fdeaea;
+    --purple:#8a5cf6; --purple-light:#f2ecfe;
+    --ink:#1c2430; --ink-soft:#5b6675; --ink-faint:#8b93a1;
+    --line:#e7eaef; --bg:#f4f6f9; --card:#ffffff;
+    --radius:12px;
+    --shadow:0 1px 2px rgba(20,30,50,.04),0 1px 8px rgba(20,30,50,.04);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:18px;
+  }
+  *{box-sizing:border-box;}
+  html,body{width:100%;min-width:100%;overflow-x:hidden;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-size:16px;-webkit-font-smoothing:antialiased;}
+  a{text-decoration:none;color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+  .app{width:100vw;max-width:none;min-height:100vh;}
+
+  /* SIDEBAR */
+  .sidebar{background:var(--card);border-right:1px solid var(--line);padding:22px 16px 36px;position:fixed;left:0;top:0;width:280px;height:100vh;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none;transition:width 0.3s ease,padding 0.3s ease;z-index:200;}
+  .sidebar::-webkit-scrollbar{display:none;width:0;height:0;}
+  .app.sidebar-collapsed .sidebar{width:64px;padding:12px 6px 24px;}
+  .app.sidebar-collapsed .brand{justify-content:center;padding:6px 0 14px;margin-bottom:6px;}
+  .app.sidebar-collapsed .brand-text{display:none;}
+  .app.sidebar-collapsed .portal-label{display:none;}
+  .app.sidebar-collapsed .nav-group-title{display:none;}
+  .app.sidebar-collapsed .nav-item{justify-content:center;width:52px;height:44px;margin:3px auto;padding:8px;font-size:0;gap:0;}
+  .app.sidebar-collapsed .nav-item span:not(.ico):not(.nav-badge){display:none !important;}
+  .app.sidebar-collapsed .nav-item .ico{width:24px;font-size:20px;line-height:1;text-align:center;}
+  .app.sidebar-collapsed .nav-item .ico i{font-size:20px;}
+  .app.sidebar-collapsed .nav-badge{position:absolute;top:2px;right:2px;font-size:9px;padding:0 4px;min-width:16px;height:16px;line-height:16px;}
+  .brand{display:flex;align-items:center;gap:12px;padding:6px 8px 22px;margin-bottom:10px;border-bottom:1px solid var(--line);position:relative;}
+  .brand-mark{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--green),var(--green-dark));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0;}
+  .brand-text .t1{font-weight:700;font-size:15px;}
+  .brand-text .t2{font-size:12px;color:var(--ink-faint);letter-spacing:.03em;}
+  .portal-label{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink-faint);text-transform:uppercase;padding:14px 12px 6px;}
+  .nav-group-title{font-size:12px;font-weight:700;letter-spacing:.07em;color:var(--ink-faint);text-transform:uppercase;padding:16px 12px 8px;}
+  .nav-item{display:flex;align-items:center;gap:12px;min-height:44px;padding:10px 12px;border-radius:10px;font-size:16px;color:var(--ink-soft);cursor:pointer;transition:background .12s,color .12s;position:relative;}
+  .nav-item:hover{background:#f2f4f7;color:var(--ink);}
+  .nav-item.active{background:var(--green-light);color:var(--green-dark);font-weight:600;}
+  .nav-item .ico{width:22px;text-align:center;flex-shrink:0;font-size:18px;color:var(--ink-soft);}
+  .nav-item .ico i{font-size:18px;}
+  .nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:11px;font-weight:700;border-radius:20px;padding:2px 8px;min-width:18px;text-align:center;}
+
+  /* MAIN */
+  .main{padding:0;max-width:none;min-width:0;width:calc(100% - 280px);margin-left:280px;transition:width 0.3s ease,margin-left 0.3s ease;}
+  .app.sidebar-collapsed .main{width:calc(100% - 64px);margin-left:64px;}
+
+  /* Header Bar */
+  .header-bar{background:linear-gradient(135deg,var(--green),var(--green-dark));padding:12px 20px;display:flex;align-items:center;justify-content:space-between;color:#fff;position:sticky;top:0;z-index:100;gap:16px;flex-wrap:nowrap;}
+  .header-brand{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .header-toggle{width:36px;height:36px;border-radius:6px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;transition:background .12s;flex-shrink:0;}
+  .header-toggle:hover{background:rgba(255,255,255,0.3);}
+  .header-brand .logo{font-size:16px;font-weight:800;letter-spacing:.02em;}
+  .header-search{flex:1;max-width:300px;margin:0 16px;}
+  .header-search input{width:100%;padding:8px 12px;border-radius:6px;border:none;background:rgba(255,255,255,0.2);color:#fff;font-size:13px;placeholder:rgba(255,255,255,0.7);}
+  .header-search input::placeholder{color:rgba(255,255,255,0.7);}
+  .header-actions{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+  .header-btn{width:36px;height:36px;border-radius:6px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;transition:background .12s;}
+  .header-btn:hover{background:rgba(255,255,255,0.3);}
+  .header-user{display:flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(255,255,255,0.2);border-radius:20px;cursor:pointer;flex-shrink:0;}
+  .header-user .avatar{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;}
+  .header-user .name{font-size:13px;font-weight:600;}
+
+  /* Welcome Banner */
+  .welcome-banner{background:linear-gradient(135deg,var(--green),var(--green-dark));padding:24px 32px;color:#fff;margin:24px 32px 20px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;transition:all 0.3s ease;}
+  .welcome-banner h1{font-size:24px;font-weight:800;margin-bottom:8px;}
+  .welcome-banner .datetime{font-size:14px;opacity:0.9;text-align:right;}
+  .app.sidebar-collapsed .welcome-banner{margin:24px 32px 20px;}
+
+  .topbar{padding:0 32px 28px 32px;display:flex;align-items:center;justify-content:space-between;margin-bottom:0;flex-wrap:wrap;gap:14px;transition:all 0.3s ease;}
+  .greeting{font-size:13px;font-weight:600;color:var(--ink-faint);letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px;}
+  .page-title{font-size:26px;font-weight:800;color:var(--green-dark);letter-spacing:-.01em;}
+  .topbar-right{display:flex;align-items:center;gap:18px;}
+  .timestamp-info{font-size:13px;color:var(--ink-faint);font-weight:600;}
+  .topbar-actions{display:flex;align-items:center;gap:10px;}
+  .icon-btn{width:42px;height:42px;border-radius:10px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--ink-soft);position:relative;box-shadow:var(--shadow);cursor:pointer;transition:background .12s;}
+  .icon-btn:hover{background:#f2f4f7;}
+  .icon-btn .dot{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg);}
+  .user-chip{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);}
+  .avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#ffb37b,#ff8a5c);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;}
+  .user-meta .name{font-size:14px;font-weight:700;}
+  .user-meta .role{font-size:12px;color:var(--green);font-weight:600;}
+  .period-selector{display:flex;align-items:center;gap:10px;margin-top:6px;}
+  .period-nav{width:32px;height:32px;border-radius:8px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--ink-soft);cursor:pointer;transition:background .12s;}
+  .period-nav:hover{background:#f2f4f7;}
+  .period-select{border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:14px;font-weight:600;background:var(--card);font-family:inherit;cursor:pointer;}
+
+  .dashboard-content{padding:0 32px 32px 32px;transition:all 0.3s ease;}
+
+  .dashboard-content{padding:0 32px 32px 32px;}
+
+  /* KPI */
+  .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px;transition:all 0.3s ease;}
+  .app.sidebar-collapsed .kpi-row{grid-template-columns:repeat(5,1fr);}
+  .kpi-card{background:var(--card);border-radius:12px;border:1px solid var(--line);box-shadow:var(--shadow);padding:20px;cursor:pointer;transition:background .12s;}
+  .kpi-card:hover{background:#f8f9fa;}
+  .kpi-label{font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:10px;}
+  .kpi-value{font-size:26px;font-weight:800;margin-bottom:4px;color:var(--ink);}
+  .kpi-sub{font-size:12px;color:var(--ink-soft);font-weight:600;}
+  .kpi-card.green .kpi-value{color:var(--green);}
+  .kpi-card.amber .kpi-value{color:var(--amber);}
+  .kpi-card.red .kpi-value{color:var(--red);}
+  .kpi-card.fund .kpi-value{color:var(--green-dark);}
+
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:18px;}
+  .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:18px;margin-bottom:18px;}
+  .panel{background:var(--card);border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow);padding:22px 24px;margin-bottom:18px;}
+  .panel-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;flex-wrap:wrap;gap:14px;}
+  .panel-title{font-size:15px;font-weight:700;letter-spacing:.02em;}
+  .panel-sub{font-size:13px;color:var(--ink-faint);margin-top:2px;}
+  .chart-wrap{position:relative;height:260px;}
+  .chart-wrap.small{height:240px;}
+  .donut-total{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;}
+  .donut-total .amt{font-size:26px;font-weight:800;}
+  .donut-total .lbl{font-size:14px;color:var(--ink-faint);font-weight:600;}
+  .legend{display:flex;flex-direction:column;gap:16px;margin-top:0;}
+  .legend-item{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--ink-soft);padding:10px 14px;background:var(--bg);border-radius:8px;}
+  .legend-dot{width:12px;height:12px;border-radius:4px;flex-shrink:0;}
+  .legend-item .label{flex:1;font-weight:600;color:var(--ink);}
+  .legend-item .count{font-weight:700;color:var(--ink);min-width:40px;text-align:right;}
+  .legend-item .pct{font-weight:700;color:var(--ink);min-width:50px;text-align:right;}
+
+  .status-bar{display:flex;height:28px;border-radius:14px;overflow:hidden;margin:14px 0 18px;background:var(--line);}
+  .status-row{display:flex;align-items:center;font-size:13px;color:var(--ink-soft);padding:6px 0;}
+  .status-row b{color:var(--ink);margin-left:6px;font-size:15px;font-weight:700;} .status-row .pct{margin-left:auto;font-weight:700;color:var(--ink-faint);font-size:13px;}
+  .status-total{margin-top:14px;font-size:13px;color:var(--ink-faint);font-weight:600;letter-spacing:.02em;}
+  .badge{display:inline-block;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+  .badge.pending{background:var(--amber-light);color:var(--amber);} .badge.approved{background:var(--green-light);color:var(--green);}
+  .badge.rejected{background:var(--red-light);color:var(--red);} .badge.review{background:var(--blue-light);color:var(--blue);}
+  .progress-track{height:10px;border-radius:5px;background:var(--line);overflow:hidden;}
+  .progress-fill{height:100%;border-radius:5px;transition:width 0.3s ease;}
+  .table-wrap{overflow-x:auto;}
+  table.data{width:100%;border-collapse:collapse;font-size:14px;}
+  table.data th{padding:12px 14px;text-align:left;font-weight:700;color:var(--ink-faint);letter-spacing:.02em;border-bottom:1px solid var(--line);white-space:nowrap;}
+  table.data td{padding:12px 14px;border-bottom:1px solid var(--line);color:var(--ink-soft);}
+  table.data tbody tr:nth-child(even){background:#f5f6f7;}
+  table.data tbody tr:hover{background:#e8eaed;}
+  .btn{border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .12s;}
+  .btn.primary{background:var(--green);color:#fff;}
+  .btn.primary:hover{background:var(--green-dark);}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink-soft);}
+  .btn.ghost:hover{background:#f2f4f7;color:var(--ink);}
+  .btn.sm{padding:8px 12px;font-size:13px;}
+
+  /* Action Grid */
+  .action-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+  .action-card{display:flex;flex-direction:column;gap:10px;padding:20px;border-radius:12px;border:1px solid var(--line);background:var(--card);cursor:pointer;transition:background .12s,border-color .12s;}
+  .action-card:hover{background:#f2f4f7;border-color:var(--green-light);}
+  .action-icon-container{display:flex;align-items:center;justify-content:center;height:48px;color:var(--ink-soft);}
+  .action-icon-container svg{width:32px;height:32px;}
+  .action-content{flex:1;}
+  .action-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+  .action-count{font-size:24px;font-weight:800;color:var(--ink);}
+  .action-sub{font-size:13px;color:var(--ink-faint);font-weight:600;}
+
+  .status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;}
+  .status-dot.verified{background:var(--green);}
+  .status-dot.returned{background:var(--red);}
+  .status-badge{display:inline-block;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700;text-transform:uppercase;}
+  .status-badge.success{background:var(--green-light);color:var(--green);}
+  .status-badge.excellent{background:var(--green-light);color:var(--green);}
+  .status-badge.good{background:var(--blue-light);color:var(--blue);}
+  .status-badge.attention{background:var(--amber-light);color:var(--amber);}
+  .status-badge.critical{background:var(--red-light);color:var(--red);}
+
+  /* Pipeline Styles */
+  .pipeline-container{display:flex;flex-direction:column;gap:16px;}
+  .pipeline-item{background:var(--bg);border-radius:10px;padding:16px;border:1px solid var(--line);}
+  .pipeline-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .pipeline-title{font-weight:600;font-size:14px;color:var(--ink);}
+  .pipeline-percentage{font-weight:700;font-size:14px;color:var(--green);}
+  .pipeline-progress{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-bottom:8px;}
+  .pipeline-bar{height:100%;border-radius:4px;transition:width 0.3s ease;}
+  .pipeline-details{display:flex;gap:16px;font-size:12px;color:var(--ink-soft);}
+
+  /* Attention List Styles */
+  .attention-list{display:flex;flex-direction:column;gap:12px;}
+  .attention-item{display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg);border-radius:10px;border:1px solid var(--line);cursor:pointer;transition:background 0.12s;}
+  .attention-item:hover{background:var(--card);}
+  .attention-icon{width:36px;height:36px;border-radius:8px;background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);flex-shrink:0;}
+  .attention-content{flex:1;}
+  .attention-title{font-weight:600;font-size:14px;color:var(--ink);margin-bottom:4px;}
+  .attention-sub{font-size:12px;color:var(--ink-soft);}
+  .attention-count{width:32px;height:32px;border-radius:8px;background:var(--red);color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+  /* Compliance Badge */
+  .compliance-badge{display:inline-block;padding:4px 10px;border-radius:20px;font-weight:600;font-size:12px;}
+  .compliance-badge.green{background:var(--green-light);color:var(--green-dark);}
+  .compliance-badge.blue{background:var(--blue-light);color:var(--blue-dark);}
+  .compliance-badge.amber{background:var(--amber-light);color:var(--amber);}
+  .compliance-badge.red{background:var(--red-light);color:var(--red);}
+
+  /* Member Profile Styles */
+  .member-profile{display:flex;flex-direction:column;gap:24px;}
+  .profile-section{background:var(--bg);border-radius:12px;padding:20px;border:1px solid var(--line);}
+  .section-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:16px;letter-spacing:.03em;text-transform:uppercase;}
+  .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+  .info-item{display:flex;flex-direction:column;gap:4px;}
+  .info-label{font-size:12px;font-weight:600;color:var(--ink-faint);text-transform:uppercase;}
+  .info-value{font-size:14px;font-weight:600;color:var(--ink);}
+
+  /* Period Filter */
+  .period-filter-container{display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:12px 16px;background:var(--card);border-radius:10px;border:1px solid var(--line);}
+  .period-label{font-size:13px;font-weight:600;color:var(--ink-soft);}
+  .period-select{flex:1;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;transition:border-color .12s;}
+  .period-select:hover{border-color:var(--green-light);}
+  .period-select:focus{outline:none;border-color:var(--green);}
+
+  /* Colored KPI Cards */
+  .kpi-card.green{background:var(--green-light);}
+  .kpi-card.amber{background:var(--amber-light);}
+  .kpi-card.red{background:var(--red-light);}
+  .kpi-card.fund{background:var(--green-light);}
+
+
+
+  /* Compliance Legend */
+  .compliance-legend{display:flex;gap:16px;flex-wrap:nowrap;margin-top:16px;padding-top:16px;border-top:1px solid var(--line);overflow-x:auto;}
+  .compliance-legend .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink-soft);white-space:nowrap;}
+  .compliance-legend .legend-dot{width:10px;height:10px;border-radius:50%;}
+
+  @media (max-width:1400px){.kpi-row{grid-template-columns:repeat(3,1fr);}.grid-3{grid-template-columns:1fr 1fr;}.grid-3>.panel:last-child{grid-column:span 2;}}
+  @media (max-width:1180px){.grid-3{grid-template-columns:1fr;}.grid-3>.panel:last-child{grid-column:span 1;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:900px){.sidebar{display:none;}.main,.app.sidebar-collapsed .main{width:100%;margin-left:0;}.kpi-row{grid-template-columns:repeat(2,1fr);}.grid-3{grid-template-columns:1fr;}}
+  
+  :root{--accent:#2f6fed;}
+
+  /* ===== ISU CAUFA FMIS MASTER DESIGN SYSTEM (shared across Treasurer / Auditor / President) ===== */
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+
+  /* DARK INSTITUTIONAL SIDEBAR */
+  .sidebar{width:240px;background:linear-gradient(180deg,#143d26 0%,#0d2b1a 100%);border-right:1px solid rgba(255,255,255,.06);}
+  .main{width:calc(100% - 240px);margin-left:240px;}
+  .app.sidebar-collapsed .main{width:calc(100% - 64px);margin-left:64px;}
+  .brand{border-bottom:1px solid rgba(255,255,255,.09);}
+  .brand-mark{background:rgba(255,255,255,.14);color:#fff;}
+  .brand-text .t1{color:#fff;}
+  .brand-text .t2{color:rgba(255,255,255,.5);}
+  .portal-label{color:rgba(255,255,255,.42);}
+  .nav-group-title{color:rgba(255,255,255,.4);cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;}
+  .nav-group-title::after{content:"▾";font-size:9px;opacity:.7;}
+  .nav-group-title.collapsed::after{content:"▸";}
+  .nav-item{color:rgba(255,255,255,.74);font-size:14.5px;min-height:42px;border-radius:9px;}
+  .nav-item:hover{background:rgba(255,255,255,.09);color:#fff;}
+  .nav-item.active{background:var(--green);color:#fff;font-weight:600;}
+  .nav-item .ico{color:rgba(255,255,255,.62);}
+  .nav-item:hover .ico{color:#fff;}
+  .nav-item.active .ico{color:#fff;}
+  .nav-badge{background:var(--red);}
+
+  /* WHITE TOP HEADER */
+  .header-bar{background:#fff;border-bottom:1px solid var(--line);color:var(--ink);box-shadow:0 1px 3px rgba(20,30,50,.04);}
+  .header-toggle{background:#fff;border:1px solid var(--line);color:var(--ink-soft);}
+  .header-toggle:hover{background:#f2f4f7;}
+  .header-brand .logo{color:var(--green-dark);}
+  .header-search input{background:#f4f6f9;border:1px solid var(--line);color:var(--ink);border-radius:8px;}
+  .header-search input::placeholder{color:var(--ink-faint);}
+  .header-btn{background:#fff;border:1px solid var(--line);color:var(--ink-soft);border-radius:8px;position:relative;}
+  .header-btn:hover{background:#f2f4f7;}
+  .header-user{background:#fff;border:1px solid var(--line);border-radius:22px;padding:4px 12px 4px 5px;}
+  .header-user .avatar{background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;}
+  .header-user .header-name{font-size:12.5px;font-weight:700;color:var(--ink);line-height:1.15;}
+  .header-user .header-role{font-size:10.5px;color:var(--ink-faint);font-weight:600;}
+  .header-caret{font-size:9px;color:var(--ink-faint);}
+  .header-dot{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:9.5px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;}
+
+  /* WELCOME BANNER CARD (one unified container) */
+  .pd-welcome{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;background:linear-gradient(120deg,var(--green) 0%,var(--green-dark) 72%);border-radius:14px;padding:18px 24px;color:#fff;margin:16px 0 16px;box-shadow:0 4px 14px rgba(22,112,60,.22);position:relative;overflow:hidden;}
+  .pd-welcome::after{content:"";position:absolute;right:-40px;top:-70px;width:230px;height:230px;border-radius:50%;background:rgba(255,255,255,.07);pointer-events:none;}
+  .pd-welcome::before{content:"";position:absolute;right:130px;bottom:-100px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.05);pointer-events:none;}
+  .pd-wc-left{display:flex;align-items:center;position:relative;z-index:1;}
+  .pd-wc-title{font-size:20px;font-weight:800;letter-spacing:.03em;line-height:1.25;}
+  .pd-wc-sub{font-size:12.5px;font-weight:500;opacity:.85;margin-top:4px;}
+  .pd-wc-right{display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:relative;z-index:1;}
+  .pd-wc-block{display:flex;align-items:center;gap:10px;}
+  .pd-wc-bico{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .pd-wc-bdate{font-size:12.5px;font-weight:700;white-space:nowrap;}
+  .pd-wc-btime{font-size:11px;opacity:.8;font-weight:600;}
+  .pd-wc-bline{font-size:11px;font-weight:600;opacity:.85;white-space:nowrap;}
+  .pd-wc-ok{font-weight:800;opacity:1;}
+  .pd-wc-sep{width:1px;height:36px;background:rgba(255,255,255,.25);}
+  .pd-wc-selects{display:flex;gap:8px;align-items:center;}
+  .pd-select.white{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.16);color:#fff;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;}
+  .pd-select.white option{color:var(--ink);background:#fff;}
+  @media(max-width:1100px){
+    .pd-wc-sep{display:none;}
+    .pd-welcome{align-items:flex-start;flex-direction:column;}
+  }
+
+  /* SECONDARY METRIC STRIP */
+  .pd-strip{display:flex;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:14px 6px;margin-bottom:16px;flex-wrap:wrap;}
+  .pd-strip-item{flex:1;min-width:120px;padding:2px 18px;border-left:1px solid var(--line);}
+  .pd-strip-item:first-child{border-left:none;}
+  .pd-strip-item .l{font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint);}
+  .pd-strip-item .v{font-size:19px;font-weight:800;color:var(--ink);margin-top:3px;}
+  .pd-strip-item.accent .v{color:var(--accent);}
+  .pd-strip-item.pos .v{color:var(--green);}
+  .pd-strip-item.neg .v{color:var(--red);}
+
+  /* NOTIFICATIONS COMPONENT (identical across roles) */
+  .pd-notif-list{display:flex;flex-direction:column;gap:9px;}
+  .pd-notif-item{display:flex;gap:11px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fbfcfd;cursor:pointer;transition:background .12s,border-color .12s;align-items:flex-start;}
+  .pd-notif-item:hover{background:var(--card);border-color:var(--green);}
+  .pd-notif-item.urgent{border-color:rgba(227,77,77,.35);background:var(--red-light);}
+  .pd-notif-ico{width:33px;height:33px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+  .pd-notif-ico.blue{background:var(--blue-light);color:var(--blue);}
+  .pd-notif-ico.amber{background:var(--amber-light);color:var(--amber);}
+  .pd-notif-ico.green{background:var(--green-light);color:var(--green);}
+  .pd-notif-ico.purple{background:var(--purple-light);color:var(--purple);}
+  .pd-notif-title{font-size:12.5px;font-weight:700;color:var(--ink);}
+  .pd-notif-sub{font-size:11px;color:var(--ink-faint);margin-top:2px;}
+  .pd-notif-time{margin-left:auto;font-size:10.5px;color:var(--ink-faint);font-weight:600;white-space:nowrap;}
+
+  /* AUDIT TRAIL TIMELINE (identical across roles) */
+  .pd-timeline{display:flex;flex-direction:column;}
+  .pd-tl-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);align-items:flex-start;}
+  .pd-tl-item:last-child{border-bottom:none;padding-bottom:0;}
+  .pd-tl-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);margin-top:5px;flex-shrink:0;}
+  .pd-tl-time{font-size:10.5px;color:var(--ink-faint);font-weight:600;min-width:60px;margin-top:2px;}
+  .pd-tl-body{flex:1;}
+  .pd-tl-action{font-size:12.5px;font-weight:700;color:var(--ink);}
+  .pd-tl-ref{font-size:10.5px;color:var(--ink-faint);font-weight:600;}
+  .pd-tl-meta{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+
+  /* CONFIRMATION MODAL (zero-trust sensitive actions) */
+  .pd-modal-overlay{position:fixed;inset:0;background:rgba(13,25,18,.55);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+  .pd-modal-overlay.show{display:flex;}
+  .pd-modal{background:#fff;border-radius:14px;width:430px;max-width:94vw;padding:22px 24px;box-shadow:0 20px 60px rgba(0,0,0,.28);border-top:4px solid var(--green);}
+  .pd-modal-title{font-size:13px;font-weight:800;letter-spacing:.07em;color:var(--green-dark);margin-bottom:13px;display:flex;align-items:center;gap:8px;}
+  .pd-modal-row{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px;}
+  .pd-modal-row span{color:var(--ink-soft);font-weight:600;}
+  .pd-modal-row b{color:var(--ink);font-weight:800;text-align:right;}
+  .pd-modal-msg{font-size:12px;color:var(--ink-soft);margin:12px 0 16px;line-height:1.5;}
+  .pd-modal-actions{display:flex;justify-content:flex-end;gap:10px;}
+
+  /* QUICK ACTIONS */
+  .pd-qa-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
+  .pd-qa-btn{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:11px;border:1px solid var(--line);background:var(--card);cursor:pointer;transition:background .12s,border-color .12s;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--ink);text-align:left;}
+  .pd-qa-btn:hover{background:var(--green-light);border-color:var(--green);}
+  .pd-qa-btn i{width:32px;height:32px;border-radius:9px;background:var(--green-light);color:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+
+  /* ===== pd- core components (dashboard system) ===== */
+  .pd-header{background:linear-gradient(135deg,var(--green),var(--green-dark));border-radius:14px;padding:20px 26px;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:16px;box-shadow:0 2px 10px rgba(22,112,60,.18);}
+  .pd-hello{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.85;}
+  .pd-title{font-size:26px;font-weight:800;letter-spacing:-.01em;line-height:1.15;}
+  .pd-subtitle{font-size:13px;font-weight:600;opacity:.8;}
+  .pd-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .pd-select{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.18);color:#fff;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;}
+  .pd-select option{color:var(--ink);background:#fff;}
+  .pd-select.light{color:var(--ink);background:var(--card);border-color:var(--line);}
+  .pd-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:16px;}
+  .pd-kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:15px 16px;cursor:pointer;display:flex;flex-direction:column;gap:6px;transition:transform .12s,box-shadow .12s,border-color .12s;}
+  .pd-kpi:hover{transform:translateY(-2px);border-color:var(--green);box-shadow:0 6px 16px rgba(20,30,50,.09);}
+  .pd-kpi-top{display:flex;align-items:center;justify-content:space-between;}
+  .pd-kpi-ico{width:33px;height:33px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .pd-kpi-ico.green{background:var(--green-light);color:var(--green-dark);}
+  .pd-kpi-ico.blue{background:var(--blue-light);color:var(--blue);}
+  .pd-kpi-ico.amber{background:var(--amber-light);color:var(--amber);}
+  .pd-kpi-ico.red{background:var(--red-light);color:var(--red);}
+  .pd-kpi-ico.purple{background:var(--purple-light);color:var(--purple);}
+  .pd-kpi-label{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint);}
+  .pd-kpi-value{font-size:22px;font-weight:800;line-height:1;}
+  .pd-kpi-sub{font-size:11px;color:var(--ink-soft);font-weight:600;}
+  .pd-kpi-link{font-size:10.5px;color:var(--green);font-weight:700;margin-top:auto;padding-top:4px;}
+  .pd-kpi.alert .pd-kpi-value{color:var(--amber);}
+  .pd-kpi.fund .pd-kpi-value{color:var(--green-dark);font-size:19px;}
+  .pd-row{display:grid;gap:16px;margin-bottom:16px;align-items:start;}
+  .pd-row.pdmain{grid-template-columns:2fr 1fr;}
+  .pd-row.pdcols3{grid-template-columns:1fr 1fr 1fr;}
+  .pd-row.pdcols2{grid-template-columns:1.55fr 1fr;}
+  .pd-card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:20px 22px;margin-bottom:16px;}
+  .pd-row .pd-card{margin-bottom:0;}
+  .pd-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .pd-card-title{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);}
+  .pd-card-sub{font-size:11.5px;color:var(--ink-faint);margin-top:3px;}
+  .pd-link-btn{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 11px;font-size:11px;font-weight:700;color:var(--green-dark);cursor:pointer;transition:background .12s,border-color .12s;white-space:nowrap;}
+  .pd-link-btn:hover{background:var(--green-light);border-color:var(--green);}
+  .pd-reconciled{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--green);background:var(--green-light);border-radius:20px;padding:3px 10px;}
+  .pd-reconciled .dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
+  .pd-fund-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;}
+  .pd-flow{border-radius:10px;padding:12px 15px;border:1px solid var(--line);background:#fbfcfd;}
+  .pd-flow .fl{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);}
+  .pd-flow .fv{font-size:17px;font-weight:800;margin-top:5px;color:var(--ink);}
+  .pd-flow.inflow{background:var(--green-light);border-color:rgba(30,143,78,.35);}
+  .pd-flow.inflow .fv{color:var(--green-dark);}
+  .pd-flow.outflow{background:var(--red-light);border-color:rgba(227,77,77,.35);}
+  .pd-flow.outflow .fv{color:#a12c2c;}
+  .pd-flow.balance{background:var(--green-dark);border-color:var(--green-dark);}
+  .pd-flow.balance .fl{color:rgba(255,255,255,.75);}
+  .pd-flow.balance .fv{color:#fff;}
+  .pd-fund-metrics{display:flex;gap:12px;flex-wrap:wrap;padding-top:13px;border-top:1px solid var(--line);}
+  .pd-fmetric{flex:1;min-width:130px;background:#fbfcfd;border:1px solid var(--line);border-radius:10px;padding:10px 14px;}
+  .pd-fmetric .fl{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);}
+  .pd-fmetric .fv{font-size:15px;font-weight:800;margin-top:4px;}
+  .pd-pos{color:var(--green);}
+  .pd-neg{color:var(--red);}
+  .pd-note{font-size:11px;color:var(--ink-faint);margin-top:12px;display:flex;align-items:center;gap:6px;}
+  .pd-actions{display:flex;flex-direction:column;gap:9px;}
+  .pd-action{display:flex;align-items:center;gap:11px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;transition:background .12s,border-color .12s;}
+  .pd-action:hover{background:#f8f9fa;border-color:var(--green);}
+  .pd-action .ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;}
+  .pd-action .ico.blue{background:var(--blue-light);color:var(--blue);}
+  .pd-action .ico.amber{background:var(--amber-light);color:var(--amber);}
+  .pd-action .ico.green{background:var(--green-light);color:var(--green);}
+  .pd-action .ico.purple{background:var(--purple-light);color:var(--purple);}
+  .pd-action .ico.red{background:var(--red-light);color:var(--red);}
+  .pd-action .t{font-size:12.5px;font-weight:700;}
+  .pd-action .d{font-size:10.5px;color:var(--ink-faint);margin-top:1px;}
+  .pd-action .n{margin-left:auto;font-size:19px;font-weight:800;min-width:26px;text-align:center;}
+  .pd-action .n.zero{color:var(--ink-faint);}
+  .pd-action-footer{display:flex;justify-content:space-between;align-items:center;margin-top:13px;padding-top:13px;border-top:1px solid var(--line);}
+  .pd-action-footer .tt{font-size:12px;color:var(--ink-soft);font-weight:600;}
+  .pd-donut-wrap{position:relative;height:190px;}
+  .pd-donut-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;}
+  .pd-donut-center .n{font-size:20px;font-weight:800;}
+  .pd-donut-center .l{font-size:10px;color:var(--ink-faint);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+  .status-breakdown{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
+  .status-item{display:flex;align-items:center;gap:8px;font-size:13px;}
+  .status-dot2{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .status-dot2.green{background:var(--green);}
+  .status-dot2.amber{background:var(--amber);}
+  .status-dot2.red{background:var(--red);}
+  .status-label{flex:1;font-weight:600;color:var(--ink-soft);}
+  .status-count{font-weight:700;color:var(--ink);min-width:30px;text-align:right;}
+  .status-percent{font-weight:700;color:var(--ink-faint);min-width:40px;text-align:right;}
+  .pd-chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:13px;}
+  .pd-chip{background:#fbfcfd;border:1px solid var(--line);border-radius:9px;padding:8px 13px;font-size:11px;color:var(--ink-soft);font-weight:600;}
+  .pd-chip b{display:block;font-size:14px;font-weight:800;color:var(--ink);margin-top:2px;}
+  .pd-chip b.pd-pos{color:var(--green);}
+  .pd-chip b.up{color:var(--green-dark);}
+  .pd-chip b.down{color:var(--red);}
+  .pd-bk-section{background:#fbfcfd;border:1px solid var(--line);border-radius:10px;padding:14px 16px;}
+  .pd-bk-title{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:9px;}
+  .pd-bk-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:12px;}
+  .pd-bk-row:last-child{border-bottom:none;}
+  .pd-bk-row .l{color:var(--ink-soft);font-weight:600;}
+  .pd-bk-row .v{font-weight:800;}
+  .pd-bk-row .v.pos{color:var(--green);}
+  .pd-bk-row .v.neg{color:var(--red);}
+  .pd-bk-row .v.total{color:var(--green-dark);font-size:13.5px;}
+  .pd-pipe{display:flex;flex-direction:column;gap:11px;}
+  .pd-pipe-item{border:1px solid var(--line);border-radius:10px;background:#fbfcfd;padding:12px 14px;}
+  .pd-pipe-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;}
+  .pd-pipe-name{font-size:12px;font-weight:700;}
+  .pd-pipe-pct{font-size:12px;font-weight:800;color:var(--green);}
+  .pd-pipe-bar{height:7px;border-radius:4px;background:var(--line);overflow:hidden;}
+  .pd-pipe-fill{height:100%;border-radius:4px;}
+  .pd-pipe-meta{display:flex;gap:12px;font-size:10.5px;color:var(--ink-soft);margin-top:6px;}
+  @media(max-width:1500px){
+    .pd-kpis{grid-template-columns:repeat(3,1fr);}
+    .pd-row.pdmain,.pd-row.pdcols2{grid-template-columns:1fr;}
+  }
+  @media(max-width:1100px){
+    .pd-row.pdcols3{grid-template-columns:1fr;}
+    .pd-fund-flow{grid-template-columns:1fr 1fr;}
+  }
+  @media(max-width:680px){
+    .pd-kpis{grid-template-columns:1fr 1fr;}
+    .pd-fund-flow{grid-template-columns:1fr;}
+    .pd-pagehead{flex-direction:column;align-items:flex-start;}
+  }
+
+
+  /* ===== UNIFIED DASHBOARD GRID ALIGNMENT (layout only, no visual restyle) ===== */
+  .dashboard-content{max-width:1720px;margin:0 auto;}
+  .pd-card{padding:20px;overflow:hidden;}
+  .pd-kpis{gap:16px;}
+  .pd-kpis > .pd-kpi{min-width:0;width:100%;height:100%;padding:16px;}
+  .pd-row{align-items:stretch;}
+  .pd-row > .pd-card{min-width:0;}
+  .dashboard-content .chart-wrap{height:220px;}
+  .dashboard-content .chart-wrap.small{height:180px;}
+  @media(max-width:1500px){
+    .pd-kpis{grid-template-columns:repeat(3,minmax(0,1fr));}
+    .pd-row.pdmain,.pd-row.pdcols2{grid-template-columns:minmax(0,1fr);}
+  }
+  @media(max-width:1100px){
+    .pd-row.pdcols3{grid-template-columns:repeat(2,minmax(0,1fr));}
+  }
+  @media(max-width:680px){
+    .pd-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .pd-row.pdcols3{grid-template-columns:minmax(0,1fr);}
+    .pd-fund-flow{grid-template-columns:minmax(0,1fr);}
+  }
+
+
+  .dashboard-content{padding-top:24px;}
+
+  /* ===== ROW CARD HEIGHT FILL: equal heights without dead space ===== */
+  .pd-row{align-items:stretch;}
+  .pd-row > .pd-card{display:flex;flex-direction:column;min-height:0;}
+  .pd-row > .pd-card > .pd-action-footer{margin-top:auto;}
+  .pd-row .chart-wrap{flex:1;min-height:220px;}
+  .pd-row .chart-wrap.small{min-height:180px;}
+  .pd-row .pd-donut-wrap{flex:1;min-height:190px;}
+  .pd-row .pd-fund-flow{flex:1;align-content:stretch;}
+  .pd-row .pd-flow{display:flex;flex-direction:column;justify-content:center;flex:1;min-height:96px;}
+  .pd-row > .pd-card > .pd-fund-metrics{margin-top:auto;}
+  .pd-row > .pd-card > .pd-fund-flow + .pd-fund-metrics{margin-top:auto;}
+  .pd-row .pd-pipe{flex:1;justify-content:space-evenly;}
+  .pd-row .pd-notif-list{flex:1;justify-content:space-evenly;}
+  .pd-row .pd-actions{flex:1;justify-content:space-evenly;}
+  .pd-row .pd-timeline{flex:1;justify-content:space-evenly;}
+  .pd-row .pd-tx-list{flex:1;justify-content:space-evenly;}
+  .pd-row .status-breakdown{margin-top:auto;}
+
+
+  /* ===== REPORTS MANAGEMENT (universal report builder) ===== */
+  .rpt-builder{display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start;}
+  .rpt-panel{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:20px;margin-bottom:16px;}
+  .rpt-panel-title{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);}
+  .rpt-panel-sub{font-size:11.5px;color:var(--ink-faint);margin-top:3px;}
+  .rpt-field{margin-bottom:12px;}
+  .rpt-field label{display:block;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:5px;}
+  .rpt-field select,.rpt-field input{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:12.5px;font-family:inherit;font-weight:600;color:var(--ink);background:#fbfcfd;}
+  .rpt-field select:focus,.rpt-field input:focus{outline:none;border-color:var(--green);}
+  .rpt-field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .rpt-btn{border:none;border-radius:9px;padding:10px 14px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:background .12s;}
+  .rpt-btn.primary{background:var(--green);color:#fff;width:100%;}
+  .rpt-btn.primary:hover{background:var(--green-dark);}
+  .rpt-btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink-soft);}
+  .rpt-btn.ghost:hover{background:#f2f4f7;color:var(--ink);}
+  .rpt-btn.sm{padding:7px 11px;font-size:11px;border-radius:8px;}
+  .rpt-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .rpt-chip{display:inline-flex;align-items:center;gap:7px;background:var(--green-light);border:1px solid rgba(30,143,78,.35);color:var(--green-dark);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;}
+  .rpt-chip button{border:none;background:none;color:var(--green-dark);cursor:pointer;font-size:12px;line-height:1;padding:0;font-weight:800;}
+  .rpt-chip.none{background:#fbfcfd;border-color:var(--line);color:var(--ink-faint);}
+  .rpt-count{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--ink);background:var(--blue-light);border:1px solid rgba(47,111,237,.3);border-radius:9px;padding:9px 13px;margin-bottom:14px;}
+  .rpt-count b{color:var(--blue);}
+  .rpt-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;}
+  .rpt-sum-item{background:#fbfcfd;border:1px solid var(--line);border-radius:10px;padding:10px 13px;}
+  .rpt-sum-item .l{font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);}
+  .rpt-sum-item .v{font-size:16px;font-weight:800;margin-top:3px;color:var(--ink);}
+  .rpt-sum-item .v.pos{color:var(--green);}
+  .rpt-sum-item .v.neg{color:var(--red);}
+  .rpt-preview-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .rpt-preview-table th{padding:9px 11px;text-align:left;font-weight:800;color:var(--ink-faint);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap;}
+  .rpt-preview-table td{padding:9px 11px;border-bottom:1px solid var(--line);color:var(--ink-soft);}
+  .rpt-preview-table tr.total td{border-bottom:none;border-top:2px solid var(--ink);font-weight:800;color:var(--ink);}
+  .rpt-table-wrap{overflow-x:auto;}
+  .rpt-hint{background:var(--amber-light);border:1px solid rgba(240,160,32,.4);border-radius:9px;padding:10px 13px;font-size:12px;color:var(--amber);font-weight:600;}
+  .rpt-history td .rpt-link{border:none;background:none;color:var(--green);font-weight:700;font-size:11.5px;cursor:pointer;font-family:inherit;padding:0 6px;}
+  .rpt-history td .rpt-link:hover{text-decoration:underline;}
+  /* print preview modal */
+  .rpt-modal-overlay{position:fixed;inset:0;background:rgba(13,25,18,.62);display:none;align-items:flex-start;justify-content:center;z-index:1200;padding:24px;overflow-y:auto;}
+  .rpt-modal-overlay.show{display:flex;}
+  .rpt-modal-bar{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;background:var(--green-dark);color:#fff;border-radius:10px 10px 0 0;padding:11px 16px;font-size:12px;font-weight:700;z-index:2;}
+  .rpt-modal-bar .rpt-btn{background:#fff;color:var(--green-dark);}
+  .rpt-sheet{background:#fff;width:210mm;max-width:100%;min-height:297mm;margin:0 auto;padding:14mm 12mm;box-shadow:0 24px 70px rgba(0,0,0,.35);color:#1a1a1a;}
+  /* official A4 document (screen preview + print) */
+  .rpt-doc{font-family:Georgia,'Times New Roman',serif;color:#111;font-size:12.5px;line-height:1.5;}
+  .rpt-doc .rptd-head{text-align:center;border-bottom:3px double #1a1a1a;padding-bottom:10px;margin-bottom:14px;}
+  .rpt-doc .rptd-head .univ{font-size:17px;font-weight:700;letter-spacing:.06em;}
+  .rpt-doc .rptd-head .sys{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#444;margin-top:2px;}
+  .rpt-doc .rptd-title{text-align:center;font-size:16px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin:12px 0 2px;}
+  .rpt-doc .rptd-period{text-align:center;font-size:12px;color:#333;margin-bottom:12px;}
+  .rpt-doc table{width:100%;border-collapse:collapse;font-size:11px;margin:8px 0;}
+  .rpt-doc th,.rpt-doc td{border:1px solid #999;padding:5px 7px;text-align:left;}
+  .rpt-doc th{background:#e8efe9;font-weight:700;}
+  .rpt-doc tr.total td{font-weight:700;background:#f2f2f2;}
+  .rpt-doc .rptd-sec{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:#1e5c38;color:#fff;padding:4px 9px;margin:14px 0 7px;}
+  .rpt-doc .rptd-meta{display:grid;grid-template-columns:1fr 1fr;gap:2px 24px;font-size:11.5px;margin-bottom:10px;}
+  .rpt-doc .rptd-meta div{display:flex;justify-content:space-between;border-bottom:1px dotted #bbb;padding:2px 0;}
+  .rpt-doc .rptd-meta span{color:#555;}
+  .rpt-doc .rptd-meta b{font-weight:700;}
+  .rpt-doc .rptd-sign{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px;font-size:11px;text-align:center;}
+  .rpt-doc .rptd-sign .line{border-top:1px solid #111;margin-top:34px;padding-top:4px;font-weight:700;}
+  .rpt-doc .rptd-sign .role{color:#555;font-size:10px;}
+  .rpt-doc .rptd-foot{display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid #999;margin-top:20px;padding-top:8px;font-size:10px;color:#555;}
+  .rpt-doc .rptd-qr{display:grid;grid-template-columns:repeat(11,1fr);width:66px;}
+  .rpt-doc .rptd-qr i{display:block;padding-bottom:100%;background:#111;}
+  .rpt-doc .rptd-qr i.w{background:#fff;}
+  #rptPrintWrap{display:none;}
+  @media print{
+    @page{size:A4;margin:12mm;}
+    body>*{display:none!important;}
+    body>#rptPrintWrap{display:block!important;}
+  }
+  @media(max-width:1100px){.rpt-builder{grid-template-columns:1fr;}}
+
+</style>
+</head>
+<body>
+  <div class="app">
+                      <div class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">IC</div>
+        <div class="brand-text">
+          <div class="t1">ISU CAUFA</div>
+          <div class="t2">FMIS · AUDITOR PORTAL</div>
+        </div>
+      </div>
+      
+      <div class="nav-group-title">DASHBOARD</div>
+      <div class="nav-item active" data-view="dashboard"><span class="ico"><i class="fas fa-th-large"></i></span> Overview</div>
+      <div class="nav-group-title">AUDIT</div>
+      <div class="nav-item" data-view="payments-auditing" data-badge="payments-auditing"><span class="ico"><i class="fas fa-file-invoice-dollar"></i></span> Payments Auditing <span class="nav-badge"></span></div>
+      <div class="nav-item" data-view="aid-claims-post-auditing" data-badge="aid-claims-post-auditing"><span class="ico"><i class="fas fa-heartbeat"></i></span> Aid Claims Post Auditing <span class="nav-badge"></span></div>
+      <div class="nav-item" data-view="aid-post-verifications" data-badge="aid-post-verifications"><span class="ico"><i class="fas fa-check-circle"></i></span> Aid Post Verifications <span class="nav-badge"></span></div>
+      <div class="nav-item" data-view="reports-verification"><span class="ico"><i class="fas fa-clipboard-check"></i></span> Reports for Verification <span class="nav-badge" id="rptVerBadge" style="display:none;"></span></div>
+      <div class="nav-group-title">VERIFIED REGISTRY</div>
+      <div class="nav-item" data-view="member-list"><span class="ico"><i class="fas fa-users"></i></span> Member Registry</div>
+      <div class="nav-item" data-view="paid-members"><span class="ico"><i class="fas fa-check-circle"></i></span> Paid Members</div>
+      <div class="nav-item" data-view="pending-members"><span class="ico"><i class="fas fa-clock"></i></span> Pending Members</div>
+      <div class="nav-item" data-view="unpaid-members"><span class="ico"><i class="fas fa-times-circle"></i></span> Unpaid Members</div>
+      <div class="nav-item" data-view="registration-review" data-badge="registration-review"><span class="ico"><i class="fas fa-user-plus"></i></span> Registration Review <span class="nav-badge"></span></div>
+      <div class="nav-item" data-view="audited-logs"><span class="ico"><i class="fas fa-clipboard-list"></i></span> Audited Logs</div>
+      <div class="nav-group-title">COMPLIANCE</div>
+      <div class="nav-item" data-view="department-heatmap"><span class="ico"><i class="fas fa-chart-bar"></i></span> Department Compliance Heatmap</div>
+      <div class="nav-group-title">FUND LEDGER</div>
+      <div class="nav-item" data-view="fund-ledger"><span class="ico"><i class="fas fa-wallet"></i></span> Full Fund Ledger</div>
+      <div class="nav-item" data-view="member-deductions"><span class="ico"><i class="fas fa-file-invoice"></i></span> Member Deductions</div>
+      <div class="nav-group-title">AUDIT REPORTS</div>
+      <div class="nav-item" data-view="generate-certifications"><span class="ico"><i class="fas fa-file-certificate"></i></span> Audit Reports</div>
+      <div class="nav-item" data-view="generate-certifications"><span class="ico"><i class="fas fa-stamp"></i></span> Generate Certifications</div>
+      <div class="nav-group-title">HISTORY</div>
+      <div class="nav-item" data-view="audited-logs"><span class="ico"><i class="fas fa-history"></i></span> Audit Trail</div>
+      <div class="nav-group-title">SYSTEM</div>
+      <div class="nav-item"><span class="ico"><i class="fas fa-sign-out-alt"></i></span> Logout</div>
+    </div>
+    <div class="main">
+          <div class="header-bar">
+      <div class="header-brand">
+        <div class="header-toggle" id="sidebar-toggle"><i class="fas fa-bars"></i></div>
+       
+      </div>
+      <div class="header-search">
+        <input type="text" placeholder="Search member, reference, transaction...">
+      </div>
+      <div class="header-actions">
+        <div class="header-btn" title="Notifications"><i class="fas fa-bell"></i><span class="header-dot" id="headerBellDot" style="display:none;">0</span></div>
+        <div class="header-user">
+          <div class="avatar">MS</div>
+          <div><div class="header-name">Maria Santos</div><div class="header-role">Auditor</div></div>
+          <i class="fas fa-chevron-down header-caret"></i>
+        </div>
+      </div>
+    </div>
+    <div class="dashboard-content">
+        <div id="view-root"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  const DB = {
+    duesStatus: { total: 252, paid: 190, pending: 27, unpaid: 35 },
+    fundBalance: 1250000,
+    members: [
+      {id:"EMP-001",name:"Ana Reyes",dept:"College of Engineering",status:"paid",joinDate:"Jan 15, 2020",lastPayment:"Aug 15, 2026",paymentHistory:[{date:"Aug 15, 2026",amount:500,method:"Salary Deduction"},{date:"Jul 15, 2026",amount:500,method:"Salary Deduction"}],medicalAidHistory:[{date:"Mar 10, 2025",amount:15000,reason:"Surgery",status:"Approved"}],deathAidHistory:[],contributionHistory:[{aid:"Medical Aid",amount:500,date:"Aug 10, 2026"},{aid:"Death Aid",amount:1000,date:"Jul 20, 2026"}]},
+      {id:"EMP-002",name:"Mark Villanueva",dept:"College of Nursing",status:"paid",joinDate:"Feb 20, 2020",lastPayment:"Aug 18, 2026",paymentHistory:[{date:"Aug 18, 2026",amount:500,method:"Bank Transfer"},{date:"Jul 18, 2026",amount:500,method:"Bank Transfer"}],medicalAidHistory:[],deathAidHistory:[{date:"Nov 15, 2024",amount:25000,reason:"Family Member",status:"Approved"}],contributionHistory:[{aid:"Death Aid",amount:2000,date:"Aug 15, 2026"}]},
+      {id:"EMP-003",name:"Liza Fernandez",dept:"College of Agriculture",status:"pending",joinDate:"Mar 10, 2020",lastPayment:"Jul 15, 2026",paymentHistory:[{date:"Jul 15, 2026",amount:500,method:"GCash"}],medicalAidHistory:[{date:"Jun 20, 2025",amount:12000,reason:"Hospitalization",status:"Approved"}],deathAidHistory:[],contributionHistory:[{aid:"Medical Aid",amount:800,date:"Jul 10, 2026"}]},
+      {id:"EMP-011",name:"David Tan",dept:"College of Engineering",status:"paid",joinDate:"Jan 20, 2020",lastPayment:"Aug 15, 2026",paymentHistory:[{date:"Aug 15, 2026",amount:500,method:"Salary Deduction"}],medicalAidHistory:[],deathAidHistory:[],contributionHistory:[{aid:"Medical Aid",amount:450,date:"Aug 12, 2026"}]},
+      {id:"EMP-004",name:"Jose Ramos",dept:"College of Business",status:"unpaid",joinDate:"Apr 5, 2020",lastPayment:"Jun 20, 2026",paymentHistory:[{date:"Jun 20, 2026",amount:500,method:"OTC"}],medicalAidHistory:[],deathAidHistory:[],contributionHistory:[]},
+      {id:"EMP-005",name:"Maria Cruz",dept:"College of Education",status:"paid",joinDate:"May 12, 2020",lastPayment:"Aug 20, 2026",paymentHistory:[{date:"Aug 20, 2026",amount:500,method:"Salary Deduction"},{date:"Jul 20, 2026",amount:500,method:"Salary Deduction"}],medicalAidHistory:[{date:"Feb 10, 2025",amount:8000,reason:"Checkup",status:"Approved"}],deathAidHistory:[],contributionHistory:[{aid:"Medical Aid",amount:600,date:"Aug 18, 2026"}]},
+      {id:"EMP-006",name:"Pedro Santos",dept:"CCSICT",status:"paid",joinDate:"Jun 8, 2020",lastPayment:"Aug 22, 2026",paymentHistory:[{date:"Aug 22, 2026",amount:500,method:"Salary Deduction"},{date:"Jul 22, 2026",amount:500,method:"Salary Deduction"}],medicalAidHistory:[],deathAidHistory:[{date:"Jan 20, 2026",amount:20000,reason:"Spouse",status:"Approved"}],contributionHistory:[{aid:"Death Aid",amount:1500,date:"Aug 20, 2026"}]},
+      {id:"EMP-007",name:"Cristina Bautista",dept:"COED",status:"pending",joinDate:"Jul 22, 2020",lastPayment:"Jul 25, 2026",paymentHistory:[{date:"Jul 25, 2026",amount:500,method:"GCash"}],medicalAidHistory:[],deathAidHistory:[],contributionHistory:[]},
+      {id:"EMP-008",name:"Ramon dela Peña",dept:"CBAA",status:"unpaid",joinDate:"Aug 15, 2020",lastPayment:"May 10, 2026",paymentHistory:[{date:"May 10, 2026",amount:500,method:"OTC"}],medicalAidHistory:[{date:"Sep 15, 2024",amount:10000,reason:"Accident",status:"Approved"}],deathAidHistory:[],contributionHistory:[]},
+      {id:"EMP-009",name:"Sofia Garcia",dept:"CAS",status:"paid",joinDate:"Sep 1, 2020",lastPayment:"Aug 10, 2026",paymentHistory:[{date:"Aug 10, 2026",amount:500,method:"Bank Transfer"},{date:"Jul 10, 2026",amount:500,method:"Bank Transfer"}],medicalAidHistory:[],deathAidHistory:[],contributionHistory:[{aid:"Medical Aid",amount:400,date:"Aug 5, 2026"}]},
+      {id:"EMP-010",name:"Antonio Mendez",dept:"CON",status:"paid",joinDate:"Oct 20, 2020",lastPayment:"Aug 12, 2026",paymentHistory:[{date:"Aug 12, 2026",amount:500,method:"Salary Deduction"},{date:"Jul 12, 2026",amount:500,method:"Salary Deduction"}],medicalAidHistory:[{date:"Apr 20, 2025",amount:18000,reason:"Surgery",status:"Approved"}],deathAidHistory:[],contributionHistory:[{aid:"Medical Aid",amount:700,date:"Aug 10, 2026"}]},
+      {id:"EMP-011",name:"David Tan",dept:"College of Engineering",status:"paid",joinDate:"Jan 20, 2020",lastPayment:"Aug 15, 2026",paymentHistory:[{date:"Aug 15, 2026",amount:500,method:"Salary Deduction"}],medicalAidHistory:[],deathAidHistory:[],contributionHistory:[{aid:"Medical Aid",amount:450,date:"Aug 12, 2026"}]},
+      {id:"EMP-012",name:"Elena Rodriguez",dept:"College of Nursing",status:"pending",joinDate:"Feb 25, 2020",lastPayment:"Jul 20, 2026",paymentHistory:[{date:"Jul 20, 2026",amount:500,method:"Bank Transfer"}],medicalAidHistory:[{date:"May 15, 2025",amount:14000,reason:"Surgery",status:"Approved"}],deathAidHistory:[],contributionHistory:[{aid:"Medical Aid",amount:650,date:"Jul 25, 2026"}]}
+    ],
+    paymentCompliance: [
+      { dept: 'CCSICT', members: 65, paid: 60, pending: 3, unpaid: 2, compliance: 92, collection: 6000 },
+      { dept: 'COED', members: 55, paid: 48, pending: 4, unpaid: 3, compliance: 87, collection: 4800 },
+      { dept: 'CBAA', members: 48, paid: 36, pending: 6, unpaid: 6, compliance: 76, collection: 3600 },
+      { dept: 'CAS', members: 42, paid: 20, pending: 10, unpaid: 12, compliance: 48, collection: 2000 },
+      { dept: 'CON', members: 40, paid: 23, pending: 2, unpaid: 15, compliance: 58, collection: 2300 },
+      { dept: 'Engineering', members: 20, paid: 18, pending: 1, unpaid: 1, compliance: 90, collection: 1800 },
+      { dept: 'Nursing', members: 15, paid: 13, pending: 1, unpaid: 1, compliance: 87, collection: 1300 },
+      { dept: 'Agriculture', members: 18, paid: 14, pending: 2, unpaid: 2, compliance: 78, collection: 1400 },
+      { dept: 'Business', members: 12, paid: 10, pending: 1, unpaid: 1, compliance: 83, collection: 1000 },
+      { dept: 'Education', members: 20, paid: 18, pending: 1, unpaid: 1, compliance: 90, collection: 1800 }
+    ],
+    auditPipeline: {
+      payments: { verified: 145, pending: 12, returned: 8 },
+      aidClaims: { verified: 18, pending: 4, returned: 2 },
+      contributions: { verified: 22, pending: 7, returned: 3 }
+    },
+    registrationReview: [
+      {id:"REG-2026-051",name:"Ana Reyes",empId:"EMP-3391",dept:"College of Engineering",date:"Aug 27, 2026",amount:500,method:"GCash",status:"pending",createdBy:"Self-Registered",createdAt:"Aug 27, 2026 10:15 AM"},
+      {id:"REG-2026-052",name:"Mark Villanueva",empId:"EMP-3402",dept:"College of Nursing",date:"Aug 26, 2026",amount:500,method:"OTC",status:"pending",createdBy:"Self-Registered",createdAt:"Aug 26, 2026 3:45 PM"},
+      {id:"REG-2026-053",name:"Liza Fernandez",empId:"EMP-3407",dept:"College of Agriculture",date:"Aug 25, 2026",amount:500,method:"Bank Transfer",status:"pending",createdBy:"Self-Registered",createdAt:"Aug 25, 2026 11:20 AM"},
+      {id:"REG-2026-054",name:"Jose Ramos",empId:"EMP-3412",dept:"College of Business",date:"Aug 24, 2026",amount:500,method:"Salary Deduction",status:"pending",createdBy:"Self-Registered",createdAt:"Aug 24, 2026 2:30 PM"},
+      {id:"REG-2026-055",name:"Maria Cruz",empId:"EMP-3418",dept:"College of Education",date:"Aug 23, 2026",amount:500,method:"GCash",status:"pending",createdBy:"Self-Registered",createdAt:"Aug 23 2026 9:15 AM"}
+    ],
+    returnedRecords: [
+      {member:"Ramon dela Peña",type:"Registration",reason:"Payment proof unreadable",returnedBy:"Auditor",date:"Aug 22, 2026"},
+      {member:"Cristina Bautista",type:"Medical Aid Request",reason:"Missing medical bill breakdown",returnedBy:"President",date:"Aug 20, 2026"},
+      {member:"Pedro Santos",type:"Payment",reason:"Reference number mismatch",returnedBy:"Auditor",date:"Aug 18, 2026"}
+    ],
+    paymentsAuditing: [
+      {ref:"DUE-001",member:"Juan Cruz",type:"Monthly Dues",amount:100,method:"Salary Deduction",date:"Aug 15, 2026",treasurerStatus:"Submitted",auditorStatus:"Pending",treasurer:"Maria Santos",submitted:"Aug 15, 2026 10:31 AM"},
+      {ref:"DUE-002",member:"Maria Santos",type:"Monthly Dues",amount:100,method:"Salary Deduction",date:"Aug 15, 2026",treasurerStatus:"Submitted",auditorStatus:"Pending",treasurer:"Maria Santos",submitted:"Aug 15, 2026 10:32 AM"},
+      {ref:"MEM-001",member:"Pedro Reyes",type:"Membership Fee",amount:500,method:"OTC",date:"Aug 14, 2026",treasurerStatus:"Submitted",auditorStatus:"Pending",treasurer:"Maria Santos",submitted:"Aug 14, 2026 3:15 PM"},
+      {ref:"DUE-003",member:"Elena Garcia",type:"Monthly Dues",amount:100,method:"Bank Transfer",date:"Aug 13, 2026",treasurerStatus:"Submitted",auditorStatus:"Pending",treasurer:"Maria Santos",submitted:"Aug 13, 2026 2:45 PM"},
+      {ref:"DUE-004",member:"Ramon dela Peña",type:"Monthly Dues",amount:100,method:"GCash",date:"Aug 12, 2026",treasurerStatus:"Submitted",auditorStatus:"Pending",treasurer:"Maria Santos",submitted:"Aug 12, 2026 11:20 AM"}
+    ],
+    aidClaimsPostAuditing: [
+      {ref:"MA-2026-001",type:"Medical Aid",beneficiary:"Cristina Bautista",expected:100,expectedTotal:24900,collected:24900,remaining:0,contributors:249,status:"Pending Review"},
+      {ref:"DA-2026-001",type:"Death Aid",beneficiary:"Jose Santos",category:"Member",expected:500,expectedTotal:124500,collected:123000,remaining:1500,contributors:249,status:"Pending Review"},
+      {ref:"MA-2026-002",type:"Medical Aid",beneficiary:"Ana Reyes",expected:100,expectedTotal:24900,collected:24500,remaining:400,contributors:249,status:"Pending Review"},
+      {ref:"DA-2026-002",type:"Death Aid",beneficiary:"Mark Villanueva",category:"Parents and Children",expected:250,expectedTotal:62250,collected:61000,remaining:1250,contributors:249,status:"Pending Review"}
+    ],
+    aidPostVerifications: [
+      {ref:"MA-2026-003",type:"Medical Aid",beneficiary:"Liza Fernandez",expected:24900,recorded:24900,verified:24900,eligible:249,recordedMembers:249,status:"Balanced"},
+      {ref:"DA-2026-003",type:"Death Aid",beneficiary:"Jose Ramos",category:"Husband/Wife",expected:74700,recorded:74700,verified:74700,eligible:249,recordedMembers:249,status:"Balanced"},
+      {ref:"MA-2026-004",type:"Medical Aid",beneficiary:"Maria Cruz",expected:24900,recorded:24800,verified:24800,eligible:249,recordedMembers:248,status:"Discrepancy"},
+      {ref:"DA-2026-004",type:"Death Aid",beneficiary:"Pedro Santos",category:"Brother/Sister",expected:24900,recorded:24900,verified:24900,eligible:249,recordedMembers:249,status:"Balanced"},
+      {ref:"MA-2026-005",type:"Medical Aid",beneficiary:"Ana Garcia",expected:24900,recorded:24900,verified:24900,eligible:249,recordedMembers:249,status:"Balanced"},
+      {ref:"DA-2026-005",type:"Death Aid",beneficiary:"Carlos Mendez",category:"Member",expected:124500,recorded:124000,verified:124000,eligible:249,recordedMembers:248,status:"Discrepancy"},
+      {ref:"MA-2026-006",type:"Medical Aid",beneficiary:"Rosa Lopez",expected:24900,recorded:24900,verified:24900,eligible:249,recordedMembers:249,status:"Balanced"}
+    ],
+    auditedLogs: [
+      {date:"Aug 29, 2026 10:42 AM",auditor:"Maria Santos",action:"Verified Monthly Dues",ref:"DUE-2026-001",member:"Juan Cruz",amount:100,result:"AUDITOR VERIFIED"},
+      {date:"Aug 29, 2026 11:24 AM",auditor:"Maria Santos",action:"Verified Aid Contribution",ref:"MA-2026-001",expected:24900,verified:24900,result:"PASSED"},
+      {date:"Aug 28, 2026 3:15 PM",auditor:"Maria Santos",action:"Returned Registration",ref:"REG-2026-050",member:"Ramon dela Peña",reason:"Payment proof unreadable",result:"RETURNED"},
+      {date:"Aug 28, 2026 2:30 PM",auditor:"Maria Santos",action:"Verified Membership Fee",ref:"MEM-2026-117",member:"Sofia Ramirez",amount:500,result:"AUDITOR VERIFIED"},
+      {date:"Aug 27, 2026 4:45 PM",auditor:"Maria Santos",action:"Verified Death Aid",ref:"DA-2026-002",beneficiary:"Jose Santos",amount:124500,result:"AUDITOR VERIFIED"}
+    ],
+    fundLedger: [
+      {date:"Aug 28, 2026",ref:"DUES-2026-00891",type:"IN",desc:"Monthly Dues — Juan Dela Cruz",inflow:100,outflow:0,balance:1250000,status:"posted"},
+      {date:"Aug 27, 2026",ref:"MF-2026-118",type:"IN",desc:"Membership Fee — Juan Dela Cruz",inflow:500,outflow:0,balance:1249900,status:"posted"},
+      {date:"Aug 25, 2026",ref:"AC-2026-004",type:"IN",desc:"Aid Contribution — Medical Aid MA-2026-004",inflow:21500,outflow:0,balance:1249400,status:"posted"},
+      {date:"Aug 20, 2026",ref:"REL-2026-003",type:"OUT",desc:"Aid Release — Death Aid DA-2026-006",inflow:0,outflow:20000,balance:1227900,status:"posted"},
+      {date:"Aug 18, 2026",ref:"MF-2026-119",type:"IN",desc:"Membership Fee — Sofia Ramirez",inflow:500,outflow:0,balance:1247900,status:"posted"},
+      {date:"Aug 15, 2026",ref:"DUES-2026-00885",type:"IN",desc:"Monthly Dues — Maria Lopez",inflow:100,outflow:0,balance:1247400,status:"posted"},
+      {date:"Aug 12, 2026",ref:"AC-2026-003",type:"IN",desc:"Aid Contribution — Death Aid DA-2026-005",inflow:62250,outflow:0,balance:1247300,status:"posted"}
+    ],
+    memberDeductions: [
+      {member:"Juan Dela Cruz",dept:"Engineering",month:"Aug 2026",dues:100,medical:100,death:100,total:300},
+      {member:"Maria Lopez",dept:"Nursing",month:"Aug 2026",dues:100,medical:0,death:100,total:200},
+      {member:"Pedro Santos",dept:"Agriculture",month:"Aug 2026",dues:100,medical:100,death:0,total:200},
+      {member:"Elena Garcia",dept:"Education",month:"Aug 2026",dues:100,medical:100,death:100,total:300},
+      {member:"Ramon dela Peña",dept:"Business",month:"Aug 2026",dues:100,medical:100,death:100,total:300}
+    ],
+    departmentHeatmap: [
+      {dept:"CCSICT",members:65,paid:60,pending:3,unpaid:2,compliance:92,collection:6000},
+      {dept:"COED",members:55,paid:48,pending:4,unpaid:3,compliance:87,collection:4800},
+      {dept:"CBAA",members:48,paid:36,pending:6,unpaid:6,compliance:76,collection:3600},
+      {dept:"CAS",members:42,paid:20,pending:10,unpaid:12,compliance:48,collection:2000},
+      {dept:"CON",members:40,paid:23,pending:2,unpaid:15,compliance:58,collection:2300}
+    ],
+    generatedReports: [
+      {report:"Monthly Audit",period:"Aug 2026",status:"Completed",action:"View"},
+      {report:"Fund Verification",period:"Aug 2026",status:"Completed",action:"View"},
+      {report:"Aid Audit",period:"Aug 2026",status:"Completed",action:"View"}
+    ]
+  };
+
+  function peso(n){ return '₱'+n.toLocaleString(); }
+  function root(){ return document.getElementById('view-root'); }
+  function toast(msg){ alert(msg); }
+
+  const RENDERERS = {};
+
+  function navigate(view){
+    document.querySelectorAll(".nav-item").forEach(item=>item.classList.remove("active"));
+    document.querySelector(`.nav-item[data-view="${view}"]`)?.classList.add("active");
+    if(RENDERERS[view]){
+      RENDERERS[view]();
+    } else {
+      toast('Section under development');
+    }
+  }
+
+  RENDERERS.dashboard = function(){
+    const totalMembers = DB.duesStatus.total;
+    const paid = DB.duesStatus.paid, pending = DB.duesStatus.pending, unpaid = DB.duesStatus.unpaid;
+    const complianceRate = Math.round(paid/totalMembers*100);
+    const payPipe = DB.auditPipeline.payments, aidPipe = DB.auditPipeline.aidClaims, conPipe = DB.auditPipeline.contributions;
+    const verifiedTotal = payPipe.verified + aidPipe.verified + conPipe.verified;
+    const pendingTotal = payPipe.pending + aidPipe.pending + conPipe.pending;
+    const returnedTotal = payPipe.returned + aidPipe.returned + conPipe.returned;
+    const pendingRegs = DB.registrationReview.filter(r=>r.status==="pending").length;
+
+    const notifItems = [
+      {cls:"blue",icon:"fa-file-invoice-dollar",title:payPipe.pending+" payments awaiting audit",sub:"Payments Auditing queue",time:"8 mins ago",urgent:true,view:"payments-auditing"},
+      {cls:"amber",icon:"fa-heartbeat",title:aidPipe.pending+" aid claims for post-audit",sub:"Medical and death aid claims",time:"15 mins ago",urgent:true,view:"aid-claims-post-auditing"},
+      {cls:"green",icon:"fa-check-circle",title:conPipe.pending+" contribution posts to verify",sub:"Aid Post Verifications",time:"22 mins ago",urgent:false,view:"aid-post-verifications"},
+      {cls:"purple",icon:"fa-user-plus",title:pendingRegs+" registrations for review",sub:"Registration Review",time:"1 hr ago",urgent:false,view:"registration-review"},
+      {cls:"red",icon:"fa-undo",title:returnedTotal+" returned records need follow-up",sub:"Returned records",time:"Today",urgent:true,view:"audited-logs"}
+    ];
+
+    const pipeItem = (name, p, color) => {
+      const total = p.verified + p.pending + p.returned;
+      const pct = Math.round(p.verified/total*100);
+      return `
+        <div class="pd-pipe-item">
+          <div class="pd-pipe-head"><span class="pd-pipe-name">${name}</span><span class="pd-pipe-pct">${pct}%</span></div>
+          <div class="pd-pipe-bar"><div class="pd-pipe-fill" style="width:${pct}%;background:${color};"></div></div>
+          <div class="pd-pipe-meta"><span>Verified: <b>${p.verified}</b></span><span>Pending: <b>${p.pending}</b></span><span>Returned: <b>${p.returned}</b></span></div>
+        </div>`;
+    };
+
+    root().innerHTML = `
+      ${pdPageHead("Maria Santos","Auditor · Office of the Auditor")}
+
+      <div class="pd-strip">
+        <div class="pd-strip-item accent"><div class="l">Audited This Month</div><div class="v">${payPipe.verified}</div></div>
+        <div class="pd-strip-item pos"><div class="l">Verified</div><div class="v">${verifiedTotal}</div></div>
+        <div class="pd-strip-item neg"><div class="l">Returned</div><div class="v">${returnedTotal}</div></div>
+        <div class="pd-strip-item"><div class="l">Pending</div><div class="v">${pendingTotal}</div></div>
+        <div class="pd-strip-item"><div class="l">Compliance</div><div class="v">${complianceRate}%</div></div>
+        <div class="pd-strip-item"><div class="l">Funds</div><div class="v">${peso(DB.fundBalance)}</div></div>
+      </div>
+
+      <div class="pd-kpis">
+        <div class="pd-kpi" onclick="navigate('member-list')">
+          <div class="pd-kpi-top"><span class="pd-kpi-label">Total Active Members</span><span class="pd-kpi-ico green"><i class="fas fa-users"></i></span></div>
+          <div class="pd-kpi-value">${totalMembers}</div>
+          <div class="pd-kpi-sub">Active Members</div>
+          <div class="pd-kpi-link">View Members →</div>
+        </div>
+        <div class="pd-kpi alert" onclick="navigate('payments-auditing')">
+          <div class="pd-kpi-top"><span class="pd-kpi-label">Payments for Audit</span><span class="pd-kpi-ico blue"><i class="fas fa-file-invoice-dollar"></i></span></div>
+          <div class="pd-kpi-value">${payPipe.pending}</div>
+          <div class="pd-kpi-sub">For Verification</div>
+          <div class="pd-kpi-link">Review Now →</div>
+        </div>
+        <div class="pd-kpi alert" onclick="navigate('aid-claims-post-auditing')">
+          <div class="pd-kpi-top"><span class="pd-kpi-label">Aid Claims for Audit</span><span class="pd-kpi-ico amber"><i class="fas fa-heartbeat"></i></span></div>
+          <div class="pd-kpi-value">${aidPipe.pending}</div>
+          <div class="pd-kpi-sub">For Review</div>
+          <div class="pd-kpi-link">Review Claims →</div>
+        </div>
+        <div class="pd-kpi" onclick="navigate('aid-post-verifications')">
+          <div class="pd-kpi-top"><span class="pd-kpi-label">Contributions to Verify</span><span class="pd-kpi-ico purple"><i class="fas fa-check-circle"></i></span></div>
+          <div class="pd-kpi-value">${conPipe.pending}</div>
+          <div class="pd-kpi-sub">For Verification</div>
+          <div class="pd-kpi-link">Verify Now →</div>
+        </div>
+        <div class="pd-kpi" onclick="navigate('audited-logs')">
+          <div class="pd-kpi-top"><span class="pd-kpi-label">Pending Post-Audits</span><span class="pd-kpi-ico red"><i class="fas fa-undo"></i></span></div>
+          <div class="pd-kpi-value">${DB.returnedRecords.length}</div>
+          <div class="pd-kpi-sub">Returned Items</div>
+          <div class="pd-kpi-link">View Audit Trail →</div>
+        </div>
+        <div class="pd-kpi fund" onclick="navigate('fund-ledger')">
+          <div class="pd-kpi-top"><span class="pd-kpi-label">Fund Balance</span><span class="pd-kpi-ico green"><i class="fas fa-wallet"></i></span></div>
+          <div class="pd-kpi-value">${peso(DB.fundBalance)}</div>
+          <div class="pd-kpi-sub">Available</div>
+          <div class="pd-kpi-link">View Fund Ledger →</div>
+        </div>
+      </div>
+
+      <div class="pd-row pdmain">
+        <div class="pd-card">
+          <div class="pd-card-head">
+            <div>
+              <div class="pd-card-title">Payments for Audit</div>
+              <div class="pd-card-sub">${DB.paymentsAuditing.length} payments in the audit queue — verify or return</div>
+            </div>
+            <button class="pd-link-btn" onclick="navigate('payments-auditing')">View All →</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead><tr><th>Reference</th><th>Member</th><th>Type</th><th>Amount</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody>
+                ${DB.paymentsAuditing.map(p=>`
+                  <tr>
+                    <td><b>${p.ref}</b></td>
+                    <td>${p.member}</td>
+                    <td>${p.type}</td>
+                    <td>${peso(p.amount)}</td>
+                    <td>${p.submitted}</td>
+                    <td><span class="badge pending">For Audit</span></td>
+                    <td><button class="btn primary sm" onclick="navigate('payments-auditing')">Review</button></td>
+                  </tr>`).join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="pd-card">
+          <div class="pd-card-head">
+            <div>
+              <div class="pd-card-title">Payment Status</div>
+              <div class="pd-card-sub">August 2026 — ${totalMembers} members</div>
+            </div>
+          </div>
+          <div class="pd-donut-wrap">
+            <canvas id="pdAuditStatusChart"></canvas>
+            <div class="pd-donut-center"><div class="n">${complianceRate}%</div><div class="l">Compliance</div></div>
+          </div>
+          <div class="status-breakdown">
+            <div class="status-item"><span class="status-dot2 green"></span><span class="status-label">Paid</span><span class="status-count">${paid}</span><span class="status-percent">${Math.round(paid/totalMembers*100)}%</span></div>
+            <div class="status-item"><span class="status-dot2 amber"></span><span class="status-label">Pending</span><span class="status-count">${pending}</span><span class="status-percent">${Math.round(pending/totalMembers*100)}%</span></div>
+            <div class="status-item"><span class="status-dot2 red"></span><span class="status-label">Unpaid</span><span class="status-count">${unpaid}</span><span class="status-percent">${Math.round(unpaid/totalMembers*100)}%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pd-row pdcols2">
+        <div class="pd-card">
+          <div class="pd-card-head">
+            <div>
+              <div class="pd-card-title">Department Compliance</div>
+              <div class="pd-card-sub">Payment compliance by department</div>
+            </div>
+            <button class="pd-link-btn" onclick="navigate('department-heatmap')">View Full Heatmap →</button>
+          </div>
+          <div class="chart-wrap"><canvas id="pdAuditComplianceChart"></canvas></div>
+        </div>
+
+        <div class="pd-card">
+          <div class="pd-card-head">
+            <div>
+              <div class="pd-card-title">Audit Pipeline</div>
+              <div class="pd-card-sub">Verification progress per record type</div>
+            </div>
+          </div>
+          <div class="pd-pipe">
+            ${pipeItem("Payments", payPipe, "var(--green)")}
+            ${pipeItem("Aid Claims", aidPipe, "var(--blue)")}
+            ${pipeItem("Contributions", conPipe, "var(--purple)")}
+          </div>
+        </div>
+      </div>
+
+      <div class="pd-row pdmain">
+        <div class="pd-card">
+          <div class="pd-card-head">
+            <div>
+              <div class="pd-card-title">Audit Activity</div>
+              <div class="pd-card-sub">Latest verification actions — full audit trail</div>
+            </div>
+            <button class="pd-link-btn" onclick="navigate('audited-logs')">View Audit Trail →</button>
+          </div>
+          <div class="pd-timeline">
+            ${DB.auditedLogs.slice(0,5).map(l=>{
+              const parts = l.date.replace(",", "").split(" ");
+              const time = parts.slice(-2).join(" ");
+              const day = parts.slice(0,3).join(" ");
+              return `
+                <div class="pd-tl-item">
+                  <div class="pd-tl-dot"></div>
+                  <div class="pd-tl-time">${time}<br><span style="font-weight:600;">${day}</span></div>
+                  <div class="pd-tl-body">
+                    <div class="pd-tl-action">${l.action} <span class="pd-tl-ref">${l.ref}</span></div>
+                    <div class="pd-tl-meta">${l.auditor} · ${l.result}</div>
+                  </div>
+                </div>`;
+            }).join("")}
+          </div>
+        </div>
+
+        ${pdNotifCard(notifItems,"audited-logs")}
+      </div>
+
+      <div class="pd-card">
+        <div class="pd-card-head">
+          <div>
+            <div class="pd-card-title">Quick Actions</div>
+            <div class="pd-card-sub">Opens the existing Auditor workflows</div>
+          </div>
+        </div>
+        <div class="pd-qa-grid">
+          <button class="pd-qa-btn" onclick="navigate('payments-auditing')"><i class="fas fa-file-invoice-dollar"></i>Payments Auditing</button>
+          <button class="pd-qa-btn" onclick="navigate('aid-claims-post-auditing')"><i class="fas fa-heartbeat"></i>Aid Claims Post Auditing</button>
+          <button class="pd-qa-btn" onclick="navigate('aid-post-verifications')"><i class="fas fa-check-circle"></i>Aid Post Verifications</button>
+          <button class="pd-qa-btn" onclick="navigate('registration-review')"><i class="fas fa-user-plus"></i>Registration Review</button>
+          <button class="pd-qa-btn" onclick="navigate('department-heatmap')"><i class="fas fa-chart-bar"></i>Department Compliance</button>
+          <button class="pd-qa-btn" onclick="navigate('generate-certifications')"><i class="fas fa-file-certificate"></i>Audit Reports</button>
+          <button class="pd-qa-btn" onclick="navigate('generate-certifications')"><i class="fas fa-stamp"></i>Generate Certifications</button>
+        </div>
+      </div>
+    `;
+
+    document.querySelectorAll(".nav-item[data-badge]").forEach(item=>{
+      const key=item.dataset.badge;
+      const b=item.querySelector(".nav-badge");
+      let n=0;
+      if(key==="payments-auditing") n=DB.auditPipeline.payments.pending;
+      if(key==="aid-claims-post-auditing") n=DB.auditPipeline.aidClaims.pending;
+      if(key==="aid-post-verifications") n=DB.auditPipeline.contributions.pending;
+      if(key==="registration-review") n=DB.registrationReview.filter(r=>r.status==="pending").length;
+      b.textContent=n; b.style.display = n>0 ? "" : "none";
+    });
+
+    const bellDot = document.getElementById("headerBellDot");
+    if(bellDot){ bellDot.textContent = notifItems.filter(n=>n.urgent).length + pendingRegs; bellDot.style.display = ""; }
+
+    updateDateTime();
+
+    setTimeout(() => {
+      const statusCanvas = document.getElementById("pdAuditStatusChart");
+      const complianceCanvas = document.getElementById("pdAuditComplianceChart");
+
+      if(statusCanvas && typeof Chart !== 'undefined'){
+        new Chart(statusCanvas,{type:"doughnut",data:{labels:["Paid","Pending","Unpaid"],datasets:[{data:[DB.duesStatus.paid,DB.duesStatus.pending,DB.duesStatus.unpaid],backgroundColor:["#1e8f4e","#f0a020","#e34d4d"],borderWidth:4,borderColor:"#fff"}]},options:{responsive:true,maintainAspectRatio:false,cutout:"68%",plugins:{legend:{display:false},tooltip:{backgroundColor:"rgba(20,30,50,0.95)",padding:12,titleFont:{size:12},bodyFont:{size:12},callbacks:{label:ctx=>ctx.label+": "+ctx.parsed}}}}});
+      }
+
+      if(complianceCanvas && typeof Chart !== 'undefined'){
+        new Chart(complianceCanvas,{type:"bar",data:{labels:DB.departmentHeatmap.map(d=>d.dept),datasets:[{data:DB.departmentHeatmap.map(d=>d.compliance),backgroundColor:DB.departmentHeatmap.map(d=>d.compliance>=90?"#1e8f4e":d.compliance>=75?"#2f6fed":d.compliance>=50?"#f0a020":"#e34d4d"),borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"rgba(20,30,50,0.95)",padding:12,titleFont:{size:12},bodyFont:{size:12},callbacks:{label:ctx=>ctx.parsed.y+"%"}}},scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+"%",font:{size:10},color:"#5a6475"},grid:{color:"#eef1f5"}},x:{ticks:{font:{size:10},color:"#5a6475"},grid:{display:false}}}}});
+      }
+    }, 100);
+  };
+
+  /* MEMBER LIST VIEW */
+  RENDERERS["member-list"] = function(){
+    root().innerHTML = `
+            <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">ISU CAUFA MEMBERS</div>
+            <div class="panel-sub">${DB.members.length} Active Members</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Status</th>
+                <th>Join Date</th>
+                <th>Last Payment</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${DB.members.map(m => `
+                <tr>
+                  <td>${m.id}</td>
+                  <td><b>${m.name}</b></td>
+                  <td>${m.dept}</td>
+                  <td><span class="status-badge ${m.status === 'paid' ? 'success' : m.status === 'pending' ? 'attention' : 'critical'}">${m.status.toUpperCase()}</span></td>
+                  <td>${m.joinDate}</td>
+                  <td>${m.lastPayment}</td>
+                  <td><button class="btn ghost sm" onclick="viewMemberDetail('${m.id}')">View Details</button></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  };
+
+  /* MEMBER DETAIL VIEW */
+  window.viewMemberDetail = function(memberId) {
+    const member = DB.members.find(m => m.id === memberId);
+    if(!member) return;
+
+    root().innerHTML = `
+            <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">MEMBER PROFILE</div>
+            <div class="panel-sub">${member.id} • ${member.dept}</div>
+          </div>
+          <button class="btn ghost sm" onclick="navigate('member-list')">← Back to Members</button>
+        </div>
+        <div class="member-profile">
+          <div class="profile-section">
+            <div class="section-title">Basic Information</div>
+            <div class="info-grid">
+              <div class="info-item"><span class="info-label">Employee ID:</span><span class="info-value">${member.id}</span></div>
+              <div class="info-item"><span class="info-label">Name:</span><span class="info-value">${member.name}</span></div>
+              <div class="info-item"><span class="info-label">Department:</span><span class="info-value">${member.dept}</span></div>
+              <div class="info-item"><span class="info-label">Status:</span><span class="info-value"><span class="status-badge ${member.status === 'paid' ? 'success' : member.status === 'pending' ? 'attention' : 'critical'}">${member.status.toUpperCase()}</span></span></div>
+              <div class="info-item"><span class="info-label">Join Date:</span><span class="info-value">${member.joinDate}</span></div>
+              <div class="info-item"><span class="info-label">Last Payment:</span><span class="info-value">${member.lastPayment}</span></div>
+            </div>
+          </div>
+          <div class="profile-section">
+            <div class="section-title">Payment History</div>
+            <div class="table-wrap">
+              <table class="data">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${member.paymentHistory.map(p => `
+                    <tr>
+                      <td>${p.date}</td>
+                      <td>${peso(p.amount)}</td>
+                      <td>${p.method}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="profile-section">
+            <div class="section-title">Medical Aid History</div>
+            <div class="table-wrap">
+              <table class="data">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${member.medicalAidHistory.length > 0 ? member.medicalAidHistory.map(m => `
+                    <tr>
+                      <td>${m.date}</td>
+                      <td>${peso(m.amount)}</td>
+                      <td>${m.reason}</td>
+                      <td><span class="status-badge success">${m.status}</span></td>
+                    </tr>
+                  `).join('') : '<tr><td colspan="4">No medical aid history</td></tr>'}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="profile-section">
+            <div class="section-title">Death Aid History</div>
+            <div class="table-wrap">
+              <table class="data">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${member.deathAidHistory.length > 0 ? member.deathAidHistory.map(d => `
+                    <tr>
+                      <td>${d.date}</td>
+                      <td>${peso(d.amount)}</td>
+                      <td>${d.reason}</td>
+                      <td><span class="status-badge success">${d.status}</span></td>
+                    </tr>
+                  `).join('') : '<tr><td colspan="4">No death aid history</td></tr>'}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="profile-section">
+            <div class="section-title">Contribution History</div>
+            <div class="table-wrap">
+              <table class="data">
+                <thead>
+                  <tr>
+                    <th>Aid Type</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${member.contributionHistory.length > 0 ? member.contributionHistory.map(c => `
+                    <tr>
+                      <td>${c.aid}</td>
+                      <td>${peso(c.amount)}</td>
+                      <td>${c.date}</td>
+                    </tr>
+                  `).join('') : '<tr><td colspan="3">No contribution history</td></tr>'}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /* PAID MEMBERS VIEW */
+  RENDERERS["paid-members"] = function(){
+    const paidMembers = DB.members.filter(m => m.status === 'paid');
+    root().innerHTML = `
+            <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">PAID MEMBERS</div>
+            <div class="panel-sub">${paidMembers.length} Members with current payments</div>
+          </div>
+          <button class="btn ghost sm" onclick="navigate('dashboard')">← Back to Dashboard</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Last Payment</th>
+                <th>Join Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${paidMembers.map(m => `
+                <tr>
+                  <td>${m.id}</td>
+                  <td><b>${m.name}</b></td>
+                  <td>${m.dept}</td>
+                  <td>${m.lastPayment}</td>
+                  <td>${m.joinDate}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  };
+
+  /* PENDING MEMBERS VIEW */
+  RENDERERS["pending-members"] = function(){
+    const pendingMembers = DB.members.filter(m => m.status === 'pending');
+    root().innerHTML = `
+            <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">PENDING MEMBERS</div>
+            <div class="panel-sub">${pendingMembers.length} Members with overdue payments</div>
+          </div>
+          <button class="btn ghost sm" onclick="navigate('dashboard')">← Back to Dashboard</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Last Payment</th>
+                <th>Join Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${pendingMembers.map(m => `
+                <tr>
+                  <td>${m.id}</td>
+                  <td><b>${m.name}</b></td>
+                  <td>${m.dept}</td>
+                  <td>${m.lastPayment}</td>
+                  <td>${m.joinDate}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  };
+
+  /* UNPAID MEMBERS VIEW */
+  RENDERERS["unpaid-members"] = function(){
+    const unpaidMembers = DB.members.filter(m => m.status === 'unpaid');
+    root().innerHTML = `
+            <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">UNPAID MEMBERS</div>
+            <div class="panel-sub">${unpaidMembers.length} Members with no recent payments</div>
+          </div>
+          <button class="btn ghost sm" onclick="navigate('dashboard')">← Back to Dashboard</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Last Payment</th>
+                <th>Join Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${unpaidMembers.map(m => `
+                <tr>
+                  <td>${m.id}</td>
+                  <td><b>${m.name}</b></td>
+                  <td>${m.dept}</td>
+                  <td>${m.lastPayment}</td>
+                  <td>${m.joinDate}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  };
+
+  /* Filter function for payment data */
+  function updatePaymentData() {
+    const period = document.getElementById("paymentPeriodFilter").value;
+    // This function would filter the payment data based on the selected period
+    // For now, it's a placeholder to show the functionality
+    toast(`Filter changed to: ${period.replace('-', ' ').toUpperCase()}`);
+    // In production, this would update DB.duesStatus and DB.paymentCompliance based on the period
+  }
+
+  /* Date Time Update */
+  function updateDateTime() {
+    const now = new Date();
+    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+    const dateStr = now.toLocaleDateString('en-US', dateOptions);
+    const timeStr = now.toLocaleTimeString('en-US', timeOptions);
+    const datetimeElement = document.getElementById('current-datetime');
+    if(datetimeElement) {
+      datetimeElement.innerHTML = `${dateStr}<br>${timeStr}`;
+    }
+  }
+  setInterval(updateDateTime, 30000);
+  updateDateTime();
+
+  /* DEPARTMENT DETAIL VIEW */
+  window.viewDepartmentDetail = function(deptName) {
+    const deptMembers = DB.members.filter(m => m.dept === deptName);
+    const deptData = DB.paymentCompliance.find(d => d.dept === deptName);
+
+    root().innerHTML = `
+            <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">DEPARTMENT MEMBERS</div>
+            <div class="panel-sub">${deptMembers.length} Members • ${deptData?.compliance || 0}% Compliance</div>
+          </div>
+          <button class="btn ghost sm" onclick="navigate('department-heatmap')">← Back to Breakdown</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Last Payment</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${deptMembers.map(m => `
+                <tr>
+                  <td>${m.id}</td>
+                  <td><b>${m.name}</b></td>
+                  <td><span class="status-badge ${m.status === 'paid' ? 'success' : m.status === 'pending' ? 'attention' : 'critical'}">${m.status.toUpperCase()}</span></td>
+                  <td>${m.lastPayment}</td>
+                  <td><button class="btn ghost sm" onclick="viewMemberDetail('${m.id}')">View Details</button></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+  function updatePaymentData() {
+    const period = document.getElementById("paymentPeriodFilter").value;
+    // This function would filter the payment data based on the selected period
+    // For now, it's a placeholder to show the functionality
+    toast(`Filter changed to: ${period.replace('-', ' ').toUpperCase()}`);
+    // In production, this would update DB.duesStatus and DB.paymentCompliance based on the period
+  }
+
+  /* PAYMENTS AUDITING */
+  RENDERERS["payments-auditing"] = function(){
+    root().innerHTML = `
+            <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">PAYMENTS AWAITING VERIFICATION</div>
+            <div class="panel-sub">${DB.paymentsAuditing.length} payments pending auditor review</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>Member</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Treasurer Status</th>
+                <th>Auditor Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${DB.paymentsAuditing.map(p=>`
+                <tr>
+                  <td><b>${p.ref}</b></td>
+                  <td>${p.member}</td>
+                  <td>${p.type}</td>
+                  <td>${peso(p.amount)}</td>
+                  <td>${p.method}</td>
+                  <td><span class="badge pending">${p.treasurerStatus}</span></td>
+                  <td><span class="badge pending">${p.auditorStatus}</span></td>
+                  <td><button class="btn primary sm" onclick="toast('Review ${p.ref}')">Review</button></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  };
+
+  /* AID CLAIMS POST AUDITING */
+  RENDERERS["aid-claims-post-auditing"] = function(){
+    root().innerHTML = `
+            <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">AID CONTRIBUTION POSTS</div>
+            <div class="panel-sub">${DB.aidClaimsPostAuditing.length} contribution posts pending audit</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>Type</th>
+                <th>Beneficiary</th>
+                <th>Expected Total</th>
+                <th>Collected</th>
+                <th>Remaining</th>
+                <th>Contributors</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${DB.aidClaimsPostAuditing.map(a=>`
+                <tr>
+                  <td><b>${a.ref}</b></td>
+                  <td>${a.type}</td>
+                  <td>${a.beneficiary}</td>
+                  <td>${peso(a.expectedTotal)}</td>
+                  <td>${peso(a.collected)}</td>
+                  <td>${peso(a.remaining)}</td>
+                  <td>${a.contributors}</td>
+                  <td><span class="badge pending">${a.status}</span></td>
+                  <td><button class="btn primary sm" onclick="toast('Review ${a.ref}')">Review</button></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  };
+
+  /* AID POST VERIFICATIONS */
+  RENDERERS["aid-post-verifications"] = function(){
+    root().innerHTML = `
+            <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">CONTRIBUTION VERIFICATION</div>
+            <div class="panel-sub">${DB.aidPostVerifications.length} contributions awaiting final verification</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>Type</th>
+                <th>Beneficiary</th>
+                <th>Expected</th>
+                <th>Recorded</th>
+                <th>Verified</th>
+                <th>Eligible</th>
+                <th>Recorded</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${DB.aidPostVerifications.map(a=>`
+                <tr>
+                  <td><b>${a.ref}</b></td>
+                  <td>${a.type}</td>
+                  <td>${a.beneficiary}</td>
+                  <td>${peso(a.expected)}</td>
+                  <td>${peso(a.recorded)}</td>
+                  <td>${peso(a.verified)}</td>
+                  <td>${a.eligible}</td>
+                  <td>${a.recordedMembers}</td>
+                  <td><span class="badge ${a.status==='Balanced'?'approved':'rejected'}">${a.status}</span></td>
+                  <td><button class="btn primary sm" onclick="toast('Verify ${a.ref}')">Verify</button></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  };
+
+  /* REGISTRATION REVIEW */
+  RENDERERS["registration-review"] = function(){
+    root().innerHTML = `
+            <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">REGISTRATION REQUESTS</div>
+            <div class="panel-sub">${DB.registrationReview.filter(r=>r.status==="pending").length} registrations pending review</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Employee ID</th>
+                <th>Department</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${DB.registrationReview.map(r=>`
+                <tr>
+                  <td><b>${r.id}</b></td>
+                  <td>${r.name}</td>
+                  <td>${r.empId}</td>
+                  <td>${r.dept}</td>
+                  <td>${r.date}</td>
+                  <td>${peso(r.amount)}</td>
+                  <td>${r.method}</td>
+                  <td><span class="badge ${r.status==='pending'?'pending':'approved'}">${r.status}</span></td>
+                  <td><button class="btn primary sm" onclick="toast('Review ${r.id}')">Review</button></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  };
+
+  /* AUDITED LOGS */
+  RENDERERS["audited-logs"] = function(){
+    root().innerHTML = `
+            <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">AUDIT TRAIL</div>
+            <div class="panel-sub">All verification actions recorded</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Auditor</th>
+                <th>Action</th>
+                <th>Reference</th>
+                <th>Details</th>
+                <th>Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${DB.auditedLogs.map(log=>`
+                <tr>
+                  <td>${log.date}</td>
+                  <td>${log.auditor}</td>
+                  <td>${log.action}</td>
+                  <td><b>${log.ref}</b></td>
+                  <td>${log.member||log.beneficiary||log.amount?peso(log.amount):''} ${log.expected||log.verified?`Expected: ${peso(log.expected)}, Verified: ${peso(log.verified)}`:''} ${log.reason?`Reason: ${log.reason}`:''}</td>
+                  <td><span class="badge approved">${log.result}</span></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  };
+
+  /* FUND LEDGER */
+  RENDERERS["fund-ledger"] = function(){
+    root().innerHTML = `
+            <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">FINANCIAL TRANSACTIONS</div>
+            <div class="panel-sub">Organization fund movement</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Reference</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Inflow</th>
+                <th>Outflow</th>
+                <th>Balance</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${DB.fundLedger.map(f=>`
+                <tr>
+                  <td>${f.date}</td>
+                  <td><b>${f.ref}</b></td>
+                  <td><span class="badge ${f.type==='IN'?'approved':'rejected'}">${f.type}</span></td>
+                  <td>${f.desc}</td>
+                  <td>${f.inflow>0?peso(f.inflow):'—'}</td>
+                  <td>${f.outflow>0?peso(f.outflow):'—'}</td>
+                  <td><b>${peso(f.balance)}</b></td>
+                  <td><span class="badge approved">${f.status}</span></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  };
+
+  /* MEMBER DEDUCTIONS */
+  RENDERERS["member-deductions"] = function(){
+    root().innerHTML = `
+            <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">MEMBER FINANCIAL HISTORY</div>
+            <div class="panel-sub">August 2026 deductions</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Member</th>
+                <th>Department</th>
+                <th>Month</th>
+                <th>Monthly Dues</th>
+                <th>Medical Aid</th>
+                <th>Death Aid</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${DB.memberDeductions.map(m=>`
+                <tr>
+                  <td><b>${m.member}</b></td>
+                  <td>${m.dept}</td>
+                  <td>${m.month}</td>
+                  <td>${peso(m.dues)}</td>
+                  <td>${peso(m.medical)}</td>
+                  <td>${peso(m.death)}</td>
+                  <td><b>${peso(m.total)}</b></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  };
+
+  /* DEPARTMENT HEATMAP */
+  RENDERERS["department-heatmap"] = function(){
+    root().innerHTML = `
+            <div class="grid-3">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">DEPARTMENT COMPLIANCE</div>
+              <div class="panel-sub">Compliance percentage by department</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="complianceChart"></canvas></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">PAID/PENDING/UNPAID</div>
+              <div class="panel-sub">Stacked distribution</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="stackedChart"></canvas></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">OVERALL STATUS</div>
+              <div class="panel-sub">Organization-wide payment condition</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:18px;">
+            <div class="chart-wrap small" style="flex:1;">
+              <canvas id="overallChart"></canvas>
+              <div class="donut-total">
+                <div class="amt">${DB.duesStatus.paid}</div>
+                <div class="lbl">Paid</div>
+              </div>
+            </div>
+            <div class="legend" style="flex:1;">
+              <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>Paid <b>${DB.duesStatus.paid}</b></div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span>Pending <b>${DB.duesStatus.pending}</b></div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Unpaid <b>${DB.duesStatus.unpaid}</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">DEPARTMENT BREAKDOWN</div>
+            <div class="panel-sub">Click department to view details</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Department</th>
+                <th>Members</th>
+                <th>Paid</th>
+                <th>Pending</th>
+                <th>Unpaid</th>
+                <th>Collection</th>
+                <th>Compliance</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${DB.paymentCompliance.map(d=>{
+                const level = d.compliance >= 90 ? 'excellent' : d.compliance >= 75 ? 'good' : d.compliance >= 50 ? 'attention' : 'critical';
+                const statusText = d.compliance >= 90 ? 'Excellent' : d.compliance >= 75 ? 'Good' : d.compliance >= 50 ? 'Needs Attention' : 'Critical';
+                return `
+                  <tr onclick="viewDepartmentDetail('${d.dept}')" style="cursor:pointer;">
+                    <td><b>${d.dept}</b></td>
+                    <td>${d.members}</td>
+                    <td>${d.paid}</td>
+                    <td>${d.pending}</td>
+                    <td>${d.unpaid}</td>
+                    <td>${peso(d.collection)}</td>
+                    <td>${d.compliance}%</td>
+                    <td><span class="status-badge ${level}">${statusText}</span></td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    setTimeout(() => {
+      const complianceCanvas = document.getElementById("complianceChart");
+      const stackedCanvas = document.getElementById("stackedChart");
+      const overallCanvas = document.getElementById("overallChart");
+
+      if(complianceCanvas && typeof Chart !== 'undefined'){
+        new Chart(complianceCanvas,{type:"bar",data:{labels:DB.departmentHeatmap.map(d=>d.dept),datasets:[{data:DB.departmentHeatmap.map(d=>d.compliance),backgroundColor:DB.departmentHeatmap.map(d=>d.compliance>=90?"#1e8f4e":d.compliance>=75?"#2f6fed":d.compliance>=50?"#f0a020":"#e34d4d"),borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"rgba(20,30,50,0.95)",padding:14,titleFont:{size:15},bodyFont:{size:15},callbacks:{label:ctx=>ctx.parsed.y+"%"}}},scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+"%",font:{size:14,weight:600},color:"#5a6475"},grid:{color:"#eef1f5",drawBorder:false}},x:{ticks:{font:{size:14,weight:600},color:"#5a6475"},grid:{display:false}}}}});
+      }
+
+      if(stackedCanvas && typeof Chart !== 'undefined'){
+        new Chart(stackedCanvas,{type:"bar",data:{labels:DB.departmentHeatmap.map(d=>d.dept),datasets:[{label:"Paid",data:DB.departmentHeatmap.map(d=>d.paid),backgroundColor:"#1e8f4e"},{label:"Pending",data:DB.departmentHeatmap.map(d=>d.pending),backgroundColor:"#f0a020"},{label:"Unpaid",data:DB.departmentHeatmap.map(d=>d.unpaid),backgroundColor:"#e34d4d"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"top",labels:{font:{size:13,weight:600},color:"#5a6475"}},tooltip:{backgroundColor:"rgba(20,30,50,0.95)",padding:14,titleFont:{size:15},bodyFont:{size:15}}},scales:{x:{stacked:true,ticks:{font:{size:12,weight:600},color:"#5a6475"},grid:{display:false}},y:{stacked:true,ticks:{font:{size:12,weight:600},color:"#5a6475"},grid:{color:"#eef1f5",drawBorder:false}}}}});
+      }
+
+      if(overallCanvas && typeof Chart !== 'undefined'){
+        new Chart(overallCanvas,{type:"doughnut",data:{labels:["Paid","Pending","Unpaid"],datasets:[{data:[DB.duesStatus.paid,DB.duesStatus.pending,DB.duesStatus.unpaid],backgroundColor:["#1e8f4e","#f0a020","#e34d4d"],borderWidth:4,borderColor:"#fff"}]},options:{responsive:true,maintainAspectRatio:false,cutout:"68%",plugins:{legend:{display:false},tooltip:{backgroundColor:"rgba(20,30,50,0.95)",padding:14,titleFont:{size:15},bodyFont:{size:15},callbacks:{label:ctx=>ctx.label+": "+ctx.parsed}}}}});
+      }
+    }, 100);
+  };
+
+  /* GENERATE CERTIFICATIONS */
+  RENDERERS["generate-certifications"] = function(){
+    root().innerHTML = `
+            <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">REPORT COMPILER</div>
+            <div class="panel-sub">Generate audit certification reports</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:18px;align-items:center;margin-bottom:24px;">
+          <div>
+            <label style="font-size:13px;font-weight:600;color:var(--ink-soft);display:block;margin-bottom:6px;">Year</label>
+            <select class="period-select">
+              <option>2026</option>
+              <option>2025</option>
+              <option>2024</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:13px;font-weight:600;color:var(--ink-soft);display:block;margin-bottom:6px;">Month</label>
+            <select class="period-select">
+              <option>August</option>
+              <option>July</option>
+              <option>June</option>
+            </select>
+          </div>
+          <button class="btn primary" onclick="toast('Generating report...')">Generate Report</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">GENERATED REPORTS</div>
+            <div class="panel-sub">Available certification reports</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Report</th>
+                <th>Period</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${DB.generatedReports.map(r=>`
+                <tr>
+                  <td><b>${r.report}</b></td>
+                  <td>${r.period}</td>
+                  <td><span class="badge approved">${r.status}</span></td>
+                  <td><button class="btn ghost sm" onclick="toast('View ${r.report}')">${r.action}</button></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  };
+
+  RENDERERS.dashboard();
+
+  /* ============ SIDEBAR TOGGLE ============ */
+  document.getElementById('sidebar-toggle').addEventListener('click', function() {
+    const app = document.querySelector('.app');
+    app.classList.toggle('sidebar-collapsed');
+    const icon = this.querySelector('i');
+    if (app.classList.contains('sidebar-collapsed')) {
+      icon.classList.remove('fa-bars');
+      icon.classList.add('fa-chevron-left');
+    } else {
+      icon.classList.remove('fa-chevron-left');
+      icon.classList.add('fa-bars');
+    }
+  });
+
+  document.querySelectorAll(".nav-item[data-view]").forEach(item=>{
+    item.addEventListener("click",()=>navigate(item.dataset.view));
+  });
+  
+
+  /* ============ MASTER SHELL: datetime / collapsible groups / confirm modal ============ */
+  function updateDateTime() {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    const timeStr = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+    const d = document.getElementById('pdDate');
+    const t = document.getElementById('pdTime');
+    if(d) d.textContent = dateStr;
+    if(t) t.textContent = timeStr;
+  }
+  setInterval(updateDateTime, 30000);
+
+  document.querySelectorAll(".nav-group-title").forEach(t=>{
+    t.addEventListener("click",()=>{
+      const hidden = t.classList.toggle("collapsed");
+      let el = t.nextElementSibling;
+      while(el && !el.classList.contains("nav-group-title")){
+        if(el.classList.contains("nav-item") || el.classList.contains("nav-group")) el.style.display = hidden ? "none" : "";
+        el = el.nextElementSibling;
+      }
+    });
+  });
+
+  function pdConfirm(opts, onConfirm){
+    const ov = document.getElementById("pdModal");
+    if(!ov){ if(window.confirm((opts.title||"Confirm")+": "+(opts.message||""))) onConfirm(); return; }
+    document.getElementById("pdModalTitle").textContent = opts.title || "CONFIRM ACTION";
+    document.getElementById("pdModalRows").innerHTML = (opts.rows||[]).map(r=>`<div class="pd-modal-row"><span>${r[0]}</span><b>${r[1]}</b></div>`).join("");
+    document.getElementById("pdModalMsg").textContent = opts.message || "Are you sure you want to continue?";
+    const old = document.getElementById("pdModalConfirm");
+    const btn = old.cloneNode(true);
+    old.replaceWith(btn);
+    btn.textContent = opts.confirmLabel || "Confirm";
+    btn.onclick = () => { ov.classList.remove("show"); onConfirm(); };
+    ov.classList.add("show");
+  }
+  function pdCloseModal(){ document.getElementById("pdModal").classList.remove("show"); }
+
+  function pdNotifCard(items, viewAll){
+    return `
+      <div class="pd-card">
+        <div class="pd-card-head">
+          <div><div class="pd-card-title">Notifications</div><div class="pd-card-sub">Latest items requiring attention</div></div>
+          <button class="pd-link-btn" onclick="navigate('${viewAll}')">View All →</button>
+        </div>
+        <div class="pd-notif-list">
+          ${items.map(n=>`
+            <div class="pd-notif-item${n.urgent?' urgent':''}" onclick="navigate('${n.view}')">
+              <div class="pd-notif-ico ${n.cls||'blue'}"><i class="fas ${n.icon}"></i></div>
+              <div style="flex:1;">
+                <div class="pd-notif-title">${n.title}</div>
+                <div class="pd-notif-sub">${n.sub}</div>
+              </div>
+              <div class="pd-notif-time">${n.time}</div>
+            </div>`).join("")}
+        </div>
+      </div>`;
+  }
+
+  function pdPageHead(name, office, selectsHtml){
+    return `
+      <div class="pd-welcome">
+        <div class="pd-wc-left">
+          <div>
+            <div class="pd-wc-title">WELCOME BACK, ${name.toUpperCase()}</div>
+            <div class="pd-wc-sub">Here's what's happening with your ISU CAUFA dashboard today.</div>
+          </div>
+        </div>
+        <div class="pd-wc-right">
+          <div class="pd-wc-block">
+            <div class="pd-wc-bico"><i class="fas fa-calendar-alt"></i></div>
+            <div>
+              <div class="pd-wc-bdate" id="pdDate">—</div>
+              <div class="pd-wc-btime" id="pdTime">—</div>
+            </div>
+          </div>
+          ${selectsHtml ? `<div class="pd-wc-sep"></div><div class="pd-wc-selects">${selectsHtml}</div>` : ""}
+        </div>
+      </div>`;
+  }
+
+  updateDateTime();
+
+
+
+
+/* ============ REPORTS MANAGEMENT — UNIVERSAL REPORT BUILDER + WORKFLOW ============
+   Maker (Treasurer) → Checker (Auditor) → Final Approver (President).
+   All data comes from the existing DB object and attached submission bundles. */
+const RPT = {
+  reportId: "RPT-2026-00000",
+  history: [],
+  active: {},
+  WF: { DRAFT:"Draft", SUBMITTED:"Submitted for Audit", VERIFIED:"Auditor Verified", RETURNED:"Returned to Treasurer", FINAL:"Final — Approved by President" },
+  REPORTS: {
+    "members-college": { title:"Members by College", cat:"MEMBERSHIP", type:"grouped" },
+    "members-dept": { title:"Members by Department", cat:"MEMBERSHIP", type:"grouped" },
+    "members-status": { title:"Membership Status", cat:"MEMBERSHIP", type:"status" },
+    "members-active": { title:"Active Members", cat:"MEMBERSHIP", type:"memberList" },
+    "members-inactive": { title:"Inactive Members", cat:"MEMBERSHIP", type:"memberList" },
+    "member-profile": { title:"Member Profile Report", cat:"MEMBERSHIP", type:"profile" },
+    "pay-summary": { title:"Payment Summary", cat:"PAYMENT", type:"payment" },
+    "pay-history": { title:"Payment History", cat:"PAYMENT", type:"payment" },
+    "dues-summary": { title:"Monthly Dues Summary", cat:"PAYMENT", type:"payment" },
+    "fee-summary": { title:"Membership Fee Summary", cat:"PAYMENT", type:"payment" },
+    "pay-method": { title:"Payment by Method", cat:"PAYMENT", type:"payment" },
+    "pay-date": { title:"Payment by Date", cat:"PAYMENT", type:"payment" },
+    "claims-all": { title:"Claims Report", cat:"CLAIMS", type:"claims" },
+    "claims-medical": { title:"Medical Aid Claims", cat:"CLAIMS", type:"claims" },
+    "claims-death": { title:"Death Aid Claims", cat:"CLAIMS", type:"claims" },
+    "claims-pending": { title:"Pending Claims", cat:"CLAIMS", type:"claims" },
+    "claims-approved": { title:"Approved Claims", cat:"CLAIMS", type:"claims" },
+    "claims-returned": { title:"Returned Claims", cat:"CLAIMS", type:"claims" },
+    "claims-released": { title:"Released Claims", cat:"CLAIMS", type:"claims" },
+    "contrib-summary": { title:"Contribution Summary", cat:"CONTRIBUTION", type:"contrib" },
+    "contrib-pending": { title:"Pending Contributions", cat:"CONTRIBUTION", type:"contrib" },
+    "contrib-completed": { title:"Completed Contributions", cat:"CONTRIBUTION", type:"contrib" },
+    "fund-summary": { title:"Fund Summary", cat:"FUND", type:"fund" },
+    "fund-ledger": { title:"Fund Ledger", cat:"FUND", type:"fund" },
+    "fund-inflows": { title:"Fund Inflows", cat:"FUND", type:"fund" },
+    "fund-outflows": { title:"Fund Outflows", cat:"FUND", type:"fund" },
+    "fund-movement": { title:"Fund Movement", cat:"FUND", type:"fund" },
+    "audit-audited": { title:"Audited Transactions", cat:"AUDIT", type:"audit" },
+    "audit-pending": { title:"Pending Audits", cat:"AUDIT", type:"audit" },
+    "audit-returned": { title:"Returned Transactions", cat:"AUDIT", type:"audit" },
+    "audit-trail": { title:"Audit Trail", cat:"AUDIT", type:"audit" }
+  }
+};
+const RPT_COLLEGES = ["CCSICT","COED","CBAA","CAS","CTE","CON","Engineering","Nursing","Agriculture","Business","Education"];
+const RPT_MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const RPT_QUICK_DATES = ["This Month","Previous Month","This Year","Previous Year","Custom Range"];
+
+function rptBadge(status){
+  if(typeof badge==="function"){ try{ return badge(status); }catch(e){} }
+  return '<span class="badge '+status+'">'+status.charAt(0).toUpperCase()+status.slice(1)+'</span>';
+}
+function rptWfBadge(s){
+  const map = {};
+  map[RPT.WF.DRAFT] = "review"; map[RPT.WF.SUBMITTED] = "pending"; map[RPT.WF.VERIFIED] = "approved";
+  map[RPT.WF.RETURNED] = "rejected"; map[RPT.WF.FINAL] = "approved";
+  return '<span class="badge '+(map[s]||"pending")+'">'+s+'</span>';
+}
+
+/* ---------- ROLE DETECTION + WORKFLOW STORE ---------- */
+RPT.isAuditor = typeof RENDERERS["payments-auditing"]==="function";
+RPT.isPresident = typeof RENDERERS["payments-verification"]==="function" || typeof RENDERERS["oversight-summary"]==="function";
+RPT.isTreasurer = typeof RENDERERS["otc-payment"]==="function" && !RPT.isPresident;
+RPT.role = RPT.isAuditor ? "AUDITOR" : RPT.isPresident ? "PRESIDENT" : RPT.isTreasurer ? "TREASURER" : "OFFICER";
+
+/* Submission bundles carry their own evidence (rows + ledger excerpt) so the
+   Auditor verifies the actual records behind the reported numbers. */
+const RPT_DUES_ROWS = [
+  {ref:"DUES-2026-00891",member:"Pedro Santos",type:"Monthly Dues",period:"Aug 2026",amount:100,method:"OTC",date:"Aug 24, 2026",status:"paid"},
+  {ref:"DUES-2026-00892",member:"Ramon dela Peña",type:"Monthly Dues",period:"Aug 2026",amount:100,method:"Bank Transfer",date:"Aug 23, 2026",status:"paid"},
+  {ref:"DUES-2026-00893",member:"Grace Tolentino",type:"Monthly Dues",period:"Aug 2026",amount:100,method:"GCash",date:"Aug 22, 2026",status:"paid"}
+];
+const RPT_DUES_LEDGER = [
+  {date:"Aug 29, 2026",ref:"DUES-2026-00893",desc:"Monthly Dues — Grace Tolentino",inflow:100,outflow:0,balance:1250200},
+  {date:"Aug 29, 2026",ref:"DUES-2026-00892",desc:"Monthly Dues — Ramon dela Peña",inflow:100,outflow:0,balance:1250100},
+  {date:"Aug 28, 2026",ref:"DUES-2026-00891",desc:"Monthly Dues — Pedro Santos",inflow:100,outflow:0,balance:1250000}
+];
+const RPT_CLAIMS_ROWS = [
+  {ref:"MA-2026-005",member:"Cristina Bautista",type:"Medical Aid",amount:18000,date:"Aug 21, 2026",status:"pending",approval:"Pending Review",release:"Not Released",stage:"Treasurer Review"},
+  {ref:"MA-2026-006",member:"Roberto Aquino",type:"Medical Aid",amount:20000,date:"Aug 25, 2026",status:"pending",approval:"Pending Review",release:"Not Released",stage:"Treasurer Review"}
+];
+const RPT_FUND_ROWS = [
+  {date:"Aug 29, 2026",ref:"DUES-2026-00893",desc:"Monthly Dues — Grace Tolentino",inflow:100,outflow:0,balance:1250200},
+  {date:"Aug 29, 2026",ref:"DUES-2026-00892",desc:"Monthly Dues — Ramon dela Peña",inflow:100,outflow:0,balance:1250100},
+  {date:"Aug 28, 2026",ref:"DUES-2026-00891",desc:"Monthly Dues — Pedro Santos",inflow:100,outflow:0,balance:1250000},
+  {date:"Aug 27, 2026",ref:"MF-2026-118",desc:"Membership Fee — Juan Dela Cruz",inflow:500,outflow:0,balance:1249900},
+  {date:"Aug 25, 2026",ref:"AC-2026-004",desc:"Aid Contribution — Medical Aid MA-2026-004",inflow:21500,outflow:0,balance:1249400},
+  {date:"Aug 20, 2026",ref:"REL-2026-003",desc:"Aid Release — Death Aid DA-2026-006",inflow:0,outflow:20000,balance:1227900}
+];
+
+function rptSeedWorkflow(){
+  const dues = {type:"dues-summary", title:"Monthly Dues Summary", filters:"Month: August + Status: paid", rows:RPT_DUES_ROWS, ledgerRows:RPT_DUES_LEDGER, ledgerTotal:300};
+  const fund = {type:"fund-summary", title:"Fund Summary", filters:"Month: August", rows:RPT_FUND_ROWS, ledgerRows:RPT_FUND_ROWS, ledgerTotal:12600};
+  const claims = {type:"claims-pending", title:"Pending Claims", filters:"Type: Medical Aid + Status: pending", rows:RPT_CLAIMS_ROWS, ledgerRows:[], ledgerTotal:0};
+  if(RPT.isTreasurer) return [
+    {...dues, id:"RPT-2026-00122", date:"Aug 29, 2026", count:3, status:RPT.WF.VERIFIED, verifiedBy:"Maria Santos — Auditor", reason:""},
+    {...claims, id:"RPT-2026-00125", date:"Aug 29, 2026", count:2, status:RPT.WF.SUBMITTED, verifiedBy:"", reason:""},
+    {id:"RPT-2026-00121", type:"pay-history", title:"Payment History", filters:"Month: August", date:"Aug 28, 2026", count:5, rows:RPT.paymentRows?RPT.paymentRows():[], ledgerRows:[], ledgerTotal:0, status:RPT.WF.RETURNED, reason:"Total collection does not match individual payment records — OTC payments are missing reference numbers.", verifiedBy:""},
+    {...fund, id:"RPT-2026-00120", date:"Aug 27, 2026", count:6, status:RPT.WF.FINAL, verifiedBy:"Maria Santos — Auditor", approvedBy:"Maria Santos — President", reason:""}
+  ];
+  if(RPT.isAuditor) return [
+    {...claims, id:"RPT-2026-00125", date:"Aug 29, 2026", count:2, status:RPT.WF.SUBMITTED, preparedBy:"Maria Santos — Treasurer", reason:""},
+    {...dues, id:"RPT-2026-00122", date:"Aug 29, 2026", count:3, status:RPT.WF.VERIFIED, verifiedBy:"Maria Santos — Auditor", preparedBy:"Maria Santos — Treasurer", reason:""},
+    {id:"RPT-2026-00121", type:"pay-history", title:"Payment History", filters:"Month: August", date:"Aug 28, 2026", count:5, rows:[], ledgerRows:[], ledgerTotal:0, status:RPT.WF.RETURNED, preparedBy:"Maria Santos — Treasurer", reason:"Total collection does not match individual payment records — OTC payments are missing reference numbers."}
+  ];
+  if(RPT.isPresident) return [
+    {...dues, id:"RPT-2026-00122", date:"Aug 29, 2026", count:3, status:RPT.WF.VERIFIED, preparedBy:"Maria Santos — Treasurer", verifiedBy:"Maria Santos — Auditor", reason:""},
+    {...fund, id:"RPT-2026-00120", date:"Aug 27, 2026", count:6, status:RPT.WF.FINAL, preparedBy:"Maria Santos — Treasurer", verifiedBy:"Maria Santos — Auditor", approvedBy:"Maria Santos — President", reason:""}
+  ];
+  return [];
+}
+RPT.workflow = rptSeedWorkflow();
+
+/* ---------- DATA VIEWS ---------- */
+RPT.memberRows = function(){
+  return DB.members ? DB.members.map(m=>({...m, college:m.dept, active:m.status!=="inactive"}))
+    : DB.duesTracking.map((d,i)=>({ id:"EMP-"+String(1000+i), name:d.member, dept:d.dept, college:d.dept, status:d.status==="paid"?"paid":d.status, lastPayment:d.month, amount:d.amount, method:d.method }));
+};
+RPT.paymentRows = function(){
+  const rows = [];
+  (DB.duesApproval||[]).forEach(p=>rows.push({ref:"DUE-2026-"+p.month.replace(/[^0-9]/g,""),member:p.member,type:"Monthly Dues",period:p.month,amount:p.amount,method:p.method,date:p.date,status:p.status==="approved"?"paid":p.status}));
+  (DB.membershipFeePayments||[]).forEach(p=>rows.push({ref:p.ref,member:p.member,type:"Membership Fee",period:"—",amount:p.amount,method:p.method,date:p.date,status:p.status==="approved"?"paid":p.status}));
+  (DB.duesTracking||[]).forEach(d=>rows.push({ref:"DUES-"+d.month.replace(/[^A-Za-z0-9]/g,""),member:d.member,type:"Monthly Dues",period:d.month,amount:d.amount,method:d.method,date:"—",status:d.status==="paid"?"paid":d.status==="advance"?"paid":d.status}));
+  (DB.paymentsAuditing||[]).forEach(p=>rows.push({ref:p.ref,member:p.member,type:p.type,period:"—",amount:p.amount,method:p.method,date:p.date,status:p.auditorStatus==="Pending"?"pending":"verified"}));
+  return rows;
+};
+RPT.claimRows = function(){
+  const rows = (DB.claimsQueue||[]).map(c=>({
+    ref:c.ref, member:c.member, type:c.type, amount:c.amount, date:c.date,
+    status:c.status, approval:c.status==="approved"?"Approved":c.status==="pending"?"Pending Review":"—",
+    release:c.status==="released"?"Released":c.status==="approved"?"Pending Release":"Not Released",
+    stage:c.status==="pending"?"Treasurer Review":c.status==="approved"?"Contribution Collection / Release Pending":"—", year:(c.date.match(/\d{4}/)||[""])[0]
+  }));
+  (DB.aidClaimsPostAuditing||[]).forEach(a=>rows.push({ref:a.ref,member:a.beneficiary,type:a.type,amount:a.expectedTotal,date:"—",status:a.status==="Pending Review"?"pending":"approved",approval:"Pending Audit",release:"Not Released",stage:"Auditor Verification",year:"2026"}));
+  (DB.aidPostVerifications||[]).forEach(a=>rows.push({ref:a.ref,member:a.beneficiary,type:a.type,amount:a.expected,date:"—",status:a.status==="Discrepancy"?"returned":"approved",approval:a.status==="Balanced"?"Verified":"Discrepancy",release:a.status==="Balanced"?"Pending Release":"Not Released",stage:"Post Verification",year:"2026"}));
+  const released = (DB.aidRelease||[]).filter(r=>r.status==="released").map(r=>({ref:r.ref,member:r.member,type:r.type,amount:r.approved,date:"—",status:"released",approval:"Approved",release:"Released",stage:"Released",year:"2026"}));
+  return rows.concat(released.filter(r=>!rows.some(x=>x.ref===r.ref)));
+};
+RPT.contribRows = function(){
+  const rows = [];
+  (DB.aidProgress||[]).forEach(a=>rows.push({ref:a.ref,aidEvent:a.name+" "+a.ref,expected:a.expected,collected:a.collected,remaining:Math.max(a.expected-a.collected,0),status:a.collected>=a.expected?"Completed":"Collecting",date:a.due}));
+  const cd = DB.contributionDetail;
+  if(cd && cd.contributors) cd.contributors.forEach(x=>rows.push({ref:cd.ref,aidEvent:cd.type+" "+cd.ref,member:x.member,amount:cd.perMember,status:x.status==="paid"?"Completed":"Pending",date:"Aug 2026"}));
+  return rows;
+};
+RPT.fundRows = function(){
+  return (DB.fundLedger||[]).map(f=>({...f, direction:f.type==="IN"?"Inflow":"Outflow", amount:f.inflow>0?f.inflow:f.outflow, category:f.desc.split(" — ")[0]}));
+};
+RPT.auditRows = function(){
+  const rows = (DB.auditedLogs||[]).map(l=>({date:l.date,action:l.action,ref:l.ref,user:l.auditor,detail:l.member?l.member:(l.reason||""),result:l.result||"—"}));
+  (DB.paymentsAuditing||[]).forEach(p=>rows.push({date:p.submitted,action:"Submitted for audit",ref:p.ref,user:p.treasurer,detail:p.member+" — "+p.type,result:"PENDING"}));
+  return rows;
+};
+
+/* ---------- FILTERING ---------- */
+RPT.matchFilter = function(row, f){
+  const s = JSON.stringify(row).toLowerCase();
+  if(f.member && row.member && !row.member.toLowerCase().includes(f.member.toLowerCase())) return false;
+  if(f.college && f.college!=="All Colleges" && !(row.college===f.college || row.dept===f.college || (row.college||"").includes(f.college))) return false;
+  if(f.status && f.status!=="All Statuses" && String(row.status).toLowerCase()!==f.status.toLowerCase()) return false;
+  if(f.method && f.method!=="All Methods" && String(row.method||"").toLowerCase()!==f.method.toLowerCase()) return false;
+  if(f.year && f.year!=="All Years" && !(row.year===f.year || String(row.date||"").includes(f.year) || String(row.period||"").includes(f.year))) return false;
+  if(f.month && f.month!=="All Months" && !((row.period||"").toLowerCase().startsWith(f.month.toLowerCase()) || String(row.date||"").toLowerCase().startsWith(f.month.toLowerCase().slice(0,3)))) return false;
+  if(f.min && !(Number(row.amount||row.collected||0) >= Number(f.min))) return false;
+  if(f.max && !(Number(row.amount||row.collected||0) <= Number(f.max))) return false;
+  if(f.type && f.type!=="All Types" && !String(row.type||row.aidEvent||"").includes(f.type)) return false;
+  if(f.direction && f.direction!=="All Movements" && row.direction!==f.direction.replace(/s$/,"")) return false;
+  return true;
+};
+RPT.applyFilters = function(rows){
+  const active = Object.entries(RPT.active).filter(([,v])=>v && !v.startsWith("All ") && v!=="All");
+  return rows.filter(r => active.every(([k,v]) => RPT.matchFilter(r, {[k]:v})));
+};
+
+/* ---------- UI: BUILDER ---------- */
+RPT.filterFieldsFor = function(type){
+  const cat = RPT.REPORTS[type] ? RPT.REPORTS[type].cat : "PAYMENT";
+  const fields = [];
+  fields.push({key:"member",label:"Member",input:"search",hint:"Search member..."});
+  fields.push({key:"college",label:"College",options:["All Colleges",...RPT_COLLEGES]});
+  if(cat==="PAYMENT"||cat==="FUND") fields.push({key:"type",label:"Payment Type",options:["All Types","Monthly Dues","Membership Fee","Aid Contribution"]});
+  if(cat==="PAYMENT") fields.push({key:"method",label:"Payment Method",options:["All Methods","Salary Deduction","OTC","Bank Transfer","GCash"]});
+  if(cat==="CLAIMS") fields.push({key:"type",label:"Claim Type",options:["All Types","Medical Aid","Death Aid"]});
+  if(cat==="FUND") fields.push({key:"direction",label:"Direction",options:["All Movements","Inflow","Outflow"]});
+  fields.push({key:"year",label:"Year",options:["All Years","2026","2025"]});
+  fields.push({key:"month",label:"Month",options:["All Months",...RPT_MONTHS]});
+  fields.push({key:"status",label:"Status",options:["All Statuses","paid","pending","unpaid","approved","rejected","returned","released","ready","Completed","Collecting"]});
+  if(cat!=="MEMBERSHIP") fields.push({key:"min",label:"Min Amount",input:"number",hint:"0"});
+  if(cat!=="MEMBERSHIP") fields.push({key:"max",label:"Max Amount",input:"number",hint:"1000000"});
+  return fields;
+};
+RPT.getRowsFor = function(type){
+  const cfg = RPT.REPORTS[type];
+  if(!cfg) return [];
+  switch(cfg.type){
+    case "grouped": case "status": case "memberList": case "profile": return RPT.memberRows();
+    case "payment": return RPT.paymentRows();
+    case "claims": return RPT.claimRows();
+    case "contrib": return RPT.contribRows();
+    case "fund": return RPT.fundRows();
+    case "audit": return RPT.auditRows();
+    default: return [];
+  }
+};
+RPT.newReportId = function(){ return "RPT-2026-" + String(126 + RPT.history.length).padStart(5,"0"); };
+RPT.chipLabel = function(k,v){
+  const labels = {member:"Member",college:"College",type:"Type",method:"Method",year:"Year",month:"Month",status:"Status",min:"Min ₱",max:"Max ₱",direction:"Direction"};
+  return labels[k] + ": " + v;
+};
+
+RENDERERS["reports-management"] = function(){
+  if(!RPT.isTreasurer){
+    root().innerHTML = `
+      <div class="panel">
+        <div class="panel-head">
+          <div><div class="panel-title">REPORTS MANAGEMENT</div><div class="panel-sub">Report generation is restricted to the Treasurer.</div></div>
+        </div>
+        <div class="rpt-hint" style="background:var(--blue-light);border-color:rgba(47,111,237,.4);color:var(--blue);">
+          <i class="fas fa-lock"></i>&nbsp; <b>Maker → Checker → Approver workflow:</b> reports are <b>prepared and generated by the Treasurer</b>, <b>independently verified by the Auditor</b>, and <b>finalized by the President</b>. Your role
+          ${RPT.isAuditor ? "verifies submitted reports" : "reviews and signs verified reports"} — open ${RPT.isAuditor ? '"<b>Reports for Verification</b>" in the Audit section' : '"<b>Reports for Final Review</b>" in the Reports section'} to work on them.
+        </div>
+        ${ (RPT.workflow||[]).filter(w=>w.status===RPT.WF.FINAL).length ? `
+        <div class="panel-head" style="margin:6px 0 10px;"><div><div class="panel-title">FINAL REPORTS (READ-ONLY)</div></div></div>
+        <div class="table-wrap">
+          <table class="data" style="font-size:12.5px;">
+            <thead><tr><th>Report ID</th><th>Report Type</th><th>Filters</th><th>Records</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>${RPT.workflow.filter(w=>w.status===RPT.WF.FINAL).map(w=>`
+              <tr><td><b>${w.id}</b></td><td>${w.title}</td><td>${w.filters}</td><td>${w.count}</td><td>${rptWfBadge(w.status)}</td><td><button class="rpt-link" onclick="rptSheetById('\${w.id}')">View</button></td></tr>`).join("")}</tbody>
+          </table>
+        </div>` : "" }
+      </div>`;
+    return;
+  }
+  root().innerHTML = `
+    <div class="panel">
+      <div class="panel-head">
+        <div><div class="panel-title">REPORTS MANAGEMENT</div><div class="panel-sub">Generate, filter, preview, print, and export organizational reports.</div></div>
+      </div>
+      <div id="rptReturnedStrips"></div>
+      <div class="rpt-hint" style="margin-bottom:16px;background:var(--green-light);border-color:rgba(30,143,78,.4);color:var(--green-dark);">
+        <i class="fas fa-route"></i>&nbsp; Report workflow: <b>Prepared (Treasurer)</b> → <b>Verified (Auditor)</b> → <b>Approved &amp; Signed (President)</b>. Generating a report does not finalize it — submit it for audit.
+      </div>
+
+      <div class="rpt-builder">
+        <div>
+          <div class="rpt-panel">
+            <div class="rpt-panel-title">REPORT TYPE</div>
+            <div class="rpt-panel-sub" style="margin-bottom:10px;">Choose what to report on</div>
+            <div class="rpt-field">
+              <label>Report Type</label>
+              <select id="rptType" onchange="rptOnTypeChange()">
+                ${Object.entries(RPT.REPORTS).map(([k,c])=>`<option value="${k}">${c.cat} — ${c.title}</option>`).join("")}
+              </select>
+            </div>
+            <div class="rpt-field">
+              <label>Quick Date</label>
+              <select id="rptQuickDate">${RPT_QUICK_DATES.map(d=>`<option${d==="Custom Range"?" selected":""}>${d}</option>`).join("")}</select>
+            </div>
+          </div>
+
+          <div class="rpt-panel">
+            <div class="rpt-panel-title">FILTERS</div>
+            <div class="rpt-panel-sub" style="margin-bottom:12px;">Combine filters — only records matching ALL conditions are included.</div>
+            <div id="rptFilterFields"></div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+              <button class="rpt-btn primary" onclick="rptApply()">Apply Filters</button>
+              <button class="rpt-btn ghost" onclick="rptReset()">Reset</button>
+            </div>
+          </div>
+
+          <div class="rpt-panel">
+            <div class="rpt-panel-title">ACTIVE FILTERS</div>
+            <div class="rpt-chips" id="rptChips"></div>
+          </div>
+
+          <div class="rpt-panel">
+            <div class="rpt-panel-title">EXPORT &amp; WORKFLOW</div>
+            <div style="display:grid;gap:8px;margin-top:10px;">
+              <button class="rpt-btn primary" onclick="rptPrintPreview()">Print Preview</button>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <button class="rpt-btn ghost" onclick="rptExport('pdf')">Export PDF</button>
+                <button class="rpt-btn ghost" onclick="rptExport('excel')">Export Excel</button>
+              </div>
+              <button class="rpt-btn ghost" onclick="rptReset()">Clear Filters</button>
+              ${RPT.isTreasurer?`<button class="rpt-btn primary" style="background:var(--blue);" onclick="rptSubmitForAudit()"><i class="fas fa-paper-plane"></i>&nbsp; Submit for Audit</button>`:""}
+            </div>
+            ${RPT.isTreasurer?`<div class="rpt-panel-sub" style="margin-top:8px;">Submitting sends the report with its records and ledger excerpt to the Auditor.</div>`:""}
+          </div>
+        </div>
+
+        <div>
+          <div class="rpt-panel" id="rptSummaryPanel">
+            <div class="rpt-panel-title" id="rptResultTitle">REPORT PREVIEW</div>
+            <div class="rpt-panel-sub" id="rptResultSub">Select a report type and apply filters.</div>
+            <div class="rpt-count" id="rptCount" style="display:none;"></div>
+            <div class="rpt-sum" id="rptSum"></div>
+            <div class="rpt-table-wrap" id="rptTable"></div>
+          </div>
+
+          <div class="rpt-panel rpt-history">
+            <div class="panel-head" style="margin-bottom:10px;">
+              <div><div class="panel-title">REPORT HISTORY &amp; WORKFLOW STATUS</div><div class="panel-sub">Lifecycle of generated reports</div></div>
+            </div>
+            <div class="table-wrap">
+              <table class="data" style="font-size:12.5px;">
+                <thead><tr><th>Report ID</th><th>Report Type</th><th>Generated</th><th>Filters</th><th>Records</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="rptHistoryBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pd-modal-overlay" id="rptReasonModal">
+      <div class="pd-modal" style="border-top-color:var(--amber);">
+        <div class="pd-modal-title" style="color:var(--amber);"><i class="fas fa-rotate-left"></i><span>RETURN REPORT TO TREASURER</span></div>
+        <div class="pd-modal-msg">State the reason for returning this report. The Treasurer will be able to correct and resubmit it.</div>
+        <textarea id="rptReasonText" style="width:100%;min-height:90px;border:1px solid var(--line);border-radius:8px;padding:10px;font-family:inherit;font-size:12.5px;margin-bottom:14px;" placeholder="e.g. Total collection does not match individual payment records."></textarea>
+        <div class="pd-modal-actions">
+          <button class="btn ghost sm" onclick="document.getElementById('rptReasonModal').classList.remove('show')">Cancel</button>
+          <button class="btn primary sm" id="rptReasonConfirm">Submit Return</button>
+        </div>
+      </div>
+    </div>
+  `;
+  RPT.reportId = RPT.newReportId();
+  rptRenderFilterFields();
+  rptRun(false);
+  rptRenderReturnedStrips();
+};
+
+function rptOnTypeChange(){ RPT.active = {}; rptRenderFilterFields(); rptRun(false); }
+function rptRenderFilterFields(){
+  const type = document.getElementById("rptType").value;
+  const cfg = RPT.REPORTS[type];
+  const fields = RPT.filterFieldsFor(type);
+  document.getElementById("rptFilterFields").innerHTML = fields.map(f=>{
+    if(f.input) return `<div class="rpt-field"><label>${f.label}</label><input type="${f.input}" id="rptF_${f.key}" placeholder="${f.hint||""}" oninput="rptLive()"></div>`;
+    return `<div class="rpt-field"><label>${f.label}</label><select id="rptF_${f.key}" onchange="rptLive()">${f.options.map(o=>`<option>${o}</option>`).join("")}</select></div>`;
+  }).join("");
+  document.getElementById("rptResultTitle").textContent = cfg.title.toUpperCase();
+}
+function rptCollect(){
+  const type = document.getElementById("rptType").value;
+  const fields = RPT.filterFieldsFor(type);
+  const vals = {};
+  fields.forEach(f=>{ vals[f.key] = document.getElementById("rptF_"+f.key).value.trim(); });
+  RPT.active = vals;
+  return type;
+}
+function rptLive(){ clearTimeout(RPT._t); RPT._t = setTimeout(()=>rptRun(false), 250); }
+function rptApply(){ rptRun(true); }
+function rptReset(){ RPT.active = {}; rptRenderFilterFields(); rptRun(false); }
+
+function rptRun(committed){
+  const type = rptCollect();
+  const cfg = RPT.REPORTS[type];
+  const all = RPT.getRowsFor(type);
+  const rows = RPT.applyFilters(all);
+
+  const entries = Object.entries(RPT.active).filter(([,v])=>v && !v.startsWith("All ") && v!=="All");
+  document.getElementById("rptChips").innerHTML = entries.length
+    ? entries.map(([k,v])=>`<span class="rpt-chip">${RPT.chipLabel(k,v)} <button onclick="rptRemove('${k}')">×</button></span>`).join("")
+    : `<span class="rpt-chip none">No filters applied — showing all records</span>`;
+
+  const noun = cfg.cat==="CLAIMS" ? "Claims" : (["grouped","memberList","status","profile"].includes(cfg.type)) ? "Members" : "Transactions";
+  const countEl = document.getElementById("rptCount");
+  countEl.style.display = "";
+  countEl.innerHTML = `<span style="font-size:16px;color:var(--blue);font-weight:800;">${rows.length}</span> ${noun.toUpperCase()} FOUND`;
+
+  const totalAmt = rows.reduce((s,r)=>s+Number(r.amount||0),0);
+  const byStatus = {};
+  rows.forEach(r=>{ const s=String(r.status||"—").toLowerCase(); byStatus[s]=(byStatus[s]||0)+1; });
+  const sumItems = [{l:"Total Records", v:rows.length},{l:"Total Amount", v:peso(totalAmt)}];
+  ["paid","pending","unpaid","approved","rejected","returned","released","ready","completed","collecting"].forEach(s=>{
+    if(byStatus[s]) sumItems.push({l:s.charAt(0).toUpperCase()+s.slice(1), v:byStatus[s], cls:s==="paid"||s==="approved"||s==="released"||s==="completed"?"pos":(s==="unpaid"||s==="rejected"||s==="returned"?"neg":"")});
+  });
+  if(cfg.type==="fund"){
+    const inflow = rows.reduce((s,r)=>s+(r.inflow||0),0), outflow = rows.reduce((s,r)=>s+(r.outflow||0),0);
+    sumItems.push({l:"Inflows", v:peso(inflow), cls:"pos"},{l:"Outflows", v:peso(outflow), cls:"neg"});
+  }
+  document.getElementById("rptSum").innerHTML = sumItems.map(i=>`<div class="rpt-sum-item"><div class="l">${i.l}</div><div class="v ${i.cls||""}">${i.v}</div></div>`).join("");
+  document.getElementById("rptTable").innerHTML = rptBuildTable(type, cfg, rows);
+
+  if(committed){
+    const id = RPT.reportId = RPT.newReportId();
+    RPT.history.unshift({id, type, title:cfg.title, date:new Date().toLocaleString("en-US",{month:"short",day:"numeric",year:"numeric"}), filters:entries.map(([k,v])=>RPT.chipLabel(k,v)).join(" + ")||"None", count:rows.length, amount:totalAmt, rows, active:JSON.parse(JSON.stringify(RPT.active)), cfg, status:RPT.WF.DRAFT});
+    rptRenderHistory();
+    toast("Report "+id+" generated — "+rows.length+" records (Draft)");
+  }
+}
+function rptRemove(k){
+  delete RPT.active[k];
+  const el = document.getElementById("rptF_"+k);
+  if(el) el.value = el.tagName==="SELECT" ? el.options[0].value : "";
+  rptRun(false);
+}
+function rptBuildTable(type, cfg, rows){
+  if(!rows.length) return `<div class="rpt-hint">No records match the selected filters.</div>`;
+  let head, body;
+  if(cfg.type==="grouped"){
+    const map = {};
+    rows.forEach(r=>{ const g=r.college||r.dept||"—"; map[g]=map[g]||{a:0,i:0}; map[g][r.active?"a":"i"]++; });
+    const keys = Object.keys(map).sort();
+    const tA = keys.reduce((s,k)=>s+map[k].a,0), tI = keys.reduce((s,k)=>s+map[k].i,0);
+    head = "<tr><th>College / Department</th><th>Active</th><th>Inactive</th><th>Total</th></tr>";
+    body = keys.map(k=>`<tr><td><b>${k}</b></td><td>${map[k].a}</td><td>${map[k].i}</td><td>${map[k].a+map[k].i}</td></tr>`).join("")
+      + `<tr class="total"><td>TOTAL</td><td>${tA}</td><td>${tI}</td><td>${tA+tI}</td></tr>`;
+  } else if(cfg.type==="payment"){
+    head = "<tr><th>Reference</th><th>Member</th><th>Type</th><th>Period</th><th>Amount</th><th>Method</th><th>Date</th><th>Status</th></tr>";
+    body = rows.map(r=>`<tr><td><b>${r.ref||"—"}</b></td><td>${r.member}</td><td>${r.type}</td><td>${r.period||"—"}</td><td>${peso(r.amount)}</td><td>${r.method||"—"}</td><td>${r.date}</td><td>${rptBadge(String(r.status).toLowerCase()==="paid"?"approved":"pending")}</td></tr>`).join("")
+      + `<tr class="total"><td colspan="4">TOTAL — ${rows.length} records</td><td>${peso(rows.reduce((s,r)=>s+Number(r.amount||0),0))}</td><td colspan="3"></td></tr>`;
+  } else if(cfg.type==="claims"){
+    head = "<tr><th>Claim ID</th><th>Member</th><th>Type</th><th>Date</th><th>Amount</th><th>Status</th><th>Approval</th><th>Release</th><th>Stage</th></tr>";
+    body = rows.map(r=>`<tr><td><b>${r.ref}</b></td><td>${r.member}</td><td>${r.type}</td><td>${r.date}</td><td>${peso(r.amount)}</td><td>${rptBadge(r.status==="released"?"approved":r.status)}</td><td>${r.approval}</td><td>${r.release}</td><td>${r.stage}</td></tr>`).join("")
+      + `<tr class="total"><td colspan="4">TOTAL — ${rows.length} claims</td><td>${peso(rows.reduce((s,r)=>s+Number(r.amount||0),0))}</td><td colspan="4"></td></tr>`;
+  } else if(cfg.type==="contrib"){
+    const hasMember = rows.some(r=>r.member);
+    head = hasMember
+      ? "<tr><th>Contribution ID</th><th>Member</th><th>Aid Event</th><th>Amount</th><th>Date</th><th>Status</th></tr>"
+      : "<tr><th>Reference</th><th>Aid Event</th><th>Expected</th><th>Collected</th><th>Remaining</th><th>Date</th><th>Status</th></tr>";
+    body = rows.map(r=>hasMember
+      ? `<tr><td><b>${r.ref}</b></td><td>${r.member}</td><td>${r.aidEvent}</td><td>${peso(r.amount)}</td><td>${r.date}</td><td>${rptBadge(r.status==="Completed"?"approved":"pending")}</td></tr>`
+      : `<tr><td><b>${r.ref}</b></td><td>${r.aidEvent}</td><td>${peso(r.expected)}</td><td>${peso(r.collected)}</td><td>${peso(r.remaining)}</td><td>${r.date}</td><td>${rptBadge(r.status==="Completed"?"approved":"pending")}</td></tr>`).join("")
+      + `<tr class="total"><td colspan="4">TOTAL — ${rows.length} records</td><td>${peso(rows.reduce((s,r)=>s+Number(r.amount!==undefined?r.amount:r.collected||0),0))}</td><td colspan="${hasMember?1:2}"></td></tr>`;
+  } else if(cfg.type==="fund"){
+    head = "<tr><th>Date</th><th>Reference</th><th>Description</th><th>Direction</th><th>Inflow</th><th>Outflow</th><th>Balance</th></tr>";
+    body = rows.map(r=>`<tr><td>${r.date}</td><td><b>${r.ref}</b></td><td>${r.desc}</td><td>${r.direction}</td><td style="color:var(--green);">${r.inflow>0?peso(r.inflow):"—"}</td><td style="color:var(--red);">${r.outflow>0?peso(r.outflow):"—"}</td><td><b>${peso(r.balance)}</b></td></tr>`).join("")
+      + `<tr class="total"><td colspan="4">TOTAL — ${rows.length} transactions</td><td>${peso(rows.reduce((s,r)=>s+(r.inflow||0),0))}</td><td>${peso(rows.reduce((s,r)=>s+(r.outflow||0),0))}</td><td></td></tr>`;
+  } else if(cfg.type==="audit"){
+    head = "<tr><th>Date</th><th>Action</th><th>Reference</th><th>User</th><th>Details</th><th>Result</th></tr>";
+    body = rows.map(r=>`<tr><td>${r.date}</td><td>${r.action}</td><td><b>${r.ref}</b></td><td>${r.user}</td><td>${r.detail}</td><td>${rptBadge(String(r.result).toLowerCase().includes("return")?"rejected":String(r.result).toLowerCase().includes("pass")||String(r.result).toLowerCase().includes("verif")?"approved":"pending")}</td></tr>`).join("")
+      + `<tr class="total"><td colspan="6">TOTAL — ${rows.length} audit records</td></tr>`;
+  } else {
+    head = "<tr><th>Employee ID</th><th>Member</th><th>College / Department</th><th>Status</th><th>Last Payment</th></tr>";
+    body = rows.map(r=>`<tr><td>${r.id||"—"}</td><td><b>${r.name}</b></td><td>${r.college||r.dept||"—"}</td><td>${rptBadge(r.status==="paid"?"approved":r.status==="unpaid"?"rejected":"pending")}</td><td>${r.lastPayment||r.joinDate||"—"}</td></tr>`).join("")
+      + `<tr class="total"><td colspan="4">TOTAL — ${rows.length} members</td><td></td></tr>`;
+  }
+  return `<table class="rpt-preview-table"><thead>${head}</thead><tbody>${body}</tbody></table>`;
+}
+
+/* ---------- WORKFLOW: SUBMIT / RETURN STRIPS / HISTORY ---------- */
+function rptRenderReturnedStrips(){
+  const el = document.getElementById("rptReturnedStrips");
+  if(!el) return;
+  const returned = RPT.workflow.filter(w=>w.status===RPT.WF.RETURNED);
+  el.innerHTML = returned.map(w=>`
+    <div class="rpt-hint" style="background:var(--red-light);border-color:rgba(227,77,77,.4);color:#a12c2c;margin-bottom:10px;">
+      <i class="fas fa-rotate-left"></i>&nbsp; <b>${w.id} — ${w.title} was RETURNED by the Auditor:</b> ${w.reason}
+      &nbsp;<button class="rpt-btn sm" style="background:#a12c2c;color:#fff;" onclick="rptLoadForCorrection('${w.id}')">Review &amp; Resubmit</button>
+    </div>`).join("");
+}
+function rptLoadForCorrection(id){
+  const w = RPT.workflow.find(x=>x.id===id);
+  if(!w) return;
+  document.getElementById("rptType").value = w.type;
+  RPT.active = {};
+  rptRenderFilterFields();
+  rptRun(false);
+  window.scrollTo({top:0,behavior:"smooth"});
+  toast("Loaded "+id+" for correction — apply filters and resubmit");
+}
+function rptSubmitForAudit(){
+  if(!RPT.history.length){ toast("Generate a report first (Apply Filters)"); return; }
+  const h = RPT.history[0];
+  if(RPT.workflow.some(w=>w.id===h.id && w.status===RPT.WF.SUBMITTED)){ toast(h.id+" is already submitted for audit"); return; }
+  const ledgerRows = (DB.fundLedger||[]).slice(0,6).map(f=>({date:f.date,ref:f.ref,desc:f.desc,inflow:f.inflow,outflow:f.outflow,balance:f.balance}));
+  const ledgerTotal = ledgerRows.reduce((s,r)=>s+r.inflow-r.outflow,0);
+  const wf = {id:h.id, type:h.type, title:h.title, filters:h.filters, date:h.date, count:h.count, rows:h.rows, active:h.active, ledgerRows, ledgerTotal, status:RPT.WF.SUBMITTED, preparedBy:"Maria Santos — Treasurer", reason:"", cfg:h.cfg};
+  const old = RPT.workflow.findIndex(w=>w.id===h.id);
+  if(old>=0) RPT.workflow[old] = wf; else RPT.workflow.unshift(wf);
+  h.status = RPT.WF.SUBMITTED;
+  rptRenderHistory();
+  toast(h.id+" submitted for audit — sent to the Auditor with records & ledger excerpt");
+  rptRenderReturnedStrips();
+}
+function rptWfFor(id){ return RPT.workflow.find(w=>w.id===id); }
+function rptRenderHistory(){
+  const b = document.getElementById("rptHistoryBody");
+  if(!b) return;
+  const local = RPT.history.map(h=>({...h, status: (rptWfFor(h.id)||{}).status || h.status || RPT.WF.DRAFT}));
+  const seeded = RPT.workflow.filter(w=>!RPT.history.some(h=>h.id===w.id));
+  const all = local.concat(seeded.map(w=>({...w, amount:(w.rows||[]).reduce((s,r)=>s+Number(r.amount||0),0)})));
+  if(!all.length){ b.innerHTML = `<tr><td colspan="8"><div class="empty-state">No reports generated yet</div></td></tr>`; return; }
+  b.innerHTML = all.map(h=>`
+    <tr>
+      <td><b>${h.id}</b></td>
+      <td>${h.title}</td>
+      <td>${h.date}</td>
+      <td>${h.filters}</td>
+      <td>${h.count}</td>
+      <td>${peso(h.amount||0)}</td>
+      <td>${rptWfBadge(h.status)}${h.status===RPT.WF.RETURNED&&h.reason?`<div style="font-size:10px;color:var(--red);margin-top:3px;max-width:180px;">${h.reason}</div>`:""}</td>
+      <td>${rptWfFor(h.id)?`<button class="rpt-link" onclick="rptSheetById('${h.id}')">View</button>`:""}${RPT.isTreasurer&&h.status===RPT.WF.DRAFT?`<button class="rpt-link" onclick="rptSubmitById('${h.id}')">Submit</button>`:""}</td>
+    </tr>`).join("");
+}
+function rptSubmitById(id){
+  const h = RPT.history.find(x=>x.id===id);
+  if(h){ RPT.history = [h, ...RPT.history.filter(x=>x.id!==id)]; rptSubmitForAudit(); }
+}
+function rptSheetById(id){ const w = rptWfFor(id); if(w) rptSheet({...w, cfg:RPT.REPORTS[w.type]}); }
+
+/* ---------- AUDITOR: REPORTS FOR VERIFICATION ---------- */
+function rptChecks(h){
+  const rows = h.rows||[];
+  const total = rows.reduce((s,r)=>s+Number(r.amount||0),0);
+  const unit = rows.length? Math.round(total/rows.length):0;
+  const compExpected = rows.length*unit;
+  const valid = rows.every(r=>r.ref&&Number(r.amount)>0);
+  const lt = (h.ledgerRows||[]).reduce((s,r)=>s+Number(r.inflow||0)-Number(r.outflow||0),0);
+  const hasLedger = (h.ledgerRows||[]).length>0;
+  return {
+    total, count: rows.length,
+    checks: [
+      {label:"Computation", detail:rows.length+" records × "+peso(unit), a:peso(compExpected), b:peso(total), ok:rows.length>0&&Math.abs(compExpected-total)<0.01},
+      {label:"Supporting records", detail:"valid reference & amount on every row", a:rows.length+" records", b:valid?"All valid":"Invalid entries", ok:valid&&rows.length>0},
+      hasLedger
+        ? {label:"Fund Ledger excerpt", detail:"net posted movement in attached ledger", a:peso(h.ledgerTotal||0), b:peso(lt), ok:(h.ledgerTotal||0)===lt}
+        : {label:"Fund Ledger", detail:"aid claims are not fund inflows until released", a:"—", b:"—", ok:true}
+    ]
+  };
+}
+RENDERERS["reports-verification"] = function(){
+  const submitted = RPT.workflow.filter(w=>w.status===RPT.WF.SUBMITTED);
+  const others = RPT.workflow.filter(w=>w.status!==RPT.WF.SUBMITTED);
+  root().innerHTML = `
+    <div class="panel">
+      <div class="panel-head">
+        <div><div class="panel-title">REPORTS FOR VERIFICATION</div><div class="panel-sub">Reports submitted by the Treasurer — verify computation, records, and ledger before forwarding to the President.</div></div>
+      </div>
+      ${submitted.length?submitted.map(h=>{
+        const v = rptChecks(h);
+        return `
+        <div class="rpt-panel" style="border-color:rgba(47,111,237,.4);">
+          <div class="panel-head" style="margin-bottom:10px;">
+            <div><div class="panel-title">${h.id} — ${h.title}</div><div class="panel-sub">${h.filters} · Prepared by: ${h.preparedBy||"Treasurer"} · ${h.date}</div></div>
+            ${rptWfBadge(h.status)}
+          </div>
+          <div class="rpt-sum" style="margin-bottom:12px;">
+            <div class="rpt-sum-item"><div class="l">Reported Records</div><div class="v">${h.count}</div></div>
+            <div class="rpt-sum-item"><div class="l">Reported Total</div><div class="v">${peso(v.total)}</div></div>
+          </div>
+          <div class="rpt-panel-sub" style="margin-bottom:8px;font-weight:700;">AUDITOR CROSS-CHECKS</div>
+          ${v.checks.map(c=>`
+            <div class="rpt-count" style="background:${c.ok?"var(--green-light)":"var(--red-light)"};border-color:${c.ok?"rgba(30,143,78,.4)":"rgba(227,77,77,.4)"};color:var(--ink);">
+              <i class="fas ${c.ok?"fa-circle-check":"fa-circle-xmark"}" style="color:${c.ok?"var(--green)":"var(--red)"};"></i>
+              <span style="flex:1;"><b>${c.label}:</b> ${c.detail} — ${c.a} vs ${c.b}</span>
+              <b style="color:${c.ok?"var(--green)":"var(--red)"};">${c.ok?"✓ MATCH":"✗ MISMATCH"}</b>
+            </div>`).join("")}
+          <div class="table-wrap" style="margin:12px 0;">${rptBuildTable(h.type, RPT.REPORTS[h.type]||{type:"payment"}, h.rows||[])}</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="rpt-btn primary" style="background:var(--green);" onclick="rptVerify('${h.id}')"><i class="fas fa-check"></i>&nbsp; Verify Report</button>
+            <button class="rpt-btn ghost" style="border-color:var(--red);color:var(--red);" onclick="rptOpenReturn('${h.id}')"><i class="fas fa-rotate-left"></i>&nbsp; Return to Treasurer</button>
+            <button class="rpt-btn ghost" onclick="rptSheetById('${h.id}')">View Official Sheet</button>
+          </div>
+        </div>`;
+      }).join(""):`<div class="rpt-hint">No reports are currently awaiting verification. Reports submitted by the Treasurer will appear here.</div>`}
+
+      <div class="panel-head" style="margin:6px 0 10px;"><div><div class="panel-title">VERIFICATION HISTORY</div></div></div>
+      <div class="table-wrap">
+        <table class="data" style="font-size:12.5px;">
+          <thead><tr><th>Report ID</th><th>Report Type</th><th>Filters</th><th>Records</th><th>Total</th><th>Status</th><th>Reason / Notes</th></tr></thead>
+          <tbody>
+            ${others.length?others.map(h=>`
+              <tr>
+                <td><b>${h.id}</b></td><td>${h.title}</td><td>${h.filters}</td><td>${h.count}</td><td>${peso((h.rows||[]).reduce((s,r)=>s+Number(r.amount||0),0))}</td>
+                <td>${rptWfBadge(h.status)}</td><td style="max-width:260px;font-size:11.5px;">${h.reason||"-"}</td>
+              </tr>`).join(""):`<tr><td colspan="7"><div class="empty-state">No verification history yet</div></td></tr>`}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+  rptUpdateBadges();
+};
+function rptVerify(id){
+  const w = rptWfFor(id);
+  if(!w) return;
+  pdConfirm({title:"CONFIRM REPORT VERIFICATION", rows:[["Report",w.id+" — "+w.title],["Records",String(w.count)],["Total",peso((w.rows||[]).reduce((s,r)=>s+Number(r.amount||0),0))]], message:"All cross-checks must match. Verifying forwards this report to the President for final review and signature.", confirmLabel:"Verify Report"}, function(){
+    w.status = RPT.WF.VERIFIED;
+    w.verifiedBy = "Maria Santos — Auditor";
+    toast(w.id+" verified — forwarded to the President for final review");
+    RENDERERS["reports-verification"]();
+  });
+}
+function rptOpenReturn(id){
+  const w = rptWfFor(id);
+  if(!w) return;
+  document.getElementById("rptReasonText").value = "";
+  document.getElementById("rptReasonConfirm").onclick = function(){
+    const reason = document.getElementById("rptReasonText").value.trim();
+    if(!reason){ toast("A return reason is required"); return; }
+    w.status = RPT.WF.RETURNED;
+    w.reason = reason;
+    document.getElementById("rptReasonModal").classList.remove("show");
+    toast(w.id+" returned to Treasurer — "+reason);
+    RENDERERS["reports-verification"]();
+  };
+  document.getElementById("rptReasonModal").classList.add("show");
+}
+
+/* ---------- PRESIDENT: REPORTS FOR FINAL REVIEW ---------- */
+RENDERERS["reports-final"] = function(){
+  const pending = RPT.workflow.filter(w=>w.status===RPT.WF.VERIFIED);
+  const final = RPT.workflow.filter(w=>w.status===RPT.WF.FINAL);
+  const returned = RPT.workflow.filter(w=>w.status===RPT.WF.RETURNED);
+  root().innerHTML = `
+    <div class="panel">
+      <div class="panel-head">
+        <div><div class="panel-title">REPORTS FOR FINAL REVIEW</div><div class="panel-sub">Auditor-verified reports awaiting presidential review, signature, and approval.</div></div>
+      </div>
+      ${pending.length?pending.map(h=>{
+        const total = (h.rows||[]).reduce((s,r)=>s+Number(r.amount||0),0);
+        return `
+        <div class="rpt-panel" style="border-color:rgba(212,160,23,.5);">
+          <div class="panel-head" style="margin-bottom:10px;">
+            <div><div class="panel-title">${h.id} — ${h.title}</div><div class="panel-sub">${h.filters} · ${h.date}</div></div>
+            <span class="pd-reconciled"><span class="dot"></span>Ready for Final Review</span>
+          </div>
+          <div class="rpt-count" style="background:var(--green-light);border-color:rgba(30,143,78,.4);">
+            <i class="fas fa-user-check" style="color:var(--green);"></i>
+            <span>Prepared by: <b>${h.preparedBy||"Treasurer"}</b> ✓ &nbsp;·&nbsp; Verified by: <b>${h.verifiedBy||"Auditor"}</b> ✓</span>
+          </div>
+          <div class="rpt-sum" style="margin:12px 0;">
+            <div class="rpt-sum-item"><div class="l">Total Records</div><div class="v">${h.count}</div></div>
+            <div class="rpt-sum-item"><div class="l">Total Amount</div><div class="v">${peso(total)}</div></div>
+            <div class="rpt-sum-item"><div class="l">Auditor Status</div><div class="v pos">✓ Verified</div></div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="rpt-btn ghost" onclick="rptSheetById('${h.id}')">View Report</button>
+            <button class="rpt-btn primary" onclick="rptApprove('${h.id}')"><i class="fas fa-signature"></i>&nbsp; Approve &amp; Sign</button>
+            <button class="rpt-btn ghost" style="border-color:var(--red);color:var(--red);" onclick="rptOpenReturn('${h.id}')"><i class="fas fa-rotate-left"></i>&nbsp; Return</button>
+          </div>
+        </div>`;
+      }).join(""):`<div class="rpt-hint">No reports are awaiting final review. Auditor-verified reports will appear here.</div>`}
+
+      ${final.length?`
+      <div class="panel-head" style="margin:6px 0 10px;"><div><div class="panel-title">SIGNED / FINAL REPORTS</div></div></div>
+      <div class="table-wrap">
+        <table class="data" style="font-size:12.5px;">
+          <thead><tr><th>Report ID</th><th>Report Type</th><th>Filters</th><th>Records</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>${final.map(h=>`
+            <tr><td><b>${h.id}</b></td><td>${h.title}</td><td>${h.filters}</td><td>${h.count}</td><td>${peso((h.rows||[]).reduce((s,r)=>s+Number(r.amount||0),0))}</td><td>${rptWfBadge(h.status)}</td><td><button class="rpt-link" onclick="rptSheetById('${h.id}')">View</button></td></tr>`).join("")}</tbody>
+        </table>
+      </div>`:""}
+
+      ${returned.length?`
+      <div class="panel-head" style="margin:6px 0 10px;"><div><div class="panel-title">RETURNED REPORTS</div></div></div>
+      <div class="table-wrap">
+        <table class="data" style="font-size:12.5px;">
+          <thead><tr><th>Report ID</th><th>Report Type</th><th>Status</th><th>Reason</th></tr></thead>
+          <tbody>${returned.map(h=>`<tr><td><b>${h.id}</b></td><td>${h.title}</td><td>${rptWfBadge(h.status)}</td><td style="max-width:320px;font-size:11.5px;">${h.reason||"-"}</td></tr>`).join("")}</tbody>
+        </table>
+      </div>`:""}
+    </div>
+  `;
+  rptUpdateBadges();
+};
+function rptApprove(id){
+  const w = rptWfFor(id);
+  if(!w) return;
+  pdConfirm({title:"CONFIRM APPROVAL & SIGNATURE", rows:[["Report",w.id+" — "+w.title],["Records",String(w.count)],["Total",peso((w.rows||[]).reduce((s,r)=>s+Number(r.amount||0),0))],["Verified By",w.verifiedBy||"Auditor"]], message:"Signing finalizes this as the official organizational report. The document will carry the Treasurer, Auditor, and President signatures.", confirmLabel:"Approve & Sign"}, function(){
+    w.status = RPT.WF.FINAL;
+    w.approvedBy = "Maria Santos — President";
+    toast(w.id+" approved & signed — report is now FINAL");
+    RENDERERS["reports-final"]();
+  });
+}
+
+/* ---------- BADGES + PRESETS ---------- */
+function rptUpdateBadges(){
+  const vb = document.getElementById("rptVerBadge");
+  if(vb){ const n = RPT.workflow.filter(w=>w.status===RPT.WF.SUBMITTED).length; vb.textContent=n; vb.style.display=n?"":"none"; }
+  const fb = document.getElementById("rptFinalBadge");
+  if(fb){ const n = RPT.workflow.filter(w=>w.status===RPT.WF.VERIFIED).length; fb.textContent=n; fb.style.display=n?"":"none"; }
+}
+document.querySelectorAll(".nav-item[data-preset]").forEach(el=>{
+  el.addEventListener("click", ()=>{ setTimeout(()=>rptPresetCategory(el.dataset.preset), 80); });
+});
+function rptPresetCategory(cat){
+  const sel = document.getElementById("rptType");
+  if(!sel) return;
+  const key = Object.keys(RPT.REPORTS).find(k=>RPT.REPORTS[k].cat===cat);
+  if(key){ sel.value = key; rptOnTypeChange(); }
+  const h = document.getElementById("rptHistoryBody");
+  if(h && cat==="HISTORY") h.scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+/* ---------- PRINT / EXPORT ---------- */
+function rptQR(id){
+  let seed = 0; for(const ch of id) seed = (seed*31 + ch.charCodeAt(0)) % 9973;
+  let cells = "";
+  for(let i=0;i<121;i++){ seed = (seed*1103515245+12345)%2147483648; cells += `<i${(seed%100<52 && (i%12)>0 && i>11 && i<110)?"":" class=\"w\""}></i>`; }
+  return cells;
+}
+function rptSheetData(h){
+  const cfg = h.cfg || RPT.REPORTS[h.type] || {title:h.title, type:"payment"};
+  const rows = h.rows || [];
+  const entries = Object.entries(h.active||RPT.active).filter(([,v])=>v && !v.startsWith("All ") && v!=="All");
+  const total = rows.reduce((s,r)=>s+Number(r.amount||0),0);
+  const period = ((h.active&&h.active.month&&h.active.month!=="All Months")?h.active.month+" ":"") + ((h.active&&h.active.year&&h.active.year!=="All Years")?h.active.year:"2026");
+  return {cfg, rows, entries, total, period};
+}
+function rptSheetHTML(h){
+  const {cfg, rows, entries, total, period} = rptSheetData(h);
+  const wf = rptWfFor(h.id)||{};
+  const statusLine = wf.status ? `<div><span>Workflow Status</span><b>${wf.status}</b></div>` : "";
+  const head = `<div class="rptd-head">
+      <div class="univ">ISABELA STATE UNIVERSITY</div>
+      <div style="font-size:12px;">CAUFA ASSOCIATION</div>
+      <div class="sys">Financial Management Information System</div>
+    </div>
+    <div class="rptd-title">${cfg.title}</div>
+    <div class="rptd-period">Reporting Period: ${period}</div>
+    <div class="rptd-sec">Report Information</div>
+    <div class="rptd-meta">
+      <div><span>Report ID</span><b>${h.id}</b></div>
+      <div><span>Generated Date</span><b>${h.date}</b></div>
+      <div><span>Prepared By</span><b>${wf.preparedBy||"Maria Santos — Treasurer"}</b></div>
+      <div><span>Role</span><b>${(wf.preparedBy||"Treasurer").includes("Treasurer")?"Treasurer":RPT.role}</b></div>
+      ${wf.verifiedBy?`<div><span>Verified By</span><b>✓ ${wf.verifiedBy}</b></div>`:""}
+      ${wf.approvedBy?`<div><span>Approved By</span><b>✓ ${wf.approvedBy}</b></div>`:""}
+      ${statusLine}
+    </div>
+    <div class="rptd-sec">Filters Applied</div>
+    <div class="rptd-meta">${entries.length ? entries.map(([k,v])=>`<div><span>${RPT.chipLabel(k,v).split(":")[0]}</span><b>${RPT.chipLabel(k,v).split(": ").slice(1).join(": ")}</b></div>`).join("") : '<div><span>Filters</span><b>None — all records</b></div>'}</div>
+    <div class="rptd-sec">Summary</div>
+    <div class="rptd-meta">
+      <div><span>Total Records</span><b>${rows.length}</b></div>
+      <div><span>Total Amount</span><b>₱${Number(total).toLocaleString()}</b></div>
+    </div>`;
+  let table;
+  if(cfg.type==="grouped"){
+    const map = {}; rows.forEach(r=>{ const g=r.college||r.dept||"—"; map[g]=map[g]||{a:0,i:0}; map[g][r.active?"a":"i"]++; });
+    const keys = Object.keys(map).sort();
+    const tA=keys.reduce((s,k)=>s+map[k].a,0), tI=keys.reduce((s,k)=>s+map[k].i,0);
+    table = `<table><thead><tr><th>College / Department</th><th>Active</th><th>Inactive</th><th>Total</th></tr></thead><tbody>
+      ${keys.map(k=>`<tr><td>${k}</td><td>${map[k].a}</td><td>${map[k].i}</td><td>${map[k].a+map[k].i}</td></tr>`).join("")}
+      <tr class="total"><td>TOTAL</td><td>${tA}</td><td>${tI}</td><td>${tA+tI}</td></tr></tbody></table>`;
+  } else if(cfg.type==="claims"){
+    table = `<table><thead><tr><th>Claim ID</th><th>Member</th><th>Type</th><th>Date</th><th>Amount</th><th>Status</th><th>Approval</th><th>Release</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr><td>${r.ref}</td><td>${r.member}</td><td>${r.type}</td><td>${r.date}</td><td>₱${Number(r.amount).toLocaleString()}</td><td>${r.status}</td><td>${r.approval}</td><td>${r.release}</td></tr>`).join("")}
+      <tr class="total"><td colspan="4">TOTAL — ${rows.length} claims</td><td>₱${Number(total).toLocaleString()}</td><td colspan="3"></td></tr></tbody></table>`;
+  } else if(cfg.type==="fund"){
+    table = `<table><thead><tr><th>Date</th><th>Reference</th><th>Description</th><th>Inflow</th><th>Outflow</th><th>Balance</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr><td>${r.date}</td><td>${r.ref}</td><td>${r.desc}</td><td>${r.inflow>0?"₱"+Number(r.inflow).toLocaleString():"—"}</td><td>${r.outflow>0?"₱"+Number(r.outflow).toLocaleString():"—"}</td><td>₱${Number(r.balance).toLocaleString()}</td></tr>`).join("")}
+      <tr class="total"><td colspan="3">TOTAL — ${rows.length} transactions</td><td>₱${Number(rows.reduce((s,r)=>s+(r.inflow||0),0)).toLocaleString()}</td><td>₱${Number(rows.reduce((s,r)=>s+(r.outflow||0),0)).toLocaleString()}</td><td></td></tr></tbody></table>`;
+  } else if(cfg.type==="audit"){
+    table = `<table><thead><tr><th>Date</th><th>Action</th><th>Reference</th><th>User</th><th>Result</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr><td>${r.date}</td><td>${r.action}</td><td>${r.ref}</td><td>${r.user}</td><td>${r.result}</td></tr>`).join("")}
+      <tr class="total"><td colspan="5">TOTAL — ${rows.length} audit records</td></tr></tbody></table>`;
+  } else if(cfg.type==="contrib"){
+    table = `<table><thead><tr><th>Reference</th><th>Aid Event</th><th>Expected</th><th>Collected</th><th>Status</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr><td>${r.ref}</td><td>${r.aidEvent}</td><td>₱${Number(r.expected||r.amount||0).toLocaleString()}</td><td>₱${Number(r.collected||r.amount||0).toLocaleString()}</td><td>${r.status}</td></tr>`).join("")}
+      <tr class="total"><td colspan="4">TOTAL — ${rows.length} records</td><td></td></tr></tbody></table>`;
+  } else {
+    table = `<table><thead><tr><th>Reference</th><th>Member</th><th>Type</th><th>Period</th><th>Amount</th><th>Method</th><th>Date</th><th>Status</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr><td>${r.ref||"—"}</td><td>${r.name||r.member}</td><td>${r.type||"—"}</td><td>${r.period||r.lastPayment||"—"}</td><td>₱${Number(r.amount||0).toLocaleString()}</td><td>${r.method||"—"}</td><td>${r.date||"—"}</td><td>${r.status}</td></tr>`).join("")}
+      <tr class="total"><td colspan="4">TOTAL — ${rows.length} records</td><td>₱${Number(total).toLocaleString()}</td><td colspan="3"></td></tr></tbody></table>`;
+  }
+  const foot = `<div class="rptd-sign">
+      <div><div class="line">${wf.preparedBy?wf.preparedBy.replace(" — Treasurer",""):"Maria Santos"}</div><div class="role">Prepared By — Treasurer</div></div>
+      <div><div class="line">${wf.verifiedBy?wf.verifiedBy.replace(" — Auditor",""):"&nbsp;"}</div><div class="role">Reviewed By — Auditor${wf.verifiedBy?" ✓":""}</div></div>
+      <div><div class="line">${wf.approvedBy?wf.approvedBy.replace(" — President",""):"&nbsp;"}</div><div class="role">Approved By — President${wf.approvedBy?" ✓":""}</div></div>
+    </div>
+    <div class="rptd-foot">
+      <div>Generated by ISU CAUFA FMIS<br>Report ID: ${h.id}<br>Verification: ${(h.id.slice(-6).split("").map(c=>c.charCodeAt(0)%10).join(""))}</div>
+      <div><div class="rptd-qr">${rptQR(h.id)}</div></div>
+    </div>`;
+  return head + table + foot;
+}
+function rptPrintPreview(){
+  if(!RPT.history.length && !RPT.workflow.length){ toast("Generate a report first"); return; }
+  const h = RPT.history.length ? RPT.history[0] : RPT.workflow[0];
+  rptSheet(h.id && rptWfFor(h.id) ? {...rptWfFor(h.id), cfg:RPT.REPORTS[h.type]} : h);
+}
+function rptSheet(h){
+  document.getElementById("rptModalTitle").textContent = "PRINT PREVIEW — " + h.id;
+  document.getElementById("rptSheet").innerHTML = `<div class="rpt-doc">${rptSheetHTML(h)}</div>`;
+  document.getElementById("rptPrintWrap").innerHTML = `<div class="rpt-doc">${rptSheetHTML(h)}</div>`;
+  document.getElementById("rptModal").classList.add("show");
+}
+function rptClosePreview(){ document.getElementById("rptModal").classList.remove("show"); }
+function rptExport(kind){
+  const h = RPT.history.length ? RPT.history[0] : RPT.workflow[0];
+  if(!h){ toast("Generate a report first"); return; }
+  if(kind==="pdf"){
+    rptSheet(h);
+    toast("Print dialog: choose 'Save as PDF' to export "+h.id);
+    setTimeout(()=>window.print(), 400);
+  } else if(kind==="excel"){
+    const {rows} = rptSheetData(h);
+    const cols = rows.length ? Object.keys(rows[0]).filter(k=>typeof rows[0][k] !== "object") : [];
+    const esc = v => `"${String(v==null?"":v).replace(/"/g,'""')}"`;
+    const csv = [cols.join(",")].concat(rows.map(r=>cols.map(k=>esc(typeof r[k]==="number"||/^₱/.test(String(r[k]))?(String(r[k]).replace(/[₱,]/g,"")):r[k])).join(","))).join("\n");
+    const blob = new Blob(["\ufeff"+csv], {type:"text/csv;charset=utf-8;"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = h.id + "-" + h.type + ".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    toast(h.id + " exported for Excel — " + rows.length + " filtered records only");
+  }
+}
+rptUpdateBadges();
+
+
+(function(){
+  if(document.getElementById("rptModal")) return;
+  const wrap=document.createElement("div");
+  wrap.innerHTML=`<div class="rpt-modal-overlay" id="rptModal">
+      <div style="width:230mm;max-width:100%;">
+        <div class="rpt-modal-bar">
+          <span id="rptModalTitle">PRINT PREVIEW</span>
+          <span style="display:flex;gap:8px;">
+            <button class="rpt-btn sm" onclick="window.print()">Print</button>
+            <button class="rpt-btn sm" onclick="rptExport('pdf')">PDF</button>
+            <button class="rpt-btn sm" onclick="rptClosePreview()">Close</button>
+          </span>
+        </div>
+        <div class="rpt-sheet" id="rptSheet"></div>
+      </div>
+    </div><div id="rptPrintWrap"></div>`;
+  document.body.appendChild(wrap);
+})();
+  </script>
+
+<div class="pd-modal-overlay" id="pdModal">
+  <div class="pd-modal">
+    <div class="pd-modal-title"><i class="fas fa-shield-halved"></i><span id="pdModalTitle">CONFIRM ACTION</span></div>
+    <div id="pdModalRows"></div>
+    <div class="pd-modal-msg" id="pdModalMsg"></div>
+    <div class="pd-modal-actions">
+      <button class="btn ghost sm" onclick="pdCloseModal()">Cancel</button>
+      <button class="btn primary sm" id="pdModalConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

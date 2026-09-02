@@ -1,0 +1,827 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CAUFA | Register</title>
+    <link rel="icon" type="image/png" href="{% static 'img/isu_caufa_official.png' %}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="{% static 'css/login-improved.css' %}" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+      /* ============================================
+         ISU CAUFA Register - matches Login design
+         ============================================ */
+      .login-right-panel {
+        align-items: flex-start;
+      }
+
+      .register-wrapper {
+        max-width: 560px;
+      }
+
+      .reg-form {
+        display: grid;
+        gap: 18px;
+      }
+
+      .reg-form label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 6px;
+        text-transform: capitalize;
+      }
+
+      .input-wrap {
+        position: relative;
+      }
+
+      .input-wrap .field-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        font-size: 16px;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .input-wrap input,
+      .input-wrap select,
+      .input-wrap textarea {
+        width: 100%;
+        padding: 13px 16px 13px 42px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-family: "Poppins", sans-serif;
+        font-size: 14px;
+        color: #333;
+        background: white;
+        transition: all 0.3s ease;
+      }
+
+      .input-wrap input::placeholder,
+      .input-wrap textarea::placeholder {
+        color: #999;
+      }
+
+      .input-wrap input:hover,
+      .input-wrap select:hover,
+      .input-wrap textarea:hover {
+        border-color: #bbb;
+      }
+
+      .input-wrap input:focus,
+      .input-wrap select:focus,
+      .input-wrap textarea:focus {
+        outline: none;
+        border-color: #1b5e3f;
+        box-shadow: 0 0 0 3px rgba(27, 94, 63, 0.1);
+        background: #fafafa;
+      }
+
+      /* Select chevron */
+      .input-wrap select {
+        padding-right: 44px;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%231b5e3f' d='M2 5L0 0h4z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 18px center;
+        background-size: 12px 12px;
+      }
+
+      /* File input */
+      .input-wrap input[type="file"] {
+        padding-left: 50px;
+        padding-right: 16px;
+        cursor: pointer;
+      }
+
+      .input-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+      }
+
+      /* Textarea */
+      .textarea-wrap textarea {
+        min-height: 140px;
+        resize: vertical;
+        padding-top: 16px;
+      }
+
+      .textarea-wrap .field-icon {
+        top: 18px;
+      }
+
+      /* Name row */
+      .split-row {
+        display: grid;
+        grid-template-columns: 1fr minmax(96px, 120px) 1fr;
+        gap: 16px;
+        align-items: end;
+      }
+
+      .split-row #middle_initial {
+        text-align: center;
+        max-width: 120px;
+        margin: 0 auto;
+      }
+
+      .split-row #middle_initial::placeholder {
+        text-align: center;
+      }
+
+      @media (max-width: 720px) {
+        .split-row {
+          grid-template-columns: 1fr;
+        }
+
+        .split-row #middle_initial {
+          max-width: none;
+          margin: 0;
+          text-align: left;
+        }
+      }
+
+      .field-note {
+        margin-top: 6px;
+        font-size: 13px;
+      }
+
+      .field-note.field-error {
+        color: #d32f2f;
+      }
+
+      .field-note.field-success {
+        color: #1b5e3f;
+      }
+
+      /* Status notes */
+      .error-note {
+        margin-bottom: 8px;
+        color: #d32f2f;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .success-note {
+        color: #1b5e3f;
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        padding: 12px 14px;
+        border-radius: 8px;
+      }
+
+      /* Account helper */
+      .account-helper {
+        text-align: center;
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 22px;
+      }
+
+      .account-helper a {
+        color: #1b5e3f;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      .account-helper a:hover {
+        color: #0d3d28;
+        text-decoration: underline;
+      }
+
+      /* Mobile progress */
+      .mobile-progress-container {
+        display: none;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 99998;
+        background: rgba(255, 255, 255, 0.98);
+        border-top: 1px solid #d8e3d8;
+        padding: 10px 16px;
+      }
+
+      .mobile-progress-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #1b5e3f;
+        margin-bottom: 8px;
+      }
+
+      .mobile-progress-track {
+        width: 100%;
+        height: 8px;
+        border-radius: 999px;
+        background: #e6e6e6;
+        overflow: hidden;
+      }
+
+      .mobile-progress-fill {
+        width: 0%;
+        height: 100%;
+        background: #2e7d32;
+        transition: width 0.2s ease;
+      }
+
+      /* Scroll top */
+      .scroll-top-button {
+        display: none;
+        position: fixed;
+        right: 18px;
+        bottom: 90px;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        border: none;
+        background: #1b5e3f;
+        color: #ffffff;
+        box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+      }
+
+      .scroll-top-button.visible {
+        display: inline-flex;
+      }
+
+      .scroll-top-button i {
+        font-size: 18px;
+      }
+
+      /* Mobile adjustments for the long registration form */
+      @media (max-width: 900px) {
+        .mobile-progress-container {
+          display: block;
+        }
+
+        .login-right-panel {
+          padding-bottom: 150px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        body {
+          overflow: auto;
+        }
+
+        .login-right-panel {
+          overflow: visible;
+          background-attachment: fixed;
+          background-size: cover;
+          background-position: center top;
+        }
+
+        .login-right-panel::before {
+          background: rgba(255, 255, 255, 0.82);
+        }
+
+        .back-home-btn {
+          position: fixed;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .reg-form input,
+        .reg-form select,
+        .reg-form textarea {
+          font-size: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <a href="{% url 'home' %}" class="back-home-btn">
+        <i class="fa-solid fa-arrow-left"></i> Back to Home
+      </a>
+
+      <!-- Left Panel with Background Image -->
+      <div class="login-left-panel" style="background-image: url('{% static 'img/isugym.jpg' %}'); background-size: cover; background-position: center;">
+        <div class="left-panel-overlay"></div>
+
+        <div class="left-panel-content">
+          <div class="brand-section">
+            <h1 class="brand-title">
+              JOIN <span class="brand-accent">ISU CAUFA</span> TODAY!
+            </h1>
+
+            <p class="brand-subtitle">
+              ISABELA STATE UNIVERSITY CAUAYAN FACULTY ASSOCIATION
+            </p>
+
+            <div class="divider"></div>
+
+            <p class="brand-tagline">
+              Become a member and be part of the association that unites faculty and administrators through collaboration, service, and excellence.
+            </p>
+          </div>
+        </div>
+
+        <!-- Wavy SVG Bottom -->
+        <svg class="wave-svg" viewBox="0 0 1000 120" preserveAspectRatio="none">
+          <path d="M0,50 Q250,0 500,50 T1000,50 L1000,120 L0,120 Z" fill="#FCD34D"></path>
+        </svg>
+      </div>
+
+      <!-- Right Panel - Registration Form -->
+      <div class="login-right-panel">
+        <div class="login-form-wrapper register-wrapper">
+          <!-- ISU CAUFA Logo -->
+          <div class="security-badge">
+            <img src="{% static 'img/isu_caufa_official.png' %}" alt="ISU CAUFA logo" class="badge-logo" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+          </div>
+
+          <!-- Form Header -->
+          <h2 class="form-title">Create Your Account</h2>
+          <p class="form-subtitle">Join the ISU CAUFA System Portal as a new member</p>
+
+          <div class="account-helper">
+            Already have an account? <a href="{% url 'login' %}">Login</a> &nbsp;|&nbsp; Applied before? <a href="{% url 'public_registration_status' %}">Track Registration</a>
+          </div>
+
+          <form id="registrationForm" enctype="multipart/form-data" autocomplete="off" class="reg-form">
+            {% csrf_token %}
+            <div id="formStatus" class="error-note" style="display:none;margin-bottom:8px;"></div>
+
+            <div class="split-row">
+              <div>
+                <label for="first_name">First Name</label>
+                <div class="input-wrap">
+                  <i class="fa-regular fa-user field-icon" aria-hidden="true"></i>
+                  <input type="text" id="first_name" name="first_name" placeholder="First name as shown on ID" required />
+                </div>
+              </div>
+              <div>
+                <label for="middle_initial">Middle Initial</label>
+                <div class="input-wrap">
+                  <i class="fa-regular fa-id-badge field-icon" aria-hidden="true"></i>
+                  <input type="text" id="middle_initial" name="middle_initial" placeholder="M" maxlength="1" pattern=".{0,1}" inputmode="text" />
+                </div>
+              </div>
+              <div>
+                <label for="last_name">Last Name</label>
+                <div class="input-wrap">
+                  <i class="fa-regular fa-user field-icon" aria-hidden="true"></i>
+                  <input type="text" id="last_name" name="last_name" placeholder="Last name as shown on ID" required />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label for="username">Username</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-user-gear field-icon" aria-hidden="true"></i>
+                <input type="text" id="username" name="username" placeholder="Faculty ID or chosen username" required autocomplete="username" />
+              </div>
+              <p class="field-note field-status" id="usernameAvailability" style="display:none;"></p>
+            </div>
+
+            <div>
+              <label for="email">Email Address</label>
+              <div class="input-wrap">
+                <i class="fa-regular fa-envelope field-icon" aria-hidden="true"></i>
+                <input type="email" id="email" name="email" placeholder="name@example.com" required autocomplete="email" />
+              </div>
+              <p class="field-note field-status" id="emailAvailability" style="display:none;"></p>
+            </div>
+
+            <div>
+              <label for="department">Department</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-building field-icon" aria-hidden="true"></i>
+                <select id="department" name="department" required>
+                  <option value="">Select department</option>
+                  <option value="IAT">IAT</option>
+                  <option value="CCJE">CCJE</option>
+                  <option value="CCSICT">CCSICT</option>
+                  <option value="PS">PS</option>
+                  <option value="SAS">SAS</option>
+                  <option value="CBM">CBM</option>
+                  <option value="CED">CED</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label for="position">Position / Rank</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-briefcase field-icon" aria-hidden="true"></i>
+                <select id="position" name="position" style="width:100%;padding:12px 14px 12px 48px;border-radius:12px;border:1px solid #cfdccc;background:#fbfdfb;">
+                  <option value="">Loading positions...</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <div style="padding: 16px; background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 8px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                  <i class="fa-solid fa-lock" style="color: #1b5e3f; font-size: 18px;"></i>
+                  <p style="margin: 0; font-weight: 600; color: #1b5e3f; font-size: 14px;">Password Auto-Generation</p>
+                </div>
+                <p style="margin: 0; font-size: 13px; color: #4a4a4a; line-height: 1.5;">
+                  A secure password will be automatically generated and sent to your email address upon successful registration. For your security, you will be required to change this password after your first login.
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label for="membership_category">Membership Type</label>
+              <div class="input-wrap">
+                <select id="membership_category" name="membership_category">
+                  <option value="Permanent" selected>Permanent</option>
+                  <option value="Temporary">Temporary</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label for="amount">Amount Paid (₱)</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-money-bill field-icon" aria-hidden="true"></i>
+                <input type="number" step="0.01" id="amount" name="amount" value="{{ membership_fee_amount|default:'500.00' }}" readonly required />
+              </div>
+            </div>
+
+            <div>
+              <label for="payment_method">Payment Method</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-credit-card field-icon" aria-hidden="true"></i>
+                <select id="payment_method" name="payment_method" required>
+                  <option value="">Select method</option>
+                  <option value="OTC Cash">OTC Cash</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                  <option value="GCash">GCash</option>
+                  <option value="Maya">Maya</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label for="payment_date">Payment Date</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-calendar-days field-icon" aria-hidden="true"></i>
+                <input type="date" id="payment_date" name="payment_date" value="{% now 'Y-m-d' %}" readonly />
+              </div>
+            </div>
+
+            <div>
+              <label for="proof_file">Upload Proof</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-paperclip field-icon" aria-hidden="true"></i>
+                <input type="file" id="proof_file" name="proof_file" accept="image/*,.pdf,.docx" />
+              </div>
+            </div>
+
+            <div>
+              <label for="notes">Additional Notes</label>
+              <div class="input-wrap textarea-wrap">
+                <i class="fa-regular fa-comments field-icon" aria-hidden="true"></i>
+                <textarea id="notes" name="notes" placeholder="Optional: additional details or notes"></textarea>
+              </div>
+            </div>
+
+            <button class="btn-login" id="registrationSubmit" type="submit">
+              <i class="fa-solid fa-paper-plane"></i> Submit Registration Request
+            </button>
+          </form>
+
+          <div id="mobileProgressContainer" class="mobile-progress-container" aria-hidden="true">
+            <div class="mobile-progress-label">
+              <span>Form completion</span>
+              <span id="mobileProgressPercent">0%</span>
+            </div>
+            <div class="mobile-progress-track">
+              <div id="mobileProgressFill" class="mobile-progress-fill"></div>
+            </div>
+          </div>
+
+          <button id="scrollTopButton" class="scroll-top-button" type="button" aria-label="Go to top">
+            <i class="fa-solid fa-arrow-up"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const registrationForm = document.getElementById("registrationForm");
+      const middleInitialInput = document.getElementById("middle_initial");
+      const usernameInput = document.getElementById("username");
+      const emailInput = document.getElementById("email");
+      const usernameAvailability = document.getElementById("usernameAvailability");
+      const emailAvailability = document.getElementById("emailAvailability");
+      const formStatus = document.getElementById("formStatus");
+      const submitButton = document.getElementById("registrationSubmit");
+      const mobileProgressFill = document.getElementById("mobileProgressFill");
+      const mobileProgressPercent = document.getElementById("mobileProgressPercent");
+      const scrollTopButton = document.getElementById("scrollTopButton");
+      const progressFields = [
+        "first_name",
+        "last_name",
+        "username",
+        "email",
+        "department",
+        "amount",
+        "payment_method",
+        "payment_date",
+        "proof_file",
+      ];
+
+      function getCSRFToken() {
+        const cookieValue = document.cookie
+          .split(";")
+          .map((cookie) => cookie.trim())
+          .find((cookie) => cookie.startsWith("csrftoken="));
+        return cookieValue ? decodeURIComponent(cookieValue.split("=")[1]) : document.querySelector('[name=csrfmiddlewaretoken]')?.value || null;
+      }
+
+      function debounce(fn, delay) {
+        let timer;
+        return function (...args) {
+          clearTimeout(timer);
+          timer = setTimeout(() => fn.apply(this, args), delay);
+        };
+      }
+
+      function setFieldStatus(element, available, message) {
+        if (!element) return;
+        element.style.display = "block";
+        element.className = available ? "field-note field-success" : "field-note field-error";
+        element.textContent = message;
+      }
+
+      async function loadPositionRanks() {
+        const positionSelect = document.getElementById("position");
+        if (!positionSelect) return;
+        
+        try {
+          const response = await fetch("/api/treasurer/members/position-ranks/options/");
+          const data = await response.json();
+          
+          if (data.ok && data.ranks) {
+            positionSelect.innerHTML = '<option value="">Select Position</option>';
+            data.ranks.forEach(rank => {
+              const option = document.createElement("option");
+              option.value = rank.name;
+              option.textContent = rank.name;
+              positionSelect.appendChild(option);
+            });
+          }
+        } catch (error) {
+          console.error("Failed to load position ranks:", error);
+          positionSelect.innerHTML = '<option value="">Select Position</option>';
+        }
+      }
+
+      // Load position ranks on page load
+      document.addEventListener("DOMContentLoaded", function() {
+        loadPositionRanks();
+      });
+
+      function isValidEmail(value) {
+        const emailValue = value.trim();
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailPattern.test(emailValue);
+      }
+
+      async function checkAvailability(field, value, statusElement) {
+        if (!value) {
+          if (statusElement) {
+            statusElement.style.display = "none";
+          }
+          return false;
+        }
+        if (value.length < 3) {
+          if (statusElement) {
+            setFieldStatus(statusElement, false, field === "email"
+              ? "Please enter a valid email address before checking availability."
+              : "Username must be at least 3 characters long.");
+          }
+          return false;
+        }
+
+        if (field === "email" && !isValidEmail(value)) {
+          if (statusElement) {
+            setFieldStatus(statusElement, false, "Please enter a valid email address, e.g. user@gmail.com.");
+          }
+          return false;
+        }
+
+        const url = new URL("{% url 'public_registration_field_availability' %}", window.location.origin);
+        url.searchParams.set("field", field);
+        url.searchParams.set("value", value);
+
+        try {
+          const response = await fetch(url.toString(), {
+            method: "GET",
+            credentials: "same-origin",
+          });
+          const data = await response.json();
+          if (!data.ok) {
+            setFieldStatus(statusElement, false, data.error || "Validation failed.");
+            return false;
+          }
+          if (data.available) {
+            setFieldStatus(statusElement, true, `${field.charAt(0).toUpperCase() + field.slice(1)} is available.`);
+            return true;
+          }
+          setFieldStatus(statusElement, false, `${field.charAt(0).toUpperCase() + field.slice(1)} is already taken.`);
+          return false;
+        } catch (err) {
+          setFieldStatus(statusElement, false, "Unable to verify availability.");
+          return false;
+        }
+      }
+
+      const debouncedUsernameCheck = debounce(() => checkAvailability("username", usernameInput.value.trim(), usernameAvailability), 400);
+      const debouncedEmailCheck = debounce(() => checkAvailability("email", emailInput.value.trim(), emailAvailability), 400);
+
+      function showFormMessage(message, isError = true) {
+        if (!formStatus) return;
+        formStatus.style.display = "block";
+        formStatus.className = isError ? "error-note" : "success-note";
+        formStatus.textContent = message;
+      }
+
+      function updateFormProgress() {
+        const filled = progressFields.reduce((count, fieldId) => {
+          const field = document.getElementById(fieldId);
+          if (!field) return count;
+          if (field.type === "file") {
+            return count + (field.files && field.files.length > 0 ? 1 : 0);
+          }
+          const value = field.value ? field.value.toString().trim() : "";
+          return count + (value ? 1 : 0);
+        }, 0);
+        const percent = Math.round((filled / progressFields.length) * 100);
+        if (mobileProgressFill) {
+          mobileProgressFill.style.width = `${percent}%`;
+        }
+        if (mobileProgressPercent) {
+          mobileProgressPercent.textContent = `${percent}%`;
+        }
+      }
+
+      function updateScrollTopButton() {
+        if (!scrollTopButton) return;
+        const isMobile = window.matchMedia("(max-width: 900px)").matches;
+        const shouldShow = isMobile && window.scrollY > 250;
+        scrollTopButton.classList.toggle("visible", shouldShow);
+      }
+
+      if (middleInitialInput) {
+        middleInitialInput.addEventListener("input", () => {
+          middleInitialInput.value = middleInitialInput.value.slice(0, 1);
+          updateFormProgress();
+        });
+      }
+
+      if (usernameInput) usernameInput.addEventListener("input", () => { debouncedUsernameCheck(); updateFormProgress(); });
+      if (emailInput) emailInput.addEventListener("input", () => {
+        if (!isValidEmail(emailInput.value)) {
+          setFieldStatus(emailAvailability, false, "Please enter a valid email address, e.g. user@gmail.com.");
+        } else {
+          debouncedEmailCheck();
+        }
+        updateFormProgress();
+      });
+
+      progressFields.forEach((fieldId) => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+          field.addEventListener("change", updateFormProgress);
+          field.addEventListener("input", updateFormProgress);
+        }
+      });
+
+      if (scrollTopButton) {
+        scrollTopButton.addEventListener("click", () => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      }
+
+      window.addEventListener("scroll", updateScrollTopButton);
+      updateFormProgress();
+      updateScrollTopButton();
+
+      registrationForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        const result = await Swal.fire({
+          title: "Submit registration?",
+          text: "Please confirm that your details are correct before submitting.",
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Yes, submit",
+          cancelButtonText: "Review again",
+          reverseButtons: true,
+        });
+
+        if (!result.isConfirmed) {
+          return;
+        }
+
+        if (formStatus) { formStatus.style.display = "none"; formStatus.textContent = ""; }
+
+        const requiredFields = [
+          { id: "first_name", label: "First Name" },
+          { id: "last_name", label: "Last Name" },
+          { id: "username", label: "Username" },
+          { id: "email", label: "Email Address" },
+          { id: "department", label: "Department" },
+          { id: "amount", label: "Amount Paid" },
+          { id: "payment_method", label: "Payment Method" },
+        ];
+
+        for (const field of requiredFields) {
+          const el = document.getElementById(field.id);
+          if (!el || !el.value.trim()) {
+            showFormMessage(`${field.label} is required.`);
+            return;
+          }
+        }
+
+        if (middleInitialInput && middleInitialInput.value.trim().length > 1) {
+          showFormMessage("Middle Initial must be only 1 character.");
+          return;
+        }
+
+        const usernameValid = await checkAvailability("username", usernameInput.value.trim(), usernameAvailability);
+        const emailValid = await checkAvailability("email", emailInput.value.trim(), emailAvailability);
+        if (!usernameValid || !emailValid) {
+          showFormMessage("Please choose a unique username and valid email before submitting.");
+          return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Submitting...';
+
+        if (!isValidEmail(emailInput.value)) {
+          showFormMessage("Please enter a valid email address before submitting.");
+          return;
+        }
+        const formData = new FormData(this);
+        const fileInput = document.getElementById("proof_file");
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+          formData.set("proof_file", fileInput.files[0]);
+        }
+
+        try {
+          const response = await fetch("{% url 'public_submit_registration_request' %}", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "X-CSRFToken": getCSRFToken() },
+            body: formData,
+          });
+          const data = await response.json();
+          if (!data.ok) {
+            const message = data.error || "Registration could not be submitted right now. Please try again later.";
+            await Swal.fire({
+              title: "Submission failed",
+              text: message,
+              icon: "error",
+              confirmButtonText: "OK",
+            });
+            return;
+          }
+          await Swal.fire({
+            title: "Registration Successful!",
+            html: `Thank you for submitting your membership application. Your request is now under review by the Treasurer.<br><br>A confirmation email will be sent to you shortly with next steps.<br><br><a href="{% url 'public_registration_status' %}" style="color:#1b5e3f;font-weight:600;">Track my registration status</a>`,
+            icon: "success",
+            confirmButtonText: "OK",
+          });
+          registrationForm.reset();
+          usernameAvailability.style.display = "none";
+          emailAvailability.style.display = "none";
+        } catch (err) {
+          await Swal.fire({
+            title: "Submission error",
+            text: "Unable to submit your registration request at this time.",
+            icon: "error",
+            confirmButtonText: "Try again",
+          });
+        } finally {
+          submitButton.disabled = false;
+          submitButton.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Registration Request';
+        }
+      });
+    </script>
+  </body>
+</html>

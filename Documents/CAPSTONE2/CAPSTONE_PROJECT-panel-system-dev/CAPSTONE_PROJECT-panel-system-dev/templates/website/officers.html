@@ -1,0 +1,106 @@
+﻿{% extends "website/base.html" %}
+{% load static %}
+
+{% block title %}Officers{% endblock %}
+
+{% block content %}
+    <style>
+        .marquee-wrap { overflow: hidden; -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent); mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent); }
+        .marquee-track { display: flex; width: max-content; gap: 2rem; animation: marquee-scroll 40s ease-in-out infinite alternate; }
+        .marquee-card { width: 340px; flex-shrink: 0; }
+        @keyframes marquee-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    </style>
+
+    <!-- Page Banner -->
+    <section class="relative h-[400px] overflow-hidden">
+        <div class="absolute inset-0">
+            <img src="{% static 'img/isugym.jpg' %}" alt="ISU CAUFA" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-black/40"></div>
+        </div>
+        <div class="relative z-10 h-full flex flex-col items-center justify-center text-white text-center px-6">
+            <p class="text-3xl md:text-4xl uppercase font-black tracking-[0.3em] text-yellow-400 mb-5 drop-shadow">ISU CAUFA</p>
+            <h1 class="text-6xl md:text-7xl font-black tracking-tighter mb-5 drop-shadow-lg">Officers</h1>
+            <div class="w-28 h-2 bg-brand-green"></div>
+        </div>
+    </section>
+
+    <!-- Executive Officers -->
+    <section class="bg-gradient-to-b from-[#fbfaf7] to-[#f3f1ea] py-16 px-6 sm:px-12" id="executive-officers">
+        <div class="max-w-[1440px] mx-auto">
+            <div class="text-center mb-12">
+                <p class="text-[10px] uppercase font-black tracking-[0.2em] text-brand-green mb-2">The Leadership</p>
+                <h2 class="text-3xl md:text-4xl font-black tracking-tighter text-brand-dark">Executive Officers</h2>
+                <div class="w-24 h-1.5 bg-brand-green mx-auto mt-4"></div>
+            </div>
+
+            {% if executive_officers %}
+            <div class="marquee-wrap">
+                <div class="marquee-track">
+                    {% for o in executive_officers %}
+                    <div class="bg-[#f7f6f2] border border-black/5 p-8 rounded-2xl text-center marquee-card shadow-[0_1px_2px_rgba(16,24,40,0.04),0_10px_28px_-12px_rgba(16,24,40,0.10)]">
+                        {% if o.photo %}
+                        <div class="w-52 h-52 mx-auto rounded-2xl overflow-hidden border-2 border-brand-green/20 mb-4"><img src="{{ o.photo.url }}" alt="{{ o.full_name }}" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none'" /></div>
+                        {% else %}
+                        <div class="w-52 h-52 mx-auto bg-gradient-to-br from-brand-green to-green-700 rounded-2xl flex items-center justify-center text-white text-5xl font-black mb-4 shadow-md shadow-brand-green/20">{{ o.full_name|slice:":1" }}</div>
+                        {% endif %}
+                        <h3 class="text-2xl font-black text-brand-dark leading-tight">{{ o.full_name }}</h3>
+                        <p class="text-base uppercase font-black tracking-widest text-brand-green mt-3">{{ o.position }}</p>
+                        {% if o.department %}
+                        <p class="text-lg font-black text-gray-700 mt-3">{{ o.department }}</p>
+                        {% endif %}
+                        {% if o.school_year %}
+                        <p class="text-base font-black text-gray-600 mt-2">{{ o.school_year }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-16 text-gray-400 bg-[#f7f6f2] border border-black/5 rounded-2xl">
+                <i class="fa-solid fa-users-gear text-4xl mb-3 block"></i>
+                <p class="text-[11px] font-bold uppercase">No executive officers have been registered yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Board of Directors -->
+    <section class="bg-[#f3f1ea] py-16 px-6 sm:px-12" id="board-of-directors">
+        <div class="max-w-[1440px] mx-auto">
+            <div class="text-center mb-12">
+                <p class="text-[10px] uppercase font-black tracking-[0.2em] text-brand-green mb-2">Governing Body</p>
+                <h2 class="text-3xl md:text-4xl font-black tracking-tighter text-brand-dark">Board of Directors</h2>
+                <div class="w-24 h-1.5 bg-brand-green mx-auto mt-4"></div>
+            </div>
+
+            {% if board_members %}
+            <div class="marquee-wrap">
+                <div class="marquee-track">
+                    {% for o in board_members %}
+                    <div class="bg-white border border-black/5 p-8 rounded-2xl text-center marquee-card shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)]">
+                        {% if o.photo %}
+                        <div class="w-52 h-52 mx-auto rounded-2xl overflow-hidden border-2 border-brand-dark/10 mb-4"><img src="{{ o.photo.url }}" alt="{{ o.full_name }}" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.style.display='none'" /></div>
+                        {% else %}
+                        <div class="w-52 h-52 mx-auto bg-brand-dark rounded-2xl flex items-center justify-center text-white text-5xl font-black mb-4">{{ o.full_name|slice:":1" }}</div>
+                        {% endif %}
+                        <h3 class="text-2xl font-black text-brand-dark leading-tight">{{ o.full_name }}</h3>
+                        <p class="text-base uppercase font-black tracking-widest text-brand-green mt-3">{{ o.position }}</p>
+                        {% if o.department %}
+                        <p class="text-lg font-black text-gray-700 mt-3">{{ o.department }}</p>
+                        {% endif %}
+                        {% if o.school_year %}
+                        <p class="text-base font-black text-gray-600 mt-2">{{ o.school_year }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-16 text-gray-400 bg-white border border-black/5 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)]">
+                <i class="fa-solid fa-users-rectangle text-4xl mb-3 block"></i>
+                <p class="text-[11px] font-bold uppercase">No board members have been registered yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

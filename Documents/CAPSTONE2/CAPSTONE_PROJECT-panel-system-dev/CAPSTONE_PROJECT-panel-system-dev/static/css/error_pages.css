@@ -1,0 +1,150 @@
+/* Import Poppins Font Family */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body,
+html {
+  height: 100%;
+  width: 100%;
+  background-color: #f6fbf6; /* Your Light Pale Mint Brand BG */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #263238; /* Your Dark Charcoal Text */
+  overflow: hidden;
+}
+
+.error-container {
+  max-width: 540px;
+  width: 90%;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 50px 40px;
+  text-align: center;
+  box-shadow: 0 15px 35px rgba(27, 94, 32, 0.06);
+  border: 1px solid #dfe9df;
+  animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Security Icon Layouts */
+.security-shield-icon {
+  font-size: 4.5rem;
+  color: #ef4444; /* Alert Red tint */
+  margin-bottom: 15px;
+  position: relative;
+  display: inline-block;
+}
+
+.error-code {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #1b5e20; /* Deep Institutional Green */
+  line-height: 1;
+  margin-bottom: 5px;
+  letter-spacing: -1px;
+}
+
+.error-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #263238;
+  margin-bottom: 15px;
+}
+
+.error-message {
+  font-size: 0.92rem;
+  color: #5a6b5a;
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+
+/* Compliance Notice Box Component */
+.context-alert-box {
+  background: #fdf2f2;
+  border: 1px solid #fde2e2;
+  color: #991b1b;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  margin-bottom: 30px;
+}
+
+.context-alert-box i {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* Interactive Action Buttons Control Matrix */
+.action-button-group {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.btn-error-back,
+.btn-error-switch {
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.btn-error-back {
+  background: #1b5e20;
+  color: #ffffff;
+  border: none;
+}
+
+.btn-error-back:hover {
+  background: #2e7d32;
+  transform: translateY(-1px);
+}
+
+.btn-error-switch {
+  background: transparent;
+  color: #5a6b5a;
+  border: 1px solid #cfdccc;
+}
+
+.btn-error-switch:hover {
+  background: #f1f5f1;
+  color: #263238;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .action-button-group {
+    flex-direction: column;
+  }
+  .error-container {
+    padding: 35px 20px;
+  }
+}

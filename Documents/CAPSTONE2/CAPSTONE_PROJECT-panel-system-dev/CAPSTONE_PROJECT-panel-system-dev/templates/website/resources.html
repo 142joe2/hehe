@@ -1,0 +1,442 @@
+﻿{% extends "website/base.html" %}
+{% load static %}
+
+{% block title %}Resources{% endblock %}
+
+{% block content %}
+    <style>
+        .doc-action {
+            width: 34px;
+            height: 34px;
+            border-radius: 9999px;
+            background: #faf9f6;
+            color: #004d26;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .doc-action:hover {
+            background: #004d26;
+            color: #fff;
+            border-color: #004d26;
+        }
+        .preview-modal-body iframe {
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            background: #fff;
+            width: 100%;
+            height: 70vh;
+        }
+        .preview-modal-body img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+    </style>
+
+    <!-- Page Banner -->
+    <section class="relative h-[400px] overflow-hidden">
+        <div class="absolute inset-0">
+            <img src="{% static 'img/isugym.jpg' %}" alt="ISU CAUFA" class="w-full h-full object-cover" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-black/40"></div>
+        </div>
+        <div class="relative z-10 h-full flex flex-col items-center justify-center text-white text-center px-6">
+            <p class="text-3xl md:text-4xl uppercase font-black tracking-[0.3em] text-yellow-400 mb-5 drop-shadow">ISU CAUFA</p>
+            <h1 class="text-6xl md:text-7xl font-black tracking-tighter mb-5 drop-shadow-lg">Resources</h1>
+            <div class="w-28 h-2 bg-brand-green"></div>
+        </div>
+    </section>
+
+    <!-- Constitution -->
+    <section class="bg-gradient-to-b from-[#fbfaf7] to-[#f3f1ea] py-16 px-6 sm:px-12" id="constitution">
+        <div class="max-w-[1440px] mx-auto">
+            <div class="mb-10">
+                <p class="text-[10px] uppercase font-black tracking-[0.2em] text-brand-green mb-2">Founding Document</p>
+                <h2 class="text-3xl md:text-4xl font-black tracking-tighter text-brand-dark">Constitution</h2>
+                <div class="w-24 h-1.5 bg-brand-green mt-4"></div>
+            </div>
+
+            {% with constitution_docs as docs %}
+            {% if docs %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for r in docs %}
+                <div class="bg-white border border-black/5 p-5 rounded-2xl flex items-center justify-between gap-4 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+                    <div class="min-w-0">
+                        <p class="font-bold text-sm text-brand-dark">{{ r.file_name }}</p>
+                        <p class="text-[11px] text-gray-500 mt-1">{{ r.uploaded_at|date:"F d, Y" }}</p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button type="button" class="doc-action preview-btn" aria-label="Preview {{ r.file_name }}"
+                            data-download-url="{% url 'public_bylaws_file' r.document_id %}"
+                            data-render-url="{% url 'public_bylaws_render' r.document_id %}"
+                            data-name="{{ r.file_name }}">
+                            <i class="fa-solid fa-eye text-[13px]"></i>
+                        </button>
+                        <a href="{% url 'public_bylaws_file' r.document_id %}" target="_blank" rel="noopener" class="doc-action" aria-label="Download {{ r.file_name }}">
+                            <i class="fa-solid fa-download text-[13px]"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-14 text-gray-400 bg-white/70 border border-black/5 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)]">
+                <i class="fa-solid fa-scale-balanced text-4xl mb-3 block"></i>
+                <p class="text-[11px] font-bold uppercase">The constitution has not been uploaded yet.</p>
+            </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+    </section>
+
+    <!-- By-Laws -->
+    <section class="bg-[#f3f1ea] py-16 px-6 sm:px-12" id="by-laws">
+        <div class="max-w-[1440px] mx-auto">
+            <div class="mb-10">
+                <p class="text-[10px] uppercase font-black tracking-[0.2em] text-brand-green mb-2">Rules &amp; Regulations</p>
+                <h2 class="text-3xl md:text-4xl font-black tracking-tighter text-brand-dark">By-Laws</h2>
+                <div class="w-24 h-1.5 bg-brand-green mt-4"></div>
+            </div>
+
+            {% if bylaws_files %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for f in bylaws_files %}
+                <div class="bg-white border border-black/5 p-5 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] flex items-center justify-between gap-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+                    <div class="min-w-0">
+                        <p class="font-bold text-sm text-brand-dark">{{ f.file_name }}</p>
+                        <p class="text-[11px] text-gray-500 mt-1">{{ f.uploaded_at|date:"F d, Y" }}</p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button type="button" class="doc-action preview-btn" aria-label="Preview {{ f.file_name }}"
+                            data-download-url="{% url 'public_bylaws_file' f.document_id %}"
+                            data-render-url="{% url 'public_bylaws_render' f.document_id %}"
+                            data-name="{{ f.file_name }}">
+                            <i class="fa-solid fa-eye text-[13px]"></i>
+                        </button>
+                        <a href="{% url 'public_bylaws_file' f.document_id %}" target="_blank" rel="noopener" class="doc-action" aria-label="Download {{ f.file_name }}">
+                            <i class="fa-solid fa-file-lines text-[13px]"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-14 text-gray-400 bg-white/70 border border-black/5 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)]">
+                <i class="fa-solid fa-file-lines text-4xl mb-3 block"></i>
+                <p class="text-[11px] font-bold uppercase">The by-laws have not been uploaded yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Policy & Benefits -->
+    <section class="bg-gradient-to-b from-[#fbfaf7] to-[#f3f1ea] py-16 px-6 sm:px-12" id="policy-benefits">
+        <div class="max-w-[1440px] mx-auto">
+            <div class="mb-10">
+                <p class="text-[10px] uppercase font-black tracking-[0.2em] text-brand-green mb-2">Bylaws</p>
+                <h2 class="text-3xl md:text-4xl font-black tracking-tighter text-brand-dark">Policy & Benefits</h2>
+                <div class="w-24 h-1.5 bg-brand-green mt-4"></div>
+                <p class="text-sm text-gray-500 mt-4 max-w-2xl">Contributions and benefits governed by the ISU CAUFA By-Laws. Amounts shown are the official policy constants currently in effect.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
+                {% for group in policy_constants %}
+                <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] border border-black/5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)] flex flex-col">
+                    <div class="flex items-center gap-2.5 mb-2">
+                        <span class="w-9 h-9 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green">
+                            {% if forloop.counter == 1 %}
+                            <i class="fa-solid fa-id-card text-sm"></i>
+                            {% elif forloop.counter == 2 %}
+                            <i class="fa-solid fa-kit-medical text-sm"></i>
+                            {% else %}
+                            <i class="fa-solid fa-dove text-sm"></i>
+                            {% endif %}
+                        </span>
+                        <h3 class="text-base font-black uppercase tracking-tight">{{ group.name }}</h3>
+                    </div>
+                    <p class="text-[11px] text-gray-500 uppercase tracking-wide mb-5">{{ group.subtitle }}</p>
+
+                    <div class="flex-1 flex flex-col gap-2.5">
+                        {% for item in group.items %}
+                        <div class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg bg-[#f7f6f2]">
+                            <span class="text-xs font-bold text-gray-600">{{ item.label }}</span>
+                            <span class="text-sm font-black text-brand-green">₱{{ item.value|floatformat:0|default:"0" }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Membership Forms -->
+    <section class="bg-gradient-to-b from-[#fbfaf7] to-[#f3f1ea] py-16 px-6 sm:px-12" id="membership-forms">
+        <div class="max-w-[1440px] mx-auto">
+            <div class="mb-10">
+                <p class="text-[10px] uppercase font-black tracking-[0.2em] text-brand-green mb-2">Join the Association</p>
+                <h2 class="text-3xl md:text-4xl font-black tracking-tighter text-brand-dark">Membership Forms</h2>
+                <div class="w-24 h-1.5 bg-brand-green mt-4"></div>
+            </div>
+
+            <div class="bg-brand-dark text-white p-10 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.3)]">
+                <div>
+                    <h3 class="font-black uppercase tracking-tight mb-2">Become an ISU CAUFA Member</h3>
+                    <p class="text-sm text-gray-300 max-w-xl">Register online to start your membership. Your application will be reviewed by the officers.</p>
+                </div>
+                <a href="{% url 'public_register' %}" class="bg-brand-green text-white px-8 py-3 rounded-full text-xs font-black uppercase tracking-[0.15em] hover:bg-white hover:text-brand-dark hover:shadow-lg transition-all w-fit shrink-0">
+                    Register Now <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Public Documents -->
+    <section class="bg-[#f3f1ea] py-16 px-6 sm:px-12" id="public-documents">
+        <div class="max-w-[1440px] mx-auto">
+            <div class="mb-10">
+                <p class="text-[10px] uppercase font-black tracking-[0.2em] text-brand-green mb-2">Downloads</p>
+                <h2 class="text-3xl md:text-4xl font-black tracking-tighter text-brand-dark">Public Documents</h2>
+                <div class="w-24 h-1.5 bg-brand-green mt-4"></div>
+            </div>
+
+            {% with public_docs as docs %}
+            {% if docs %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for r in docs %}
+                <div class="bg-white border border-black/5 p-5 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+                    <span class="text-[9px] font-black uppercase tracking-wider text-brand-green bg-brand-surface px-2 py-0.5 rounded-full">{{ r.document_type }}</span>
+                    <p class="font-bold text-sm text-brand-dark mt-3">{{ r.file_name }}</p>
+                    <div class="flex items-center justify-between mt-3">
+                        <span class="text-[11px] text-gray-500">{{ r.uploaded_at|date:"M d, Y" }}</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="doc-action preview-btn" aria-label="Preview {{ r.file_name }}"
+                                data-download-url="{{ r.download_url }}"
+                                data-render-url="{{ r.render_url }}"
+                                data-name="{{ r.file_name }}">
+                                <i class="fa-solid fa-eye text-[13px]"></i>
+                            </button>
+                            <a href="{{ r.download_url }}" target="_blank" rel="noopener" class="doc-action" aria-label="Download {{ r.file_name }}">
+                                <i class="fa-solid fa-download text-[13px]"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-14 text-gray-400 bg-white/70 border border-black/5 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)]">
+                <i class="fa-solid fa-folder-open text-4xl mb-3 block"></i>
+                <p class="text-[11px] font-bold uppercase">No public documents have been uploaded yet.</p>
+            </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+    </section>
+
+    <!-- Financial Reports -->
+    <section class="bg-gradient-to-b from-[#fbfaf7] to-[#f3f1ea] py-16 px-6 sm:px-12" id="financial-reports">
+        <div class="max-w-[1440px] mx-auto">
+            <div class="mb-10">
+                <p class="text-[10px] uppercase font-black tracking-[0.2em] text-brand-green mb-2">Transparency</p>
+                <h2 class="text-3xl md:text-4xl font-black tracking-tighter text-brand-dark">Financial Reports</h2>
+                <div class="w-24 h-1.5 bg-brand-green mt-4"></div>
+            </div>
+
+            {% with financial_docs as docs %}
+            {% if docs %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for r in docs %}
+                <div class="bg-white border border-black/5 p-5 rounded-2xl flex items-center justify-between gap-4 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+                    <div class="min-w-0">
+                        <p class="font-bold text-sm text-brand-dark">{{ r.title }}</p>
+                        <p class="text-[11px] text-gray-500 mt-1">{{ r.uploaded_at|date:"F d, Y" }}</p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button type="button" class="doc-action preview-btn" aria-label="Preview {{ r.title }}"
+                            data-download-url="{{ r.file_url }}"
+                            data-render-url="{% url 'public_document_render' r.id %}"
+                            data-name="{{ r.file_name|default:r.title }}">
+                            <i class="fa-solid fa-eye text-[13px]"></i>
+                        </button>
+                        <a href="{{ r.file_url }}" target="_blank" rel="noopener" class="doc-action" aria-label="Download {{ r.title }}">
+                            <i class="fa-solid fa-coins text-[13px]"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-14 text-gray-400 bg-white/70 border border-black/5 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)]">
+                <i class="fa-solid fa-coins text-4xl mb-3 block"></i>
+                <p class="text-[11px] font-bold uppercase">No financial reports have been published yet.</p>
+            </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+    </section>
+
+    <!-- FAQs -->
+    <section class="bg-[#f3f1ea] py-16 px-6 sm:px-12" id="faqs">
+        <div class="max-w-[1000px] mx-auto">
+            <div class="text-center mb-10">
+                <p class="text-[10px] uppercase font-black tracking-[0.2em] text-brand-green mb-2">Need Help?</p>
+                <h2 class="text-3xl md:text-4xl font-black tracking-tighter text-brand-dark">Frequently Asked Questions</h2>
+                <div class="w-24 h-1.5 bg-brand-green mx-auto mt-4"></div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-white border border-black/5 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+                    <h3 class="font-black text-brand-dark mb-2">How do I become a member of ISU CAUFA?</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">Fill out the online registration form under Resources &gt; Membership Forms and submit the required details. Your application will be reviewed by the officers.</p>
+                </div>
+                <div class="bg-white border border-black/5 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+                    <h3 class="font-black text-brand-dark mb-2">Where can I find official announcements?</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">Visit the Announcements page. The Public Information Officer publishes all official notices and updates there.</p>
+                </div>
+                <div class="bg-white border border-black/5 rounded-2xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_32px_-12px_rgba(16,24,40,0.12)] p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_16px_40px_-12px_rgba(16,24,40,0.16)]">
+                    <h3 class="font-black text-brand-dark mb-2">Where can I download organizational documents?</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">The Constitution, By-Laws, and other public documents are available for download in the Resources section of this website.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- File Preview Modal -->
+    <div id="filePreviewModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 md:p-8" role="dialog" aria-modal="true" aria-label="File preview">
+        <div class="absolute inset-0 bg-black/70" data-close-preview></div>
+        <div class="relative bg-white rounded-2xl w-full max-w-4xl max-h-full flex flex-col overflow-hidden shadow-2xl">
+            <div class="flex items-center justify-between gap-4 px-6 py-4 border-b border-gray-100">
+                <div class="min-w-0">
+                    <p class="text-[10px] uppercase font-black tracking-[0.15em] text-brand-green">File Preview</p>
+                    <h3 id="previewTitle" class="font-black text-brand-dark truncate">Document</h3>
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                    <a id="previewDownloadBtn" href="javascript:void(0)" class="bg-brand-green text-white px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-wider hover:opacity-90 transition-all">
+                        Download <i class="fa-solid fa-download ml-1"></i>
+                    </a>
+                    <button type="button" data-close-preview class="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-all" aria-label="Close preview">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="previewBody" class="flex-1 overflow-auto bg-[#f8f9fa] p-6 preview-modal-body">
+                <div id="previewLoading" class="flex flex-col items-center justify-center py-24 text-gray-400">
+                    <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
+                    <p class="text-[11px] font-bold uppercase tracking-wider">Loading preview…</p>
+                </div>
+                <div id="previewContent" class="hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const PDF_EXT = ['pdf'];
+            const IMG_EXT = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'];
+
+            function extOf(name) {
+                name = (name || '').toLowerCase();
+                const i = name.lastIndexOf('.');
+                return i >= 0 ? name.slice(i + 1) : '';
+            }
+
+            function downloadHref(url, name) {
+                if (!url || url === '#') return '#';
+                if (url.indexOf('/api/') === -1) return url;
+                return url + (url.indexOf('?') === -1 ? '?download=1' : '&download=1');
+            }
+
+            const modal = document.getElementById('filePreviewModal');
+            const body = document.getElementById('previewBody');
+            const content = document.getElementById('previewContent');
+            const loading = document.getElementById('previewLoading');
+            const title = document.getElementById('previewTitle');
+            const dlBtn = document.getElementById('previewDownloadBtn');
+
+            function finish() {
+                loading.classList.add('hidden');
+                content.classList.remove('hidden');
+            }
+
+            function showFallback() {
+                content.innerHTML =
+                    '<div class="text-center py-16 text-gray-500">' +
+                    '<i class="fa-solid fa-file-circle-question text-4xl mb-4 block"></i>' +
+                    '<p class="text-[11px] font-bold uppercase tracking-wider">Preview not available for this file type.</p>' +
+                    '<p class="text-sm text-gray-400 mt-2">Use the Download button to open the file.</p>' +
+                    '</div>';
+                finish();
+            }
+
+            function openPreview(dlUrl, renderUrl, name) {
+                title.textContent = name || 'Document';
+                dlBtn.setAttribute('href', downloadHref(dlUrl, name));
+                dlBtn.setAttribute('download', name || '');
+                content.innerHTML = '';
+                content.classList.add('hidden');
+                loading.classList.remove('hidden');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.body.style.overflow = 'hidden';
+
+                const ext = extOf(name);
+
+                if (PDF_EXT.indexOf(ext) !== -1) {
+                    content.innerHTML = '<iframe src="' + dlUrl + '" title="' + name.replace(/"/g, '&quot;') + '"></iframe>';
+                    content.querySelector('iframe').onload = finish;
+                } else if (IMG_EXT.indexOf(ext) !== -1) {
+                    content.innerHTML = '<div class="flex justify-center"><img src="' + dlUrl + '" alt="' + name.replace(/"/g, '&quot;') + '" loading="lazy" decoding="async" onerror="this.style.display=\'none\'" /></div>';
+                    content.querySelector('img').onload = finish;
+                } else if (renderUrl) {
+                    fetch(renderUrl)
+                        .then(function (r) { return r.json(); })
+                        .then(function (d) {
+                            if (d.ok && d.html) {
+                                content.innerHTML = '<div class="bg-white rounded-xl shadow-sm p-8">' + d.html + '</div>';
+                                finish();
+                            } else {
+                                showFallback();
+                            }
+                        })
+                        .catch(showFallback);
+                } else {
+                    showFallback();
+                }
+            }
+
+            function closePreview() {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.body.style.overflow = '';
+                content.innerHTML = '';
+            }
+
+            document.querySelectorAll('.preview-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    openPreview(
+                        btn.getAttribute('data-download-url') || '#',
+                        btn.getAttribute('data-render-url') || '',
+                        btn.getAttribute('data-name') || 'Document'
+                    );
+                });
+            });
+
+            document.querySelectorAll('[data-close-preview]').forEach(function (el) {
+                el.addEventListener('click', closePreview);
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    closePreview();
+                }
+            });
+        })();
+    </script>
+{% endblock %}
